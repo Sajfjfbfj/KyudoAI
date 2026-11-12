@@ -1,0 +1,12 @@
+# Streamlit Secrets (API Keys)
+.streamlit/secrets.toml
+
+# Uploads & Temp media
+uploads/
+*.mp4
+*.mov
+*.avi
+*.webm
+
+# History
+history/

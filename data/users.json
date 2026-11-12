@@ -1,0 +1,14 @@
+{
+  "archer": {
+    "password_hash": "019056af252e1efef0b03ac415772f4163ab8c7ad63134a79010e0895f2a02ab",
+    "salt": "fc98790243054988b311304ce594c351",
+    "display_name": "弓引き射手",
+    "created_at": "2026-11-12 15:00"
+  },
+  "saki": {
+    "password_hash": "b9861c5cd04771241c5f5ee1a89bd2ea8684ee5ee28ff8a6fd0458e1b67b3c7c",
+    "salt": "50fea10c158c1b0fdb92efc5efb30672",
+    "display_name": "saki",
+    "created_at": "2026-11-12 15:25"
+  }
+}
