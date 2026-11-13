@@ -430,7 +430,112 @@ def get_current_history_dir() -> str:
     os.makedirs(h_dir, exist_ok=True)
     return h_dir
 
+# ==================== ChatGPT風 射手メモリー（個人記憶・カルテ機能） ====================
+MEMORIES_DIR = os.path.join(os.path.dirname(__file__), "data", "memories")
+
+def get_user_memory_path(username: str) -> str:
+    os.makedirs(MEMORIES_DIR, exist_ok=True)
+    user_safe = "".join(c for c in username if c.isalnum() or c in ("-", "_")) or "default"
+    return os.path.join(MEMORIES_DIR, f"{user_safe}.json")
+
+def load_user_memory(username: str) -> list[str]:
+    """ユーザーのAI記憶（弓力・段位・射癖・目標など）を取得"""
+    path = get_user_memory_path(username)
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+            return data.get("notes", [])
+    except Exception:
+        return []
+
+def save_user_memory(username: str, notes: list[str]):
+    """ユーザーのAI記憶を保存"""
+    path = get_user_memory_path(username)
+    data = {
+        "notes": notes,
+        "updated_at": time.strftime("%Y-%m-%d %H:%M")
+    }
+    try:
+        with open(path, "w", encoding="utf-8") as fp:
+            json.dump(data, fp, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def add_user_memory_item(username: str, note_text: str):
+    """手動または自動で記憶を1つ追加"""
+    clean_text = note_text.strip()
+    if not clean_text:
+        return
+    notes = load_user_memory(username)
+    # 重複防止
+    if clean_text not in notes:
+        notes.append(clean_text)
+        save_user_memory(username, notes)
+
+def remove_user_memory_item(username: str, index: int):
+    """特定の記憶を削除"""
+    notes = load_user_memory(username)
+    if 0 <= index < len(notes):
+        notes.pop(index)
+        save_user_memory(username, notes)
+
+def clear_all_user_memory(username: str):
+    """すべての記憶を完全消去"""
+    save_user_memory(username, [])
+
+def build_memory_prompt_section(username: str) -> str:
+    """プロンプトに注入する射手カルテ形式のテキストを生成"""
+    notes = load_user_memory(username)
+    if not notes:
+        return ""
+    bullet_points = "\n".join([f"・{item}" for item in notes])
+    return (
+        f"【射手カルテ（あなたがこの射手について記憶しているパーソナル情報）】\n"
+        f"{bullet_points}\n"
+        f"※上記の射手情報（使用弓具・弓力・目標・抱えている課題など）を熟知している前提で、"
+        f"これまでの稽古の文脈に寄り添い、射手にとって最適なアドバイスを行ってください。\n\n"
+    )
+
+def auto_extract_and_save_memory(username: str, user_text: str, api_key: str):
+    """ユーザーの発言から弓道に関する自己情報（弓力・段位・悩みなど）をAIが自動抽出し記憶に追加"""
+    if not api_key or not user_text or len(user_text.strip()) < 4:
+        return
+    # 自己情報が含まれそうなキーワードの簡易フィルター
+    trigger_words = ["弓力", "kg", "キロ", "段", "級", "高校", "大学", "部活", "矢尺", "cm", "流派", "直心", "肥後", "グラス", "カーボン", "早気", "もたれ", "手の内", "審査", "大会", "歴", "年目"]
+    if not any(w in user_text for w in trigger_words):
+        return
+
+    try:
+        client = genai.Client(api_key=api_key)
+        extract_prompt = f"""
+以下は弓道の射手が発言したテキストです。
+射手のプロフィール、使用弓具（弓力・弓の種類・矢尺など）、段位・所属、抱えている射癖や悩み、目標など、
+今後AIが指導する上で【覚えておくべき永続的な個人情報】があれば、1〜2個の簡潔な箇条書き（各20文字以内）で抽出してください。
+新しい個人情報や設定がない場合は「なし」とだけ答えてください。
+
+【発言テキスト】:
+{user_text}
+
+【出力形式の例】:
+・弓力: 14kg (直心II)
+・目標: 参段審査の合格
+"""
+        response = client.models.generate_content(
+            model="gemini-3.5-flash-lite",
+            contents=extract_prompt
+        )
+        if response.text and "なし" not in response.text:
+            lines = [line.strip().lstrip("・-*\t ") for line in response.text.split("\n") if line.strip()]
+            for item in lines:
+                if item and not item.startswith("なし") and len(item) <= 40:
+                    add_user_memory_item(username, item)
+    except Exception:
+        pass
+
 # ==================== 会話履歴の永続化・記録機能 ====================
+
 def get_all_sessions():
     # ログインユーザー専用の稽古セッション一覧を取得
     h_dir = get_current_history_dir()
@@ -796,8 +901,40 @@ with st.sidebar:
                 save_current_session(st.session_state.current_session_id, st.session_state.messages)
             st.rerun()
 
+    # ChatGPT風 射手カルテ（AIメモリー管理）
+    with st.expander("🧠 射手カルテ（AIメモリー）", expanded=False):
+        st.caption("AIが対話から覚えた情報です。新しい会話や動画分析にも自動で反映されます。")
+        cur_user = st.session_state.get("logged_in_user", "default")
+        user_notes = load_user_memory(cur_user)
+
+        if user_notes:
+            for idx, note in enumerate(user_notes):
+                col_n1, col_n2 = st.columns([0.82, 0.18])
+                with col_n1:
+                    st.markdown(f"<div style='font-size: 13px; padding: 4px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 4px;'>📌 {note}</div>", unsafe_allow_html=True)
+                with col_n2:
+                    if st.button("✕", key=f"del_mem_{idx}", help="この記憶を削除"):
+                        remove_user_memory_item(cur_user, idx)
+                        st.rerun()
+            if st.button("🗑️ すべての記憶を消去", use_container_width=True, key="clear_all_mem"):
+                clear_all_user_memory(cur_user)
+                st.rerun()
+        else:
+            st.info("まだ記憶はありません。会話を重ねるとAIが自動で記憶するか、下から手動で登録できます。")
+
+        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+        st.caption("＋ 手動で記憶を追加")
+        new_note = st.text_input("追加する情報:", key="new_memory_input", placeholder="例: 弓力14kg、参段目標、早気")
+        if st.button("記憶を登録", use_container_width=True, key="add_mem_btn"):
+            if new_note.strip():
+                add_user_memory_item(cur_user, new_note.strip())
+                st.success("記憶を追加しました！")
+                time.sleep(0.3)
+                st.rerun()
+
     # サイドバー最下部：ChatGPT風ログインユーザー情報 ＆ ログアウトボタン
     st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
     disp_name = cur_uinfo.get("display_name", st.session_state.get("logged_in_user", "射手"))
@@ -854,14 +991,18 @@ def generate_response(user_input: str, char_name: str, api_key: str) -> str:
                 role = "user" if m["role"] == "user" else "model"
                 contents.append(f"{role}: {m['content']}")
             contents.append(f"user: {user_input}")
+
+            memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
             
             prompt_text = (
                 f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
                 f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
+                f"{memory_section}"
                 f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
                 f"{system_instruction}\n\n"
                 f"【会話内容】\n" + "\n".join(contents)
             )
+
             
             # 最新の高速モデルを順に試行
             model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
@@ -1083,6 +1224,8 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
             if gemini_file.state.name == "FAILED":
                 raise ValueError("動画の処理に失敗しました。別の形式や短めの動画をお試しください。")
 
+        memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
+
         # 立体バイオメカニクス＆筋肉感知コーチングプロンプト
         analysis_prompt = f"""
 あなたは弓道の指導者（{char_name}）として、提供された射形動画（または画像）を【立体的・生体力学的（バイオメカニクス）】に詳細分析してください。
@@ -1091,10 +1234,12 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 {KYUDO_SCIENTIFIC_EVIDENCE}
 
+{memory_section}
 外見のポーズだけでなく、**「深層筋（インナーマッスル）が使えているか」「表層筋（僧帽筋などの首肩）が力みすぎてブレーキになっていないか」**を立体的に感知・推定してください。
 
 【射手からのコメント・気になっている点】
 {user_note if user_note else "特になし（全体的な射形・筋肉の使い方を見てほしい）"}
+
 
 【最も大切にすべき指導方針（コーチングアプローチ）】
 一方的に欠点を決めつけて正解を押し付けるのではなく、射手が「自分の感覚と向き合い、自分で考えて工夫できる」ように導いてください。
@@ -1374,9 +1519,15 @@ if text_to_send or files_to_send:
                 "content": f"⚠️ エラーが発生しました: {str(e)}"
             })
 
+    # ChatGPT風：ユーザー発言から個人情報（弓力・段位・悩み・弓具など）を自動学習して射手カルテに保存
+    if text_to_send and active_api_key:
+        cur_user = st.session_state.get("logged_in_user", "default")
+        auto_extract_and_save_memory(cur_user, text_to_send, active_api_key)
+
     # 会話を即時自動保存してからrerun（描画済みUIが一切ない状態でrerunするのが安全）
     if "current_session_id" in st.session_state:
         save_current_session(st.session_state.current_session_id, st.session_state.messages)
 
     st.rerun()
+
 

@@ -8,8 +8,10 @@ uploads/
 *.avi
 *.webm
 
-# History
+# History & Memories
 history/
+data/memories/
+
 
 # Python cache
 __pycache__/
