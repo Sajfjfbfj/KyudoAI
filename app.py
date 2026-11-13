@@ -1,3 +1,5 @@
+import sys
+print(">>> [1] 起動開始", file=sys.stderr, flush=True)
 import os
 import time
 import json
@@ -5,10 +7,14 @@ import re
 import tempfile
 import hashlib
 import secrets
+print(">>> [2] 標準ライブラリ OK", file=sys.stderr, flush=True)
 import streamlit as st
+print(">>> [3] streamlit OK", file=sys.stderr, flush=True)
 import plotly.graph_objects as go
+print(">>> [4] plotly OK", file=sys.stderr, flush=True)
 from google import genai
 from google.genai import types
+print(">>> [5] google-genai OK", file=sys.stderr, flush=True)
 
 # ==================== 個人情報保護・完全消去ユーティリティ ====================
 def secure_shred_file(filepath: str):
