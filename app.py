@@ -153,6 +153,13 @@ st.markdown(f"""
         box-shadow: none !important;
         padding: 12px 0 !important;
         margin-bottom: 14px !important;
+        width: 100% !important;
+    }}
+    div[data-testid="stChatMessageContent"] {{
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
     }}
 
     /* ユーザーメッセージ（右側・丸み吹き出し） */
@@ -165,12 +172,14 @@ st.markdown(f"""
         box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
     }}
 
-    /* アシスタントメッセージ（枠線なし、すっきりプレーン表示） */
+    /* アシスタントメッセージ（枠線なし、横幅いっぱいにすっきりプレーン表示） */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
         background-color: transparent !important;
         border: none !important;
         padding: 8px 0 !important;
+        width: 100% !important;
     }}
+
 
     /* キャラクターバッジ（ChatGPT風の控えめなpill） */
     .char-badge {{
@@ -388,8 +397,11 @@ COMMON_INSTRUCTION = (
     "   ただし、論文の難解な専門用語や解剖学用語をそのまま羅列しては絶対に伝わりません！\n"
     "   「科学的な実験や研究でも実証されているのですが、感覚としては…」のように、誰もが目に浮かぶ日常的な体の部位や動作（例:『首をすくめず肩をストンと落とす』『背中の下の方（脇の下）で引き絞る』『親指の付け根で壁をそっと押す』など）に優しく噛み砕いて説明してください。\n"
     "3. 【専門用語のカッコ書き解説】\n"
-    "   弓道の専門用語（角見、手の内、会、伸び合い、丹田、三重十文字、胴造りなど）を用いる際は、必ず直後にカッコ書き（例: 角見（左手親指の付け根で弓を押し開くこと））をつけて平易に解説してください。"
+    "   弓道の専門用語（角見、手の内、会、伸び合い、丹田、三重十文字、胴造りなど）を用いる際は、必ず直後にカッコ書き（例: 角見（左手親指の付け根で弓を押し開くこと））をつけて平易に解説してください。\n"
+    "4. 【ChatGPT風のスッキリした段落構成（縦長・過剰改行の防止）】\n"
+    "   1行ずつの細切れな箇条書きや空行の連発を避け、1つの段落に2〜4文程度をまとめた、ChatGPTのように自然で読みやすいスマートな文章で回答してください。"
 )
+
 
 CHARACTERS = {
     "師範（無幻先生）": {
@@ -1303,10 +1315,16 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str):
                 )
                 for chunk in response:
                     if chunk.text:
-                        yield chunk.text
+                        # まとまって届いたテキストをChatGPTのように滑らかなタイピング速度で流す
+                        chunk_str = chunk.text
+                        step = 2
+                        for i in range(0, len(chunk_str), step):
+                            yield chunk_str[i:i+step]
+                            time.sleep(0.012)  # 心地よい等速タイピング速度（ドカンと一気に出るのを防止）
                 return
             except Exception:
                 continue
+
 
         # モデル試行失敗時のフォールバック
         local_ans = get_local_response(user_input, char_name)
