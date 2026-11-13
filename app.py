@@ -1217,7 +1217,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 応答生成関数（テキスト用）
-def generate_response(user_input: str, char_name: str, api_key: str) -> str:
+def generate_response(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False) -> str:
     current_char = CHARACTERS[char_name]
     
     # Gemini APIキーがある場合、本物のGeminiを呼び出す
@@ -1236,30 +1236,39 @@ def generate_response(user_input: str, char_name: str, api_key: str) -> str:
             memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
             custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
             
+            regen_instruction = ""
+            if is_regenerate:
+                regen_instruction = (
+                    "\n\n【★別の角度からの再生成リクエスト】\n"
+                    "射手から『別の視点・アプローチから再指導してほしい』とリクエストされました。\n"
+                    "先ほどとは異なる着眼点（例: 呼吸や丹田の意識、別の関節・身体部位の連動、心構え、道場ですぐ試せる別の練習ドリルなど）から、"
+                    "射手に新しい気づきを与える新鮮な切り口で温かくアドバイスしてください。\n"
+                )
+
             prompt_text = (
                 f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
                 f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
                 f"{memory_section}"
                 f"{custom_instructions}"
+                f"{regen_instruction}"
                 f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
                 f"{system_instruction}\n\n"
                 f"【会話内容】\n" + "\n".join(contents)
             )
 
-
-            
             # 最新の高速モデルを順に試行
             model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
             response_text = None
             last_err = None
             
+            temp_setting = 0.85 if is_regenerate else 0.7
             for m_name in model_candidates:
                 try:
                     response = client.models.generate_content(
                         model=m_name,
                         contents=prompt_text,
                         config=types.GenerateContentConfig(
-                            temperature=0.7,
+                            temperature=temp_setting,
                         )
                     )
                     if response.text:
@@ -1268,6 +1277,7 @@ def generate_response(user_input: str, char_name: str, api_key: str) -> str:
                 except Exception as e:
                     last_err = e
                     continue
+
             
             if response_text:
                 return response_text
@@ -1763,16 +1773,16 @@ for idx, msg in enumerate(st.session_state.messages):
 
 
             # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン
-            if idx == len(st.session_state.messages) - 1:
-                col_rg, _ = st.columns([0.45, 0.55])
+            if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant":
+                col_rg, _ = st.columns([0.48, 0.52])
                 with col_rg:
                     if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="別の言い方や指導観点で回答を再生成"):
                         prev_user_msgs = [m for m in st.session_state.messages[:idx] if m["role"] == "user"]
                         if prev_user_msgs:
                             last_u_text = prev_user_msgs[-1]["content"]
                             st.session_state.messages.pop()
-                            with st.spinner(f"{selected_char}が思考を深めて再構成中..."):
-                                reply = generate_response(last_u_text, selected_char, active_api_key)
+                            with st.spinner(f"{selected_char}が別の視点から思考を深めて再構成中..."):
+                                reply = generate_response(last_u_text, selected_char, active_api_key, is_regenerate=True)
                             st.session_state.messages.append({
                                 "role": "assistant",
                                 "char": selected_char,
@@ -1781,6 +1791,7 @@ for idx, msg in enumerate(st.session_state.messages):
                             if "current_session_id" in st.session_state:
                                 save_current_session(st.session_state.current_session_id, st.session_state.messages)
                             st.rerun()
+
 
 
 # チャット入力欄（ChatGPT風カプセルバー、左端に「＋」添付ボタン）
@@ -1917,8 +1928,8 @@ if text_to_send or files_to_send:
                 smart_title = generate_smart_title(text_to_send, active_api_key)
             save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
 
-        # 動画と異なり、ストリーミング完了後はチラつきやDOMエラーを防ぐためrerunせずそのまま快適に維持
-        # 次のユーザー入力時に自然に再描画されます
+        st.rerun()
+
 
 
 
