@@ -1329,88 +1329,59 @@ if text_to_send or files_to_send:
         attached_media = files_to_send[0]
         user_msg_text = text_to_send if text_to_send else "🎥 射形動画を分析してください。（筋肉の使い方と3D骨格バランス）"
         file_size_str = f"{round(attached_media.size / (1024*1024), 1)} MB"
-        
-        # ユーザー発言を履歴に追加
+
+        # ユーザー発言を履歴に追加（ライブ描画は一切しない）
         st.session_state.messages.append({
             "role": "user",
             "content": user_msg_text,
             "file_name": attached_media.name,
             "file_size": file_size_str
         })
-        
-        # 画面に即座にユーザーメッセージを描画
-        with st.chat_message("user"):
-            st.markdown(f"""
-            <div class="file-attachment-card">
-                <span class="file-attachment-icon">🎬</span>
-                <div class="file-attachment-details">
-                    <span class="file-attachment-name">{attached_media.name}</span>
-                    <span class="file-attachment-meta" style="color: #166534; font-weight: 500;">
-                        🛡️ 個人情報保護：分析完了後に完全抹消済（{file_size_str}）
-                    </span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown(user_msg_text)
-            
-        # アシスタントの分析を画面に即座に表示
-        with st.chat_message("assistant", avatar=char_info["icon"]):
-            st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
-            try:
+
+        # 動画分析はspinnerのみ（DOM衝突を避けるため chat_message を外に出さない）
+        try:
+            with st.spinner(f"🎬 動画をアップロード中・{selected_char}が解析準備中..."):
                 analysis_text, muscle_data, posture_data = analyze_media_file(
                     attached_media, text_to_send, selected_char, active_api_key
                 )
-                if muscle_data and posture_data:
-                    st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
-                    col_g1, col_g2 = st.columns([1, 1])
-                    with col_g1:
-                        st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
-                        radar_fig = create_muscle_radar_chart(muscle_data)
-                        st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_live")
-                    with col_g2:
-                        st.markdown("**🧍‍♂️ 3D立体骨格（マウスで360°回転可能）**")
-                        skeleton_fig = create_3d_kyudo_skeleton(posture_data)
-                        st.plotly_chart(skeleton_fig, use_container_width=True, key=f"skeleton_chart_live")
-                    st.divider()
-                    
-                st.markdown(analysis_text)
-                
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "char": selected_char,
-                    "content": analysis_text,
-                    "muscle_data": muscle_data,
-                    "posture_data": posture_data
-                })
-            except Exception as e:
-                err_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
-                st.markdown(err_text)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "char": selected_char,
-                    "content": err_text
-                })
-                
+            st.session_state.messages.append({
+                "role": "assistant",
+                "char": selected_char,
+                "content": analysis_text,
+                "muscle_data": muscle_data,
+                "posture_data": posture_data
+            })
+        except Exception as e:
+            err_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
+            st.session_state.messages.append({
+                "role": "assistant",
+                "char": selected_char,
+                "content": err_text
+            })
+
     # B. 通常のテキスト質問の場合
     else:
         st.session_state.messages.append({"role": "user", "content": text_to_send})
-        with st.chat_message("user"):
-            st.markdown(text_to_send)
-            
-        with st.chat_message("assistant", avatar=char_info["icon"]):
-            st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
+
+        # テキスト回答もspinnerのみ（chat_messageブロックをここで開かない）
+        try:
             with st.spinner(f"{selected_char}が科学的文献エビデンスに基づき回答中..."):
                 reply = generate_response(text_to_send, selected_char, active_api_key)
-                st.markdown(reply)
-                
             st.session_state.messages.append({
                 "role": "assistant",
                 "char": selected_char,
                 "content": reply
             })
-            
-    # 会話を即時自動保存
+        except Exception as e:
+            st.session_state.messages.append({
+                "role": "assistant",
+                "char": selected_char,
+                "content": f"⚠️ エラーが発生しました: {str(e)}"
+            })
+
+    # 会話を即時自動保存してからrerun（描画済みUIが一切ない状態でrerunするのが安全）
     if "current_session_id" in st.session_state:
         save_current_session(st.session_state.current_session_id, st.session_state.messages)
-        
+
     st.rerun()
+
