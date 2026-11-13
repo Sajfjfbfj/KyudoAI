@@ -1423,11 +1423,13 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
     # APIキーがない、またはエラー時のローカル知識ベース応答
     return get_local_response(user_input, char_name)
 
-def generate_response_stream(user_input: str, char_name: str, api_key: str):
+def generate_response_stream(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False):
     """ChatGPT風：リアルタイムに文字が流れるストリーミング応答ジェネレーター"""
     current_char = CHARACTERS[char_name]
     if not api_key:
         local_ans = get_local_response(user_input, char_name)
+        if is_regenerate:
+            local_ans = f"（別の視点からのアドバイス）\n{local_ans}\n\n呼吸のリズムと身体の軸の意識を変えて稽古を重ねてみてください。"
         for char in local_ans:
             time.sleep(0.015)
             yield char
@@ -1446,24 +1448,35 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str):
         memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
         custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
         
+        regen_instruction = ""
+        if is_regenerate:
+            regen_instruction = (
+                "\n\n【★別の角度からの再生成リクエスト】\n"
+                "射手から『別の視点・アプローチから再指導してほしい』とリクエストされました。\n"
+                "先ほどとは異なる着眼点（例: 呼吸や丹田の意識、別の関節・身体部位の連動、心構え、道場ですぐ試せる別の練習ドリルなど）から、"
+                "射手に新しい気づきを与える新鮮な切り口で温かくアドバイスしてください。\n"
+            )
+
         prompt_text = (
             f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
             f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
             f"{memory_section}"
             f"{custom_instructions}"
+            f"{regen_instruction}"
             f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
             f"{system_instruction}\n\n"
             f"【会話内容】\n" + "\n".join(contents)
         )
 
         model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
+        temp_setting = 0.88 if is_regenerate else 0.7
         for m_name in model_candidates:
             try:
                 response = client.models.generate_content_stream(
                     model=m_name,
                     contents=prompt_text,
                     config=types.GenerateContentConfig(
-                        temperature=0.7,
+                        temperature=temp_setting,
                     )
                 )
                 for chunk in response:
@@ -1813,38 +1826,6 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 # ==================== チャット統合型メイン画面 ====================
 
-# ==================== 🔄 再生成リクエスト処理（session_stateフラグ方式 — メッセージループ外で確実実行） ====================
-if st.session_state.get("regen_requested", False):
-    st.session_state.regen_requested = False
-    regen_char = st.session_state.pop("regen_char", None)  # None = 同じキャラ
-    # 直前のユーザー発言を取得
-    last_u_text = None
-    for prev_m in reversed(st.session_state.messages):
-        if prev_m["role"] == "user":
-            last_u_text = prev_m["content"]
-            break
-    if last_u_text:
-        # 再生成に使うキャラクターを決定（別キャラ指定 or 現在選択中キャラ）
-        if regen_char and regen_char in CHARACTERS:
-            use_char = regen_char
-        else:
-            use_char = selected_char
-        # 最後のアシスタントメッセージを除去
-        if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
-            st.session_state.messages.pop()
-        # 別の角度から再生成
-        use_char_info = CHARACTERS[use_char]
-        with st.spinner(f"{use_char_info['icon']} {use_char}が別の視点から思考を深めて再構成中..."):
-            reply = generate_response(last_u_text, use_char, active_api_key, is_regenerate=True)
-        st.session_state.messages.append({
-            "role": "assistant",
-            "char": use_char,
-            "content": reply
-        })
-        if "current_session_id" in st.session_state:
-            save_current_session(st.session_state.current_session_id, st.session_state.messages)
-        st.rerun()
-
 # ユーザーメッセージがまだない場合はChatGPT風のウェルカムサジェストを表示
 has_user_msg = any(m["role"] == "user" for m in st.session_state.messages)
 quick_prompt = None
@@ -1929,15 +1910,21 @@ for idx, msg in enumerate(st.session_state.messages):
             # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン（ユーザーの質問が存在する場合のみ表示）
             has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
             if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant" and has_user_prompt:
-                regen_cols = st.columns([0.42, 0.58])
+                regen_cols = st.columns([0.48, 0.52])
+                current_msg_char = msg.get("char", selected_char)
                 with regen_cols[0]:
-                    if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="同じキャラクターで別の視点から回答を再生成"):
-                        st.session_state.regen_requested = True
-                        st.session_state.regen_char = None  # 同じキャラ
-                        st.rerun()
+                    if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help=f"{current_msg_char}の別の視点から回答を再生成"):
+                        last_u_text = None
+                        for prev_m in reversed(st.session_state.messages[:idx]):
+                            if prev_m["role"] == "user":
+                                last_u_text = prev_m["content"]
+                                break
+                        if last_u_text:
+                            st.session_state.messages.pop()
+                            st.session_state.pending_regen = {"text": last_u_text, "char": current_msg_char}
+                            st.rerun()
                 with regen_cols[1]:
                     # 別キャラで再生成：現在の回答キャラを除外した選択肢
-                    current_msg_char = msg.get("char", selected_char)
                     other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
                     if other_chars:
                         with st.popover("🎭 別のキャラで再生成", use_container_width=True):
@@ -1945,9 +1932,41 @@ for idx, msg in enumerate(st.session_state.messages):
                             for oc in other_chars:
                                 oc_info = CHARACTERS[oc]
                                 if st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True, help=oc_info["desc"]):
-                                    st.session_state.regen_requested = True
-                                    st.session_state.regen_char = oc
-                                    st.rerun()
+                                    last_u_text = None
+                                    for prev_m in reversed(st.session_state.messages[:idx]):
+                                        if prev_m["role"] == "user":
+                                            last_u_text = prev_m["content"]
+                                            break
+                                    if last_u_text:
+                                        st.session_state.messages.pop()
+                                        st.session_state.pending_regen = {"text": last_u_text, "char": oc}
+                                        st.rerun()
+
+# ==================== ChatGPT完全再現：再生成リアルタイム・ストリーミング描画 ====================
+if "pending_regen" in st.session_state:
+    p_info = st.session_state.pop("pending_regen")
+    target_text = p_info["text"]
+    target_char = p_info["char"]
+    t_info = CHARACTERS.get(target_char, char_info)
+
+    with st.chat_message("assistant", avatar=t_info["icon"]):
+        st.markdown(f'<span class="char-badge {t_info["badge_class"]}">{t_info["icon"]} {target_char}</span>', unsafe_allow_html=True)
+        try:
+            stream_gen = generate_response_stream(target_text, target_char, active_api_key, is_regenerate=True)
+            full_reply = st.write_stream(stream_gen)
+        except Exception as e:
+            full_reply = f"⚠️ エラーが発生しました: {str(e)}"
+            st.markdown(full_reply)
+        render_chatgpt_toolbar(full_reply)
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "char": target_char,
+        "content": full_reply
+    })
+    if "current_session_id" in st.session_state:
+        save_current_session(st.session_state.current_session_id, st.session_state.messages)
+    st.rerun()
 
 
 
