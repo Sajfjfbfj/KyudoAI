@@ -1746,14 +1746,13 @@ for idx, msg in enumerate(st.session_state.messages):
 
             st.markdown(msg["content"])
 
-            # ChatGPT風：アクションバー（コピー・音声読み上げ・停止）
-            safe_content = msg.get("content", "").replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
-            st.markdown(f"""
+            # ChatGPT風：アクションバー（コピー・音声読み上げ・停止：DOMから動的取得でHTML破壊ゼロ）
+            st.markdown("""
             <div class="chatgpt-action-bar">
-                <button class="chatgpt-action-btn" onclick="navigator.clipboard.writeText(`{safe_content}`); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
+                <button class="chatgpt-action-btn" onclick="const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; navigator.clipboard.writeText(p); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
                     📋 コピー
                 </button>
-                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(`{safe_content}`); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
+                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; const u = new SpeechSynthesisUtterance(p); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
                     🔊 読み上げ
                 </button>
                 <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel();">
@@ -1761,6 +1760,7 @@ for idx, msg in enumerate(st.session_state.messages):
                 </button>
             </div>
             """, unsafe_allow_html=True)
+
 
             # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン
             if idx == len(st.session_state.messages) - 1:
@@ -1884,14 +1884,13 @@ if text_to_send or files_to_send:
                 full_reply = f"⚠️ エラーが発生しました: {str(e)}"
                 st.markdown(full_reply)
 
-            # ChatGPT風：回答アクションバー（コピー・読み上げ・停止）
-            safe_c = full_reply.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
-            st.markdown(f"""
+            # ChatGPT風：回答アクションバー（コピー・読み上げ・停止：DOM動的取得でHTML破壊完全ゼロ）
+            st.markdown("""
             <div class="chatgpt-action-bar">
-                <button class="chatgpt-action-btn" onclick="navigator.clipboard.writeText(`{safe_c}`); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
+                <button class="chatgpt-action-btn" onclick="const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; navigator.clipboard.writeText(p); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
                     📋 コピー
                 </button>
-                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(`{safe_c}`); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
+                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; const u = new SpeechSynthesisUtterance(p); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
                     🔊 読み上げ
                 </button>
                 <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel();">
@@ -1899,6 +1898,7 @@ if text_to_send or files_to_send:
                 </button>
             </div>
             """, unsafe_allow_html=True)
+
 
         asst_msg = {
             "role": "assistant",
