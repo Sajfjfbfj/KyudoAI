@@ -6,9 +6,124 @@ import tempfile
 import hashlib
 import secrets
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.graph_objects as go
 from google import genai
 from google.genai import types
+
+def render_chatgpt_toolbar(text_content: str):
+    """ChatGPT風アクションツールバー（iframe内で確実に動作するクリップボードコピー＆ブラウザ音声読み上げ）"""
+    safe_text_json = json.dumps(text_content)
+    toolbar_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }}
+            .bar {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding-top: 4px;
+            }}
+            .btn {{
+                background: #ffffff;
+                border: 1px solid #e5e7eb;
+                color: #4b5563;
+                border-radius: 8px;
+                padding: 4px 12px;
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                transition: all 0.15s ease;
+            }}
+            .btn:hover {{
+                background: #f3f4f6;
+                color: #111827;
+                border-color: #d1d5db;
+            }}
+            .btn:active {{
+                transform: scale(0.96);
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="bar">
+            <button class="btn" id="copyBtn" onclick="doCopy()">📋 コピー</button>
+            <button class="btn" id="speakBtn" onclick="doSpeak()">🔊 読み上げ</button>
+            <button class="btn" id="stopBtn" onclick="doStop()">⏹️ 停止</button>
+        </div>
+        <script>
+            const textToProcess = {safe_text_json};
+
+            function doCopy() {{
+                const onSuccess = () => {{
+                    const b = document.getElementById('copyBtn');
+                    b.innerText = '✅ コピー完了';
+                    setTimeout(() => b.innerText = '📋 コピー', 2000);
+                }};
+                if (navigator.clipboard && navigator.clipboard.writeText) {{
+                    navigator.clipboard.writeText(textToProcess).then(onSuccess).catch(() => fallbackCopy(onSuccess));
+                }} else {{
+                    fallbackCopy(onSuccess);
+                }}
+            }}
+
+            function fallbackCopy(cb) {{
+                const ta = document.createElement('textarea');
+                ta.value = textToProcess;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                try {{
+                    document.execCommand('copy');
+                    if (cb) cb();
+                }} catch (e) {{
+                    console.error('Copy failed', e);
+                }}
+                document.body.removeChild(ta);
+            }}
+
+            function doSpeak() {{
+                if (!('speechSynthesis' in window)) {{
+                    alert('お使いの端末はブラウザ音声読み上げに対応していません。');
+                    return;
+                }}
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(textToProcess);
+                u.lang = 'ja-JP';
+                u.rate = 1.05;
+                const b = document.getElementById('speakBtn');
+                b.innerText = '🗣️ 再生中...';
+                u.onend = () => b.innerText = '🔊 読み上げ';
+                u.onerror = () => b.innerText = '🔊 読み上げ';
+                window.speechSynthesis.speak(u);
+            }}
+
+            function doStop() {{
+                if ('speechSynthesis' in window) {{
+                    window.speechSynthesis.cancel();
+                    const b = document.getElementById('speakBtn');
+                    if (b) b.innerText = '🔊 読み上げ';
+                }}
+            }}
+        </script>
+    </body>
+    </html>
+    """
+    components.html(toolbar_html, height=36)
+
 
 
 # ==================== 個人情報保護・完全消去ユーティリティ ====================
@@ -1756,30 +1871,21 @@ for idx, msg in enumerate(st.session_state.messages):
 
             st.markdown(msg["content"])
 
-            # ChatGPT風：アクションバー（コピー・音声読み上げ・停止：DOMから動的取得でHTML破壊ゼロ）
-            st.markdown("""
-            <div class="chatgpt-action-bar">
-                <button class="chatgpt-action-btn" onclick="const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; navigator.clipboard.writeText(p); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
-                    📋 コピー
-                </button>
-                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; const u = new SpeechSynthesisUtterance(p); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
-                    🔊 読み上げ
-                </button>
-                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel();">
-                    ⏹️ 停止
-                </button>
-            </div>
-            """, unsafe_allow_html=True)
+            # ChatGPT風：アクションツールバー（コピー・読み上げ・停止）
+            render_chatgpt_toolbar(msg.get("content", ""))
 
-
-            # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン
-            if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant":
+            # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン（ユーザーの質問が存在する場合のみ表示）
+            has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
+            if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant" and has_user_prompt:
                 col_rg, _ = st.columns([0.48, 0.52])
                 with col_rg:
                     if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="別の言い方や指導観点で回答を再生成"):
-                        prev_user_msgs = [m for m in st.session_state.messages[:idx] if m["role"] == "user"]
-                        if prev_user_msgs:
-                            last_u_text = prev_user_msgs[-1]["content"]
+                        last_u_text = None
+                        for prev_m in reversed(st.session_state.messages[:idx]):
+                            if prev_m["role"] == "user":
+                                last_u_text = prev_m["content"]
+                                break
+                        if last_u_text:
                             st.session_state.messages.pop()
                             with st.spinner(f"{selected_char}が別の視点から思考を深めて再構成中..."):
                                 reply = generate_response(last_u_text, selected_char, active_api_key, is_regenerate=True)
@@ -1791,6 +1897,7 @@ for idx, msg in enumerate(st.session_state.messages):
                             if "current_session_id" in st.session_state:
                                 save_current_session(st.session_state.current_session_id, st.session_state.messages)
                             st.rerun()
+
 
 
 
@@ -1895,20 +2002,9 @@ if text_to_send or files_to_send:
                 full_reply = f"⚠️ エラーが発生しました: {str(e)}"
                 st.markdown(full_reply)
 
-            # ChatGPT風：回答アクションバー（コピー・読み上げ・停止：DOM動的取得でHTML破壊完全ゼロ）
-            st.markdown("""
-            <div class="chatgpt-action-bar">
-                <button class="chatgpt-action-btn" onclick="const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; navigator.clipboard.writeText(p); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
-                    📋 コピー
-                </button>
-                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const p = this.closest('div[data-testid=&quot;stChatMessage&quot;]').querySelector('div[data-testid=&quot;stChatMessageContent&quot;]').innerText; const u = new SpeechSynthesisUtterance(p); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
-                    🔊 読み上げ
-                </button>
-                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel();">
-                    ⏹️ 停止
-                </button>
-            </div>
-            """, unsafe_allow_html=True)
+            # ChatGPT風：アクションツールバー（コピー・読み上げ・停止）
+            render_chatgpt_toolbar(full_reply)
+
 
 
         asst_msg = {
