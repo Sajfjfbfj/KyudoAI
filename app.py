@@ -6,7 +6,7 @@ import tempfile
 import hashlib
 import secrets
 import streamlit as st
-import streamlit.components.v1 as components
+# st.iframe を使用（components.v1.html は非推奨）
 import plotly.graph_objects as go
 from google import genai
 from google.genai import types
@@ -122,7 +122,7 @@ def render_chatgpt_toolbar(text_content: str):
     </body>
     </html>
     """
-    components.html(toolbar_html, height=36)
+    st.iframe(toolbar_html, height=44)
 
 
 
@@ -260,6 +260,13 @@ st.markdown(f"""
         line-height: 1.8 !important;
         letter-spacing: 0.01em;
     }}
+    /* マークダウンコンテナのオーバーフロー完全防止 */
+    div[data-testid="stMarkdownContainer"] {{
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+    }}
 
     /* チャット吹き出し（ChatGPTスタイル・横幅崩れ完全防止） */
     div[data-testid="stChatMessage"] {{
@@ -281,6 +288,18 @@ st.markdown(f"""
         overflow-wrap: break-word !important;
         word-break: normal !important;
         white-space: normal !important;
+    }}
+    /* iframe（ツールバー）の横幅崩れ完全防止 */
+    div[data-testid="stChatMessageContent"] iframe {{
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block !important;
+    }}
+    /* Streamlit内部のカラム化を防止 */
+    div[data-testid="stChatMessageContent"] > div {{
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
     }}
 
 
@@ -1793,6 +1812,32 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                 pass
 
 # ==================== チャット統合型メイン画面 ====================
+
+# ==================== 🔄 再生成リクエスト処理（session_stateフラグ方式 — メッセージループ外で確実実行） ====================
+if st.session_state.get("regen_requested", False):
+    st.session_state.regen_requested = False
+    # 直前のユーザー発言を取得
+    last_u_text = None
+    for prev_m in reversed(st.session_state.messages):
+        if prev_m["role"] == "user":
+            last_u_text = prev_m["content"]
+            break
+    if last_u_text:
+        # 最後のアシスタントメッセージを除去
+        if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+            st.session_state.messages.pop()
+        # 別の角度から再生成
+        with st.spinner(f"{selected_char}が別の視点から思考を深めて再構成中..."):
+            reply = generate_response(last_u_text, selected_char, active_api_key, is_regenerate=True)
+        st.session_state.messages.append({
+            "role": "assistant",
+            "char": selected_char,
+            "content": reply
+        })
+        if "current_session_id" in st.session_state:
+            save_current_session(st.session_state.current_session_id, st.session_state.messages)
+        st.rerun()
+
 # ユーザーメッセージがまだない場合はChatGPT風のウェルカムサジェストを表示
 has_user_msg = any(m["role"] == "user" for m in st.session_state.messages)
 quick_prompt = None
@@ -1877,26 +1922,9 @@ for idx, msg in enumerate(st.session_state.messages):
             # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン（ユーザーの質問が存在する場合のみ表示）
             has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
             if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant" and has_user_prompt:
-                col_rg, _ = st.columns([0.48, 0.52])
-                with col_rg:
-                    if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="別の言い方や指導観点で回答を再生成"):
-                        last_u_text = None
-                        for prev_m in reversed(st.session_state.messages[:idx]):
-                            if prev_m["role"] == "user":
-                                last_u_text = prev_m["content"]
-                                break
-                        if last_u_text:
-                            st.session_state.messages.pop()
-                            with st.spinner(f"{selected_char}が別の視点から思考を深めて再構成中..."):
-                                reply = generate_response(last_u_text, selected_char, active_api_key, is_regenerate=True)
-                            st.session_state.messages.append({
-                                "role": "assistant",
-                                "char": selected_char,
-                                "content": reply
-                            })
-                            if "current_session_id" in st.session_state:
-                                save_current_session(st.session_state.current_session_id, st.session_state.messages)
-                            st.rerun()
+                if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="別の言い方や指導観点で回答を再生成"):
+                    st.session_state.regen_requested = True
+                    st.rerun()
 
 
 
