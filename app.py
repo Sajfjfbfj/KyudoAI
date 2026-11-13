@@ -579,7 +579,7 @@ def render_login_screen():
         
         with tab_login:
             with st.form("login_form", clear_on_submit=False):
-                uname = st.text_input("ユーザー名", placeholder="例: archer")
+                uname = st.text_input("ユーザー名", placeholder="ユーザー名を入力")
                 upass = st.text_input("パスワード", type="password", placeholder="パスワードを入力")
                 btn_login = st.form_submit_button("ログインして道場に入る", use_container_width=True, type="primary")
                 
@@ -592,13 +592,7 @@ def render_login_screen():
                         st.rerun()
                     else:
                         st.error("ユーザー名またはパスワードが正しくありません。")
-                        
-            st.markdown("""
-            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-top: 16px; font-size: 13px; color: #475569; text-align: center;">
-                💡 <b>初期テスト用アカウント</b><br>
-                ユーザー名: <code style="color: #10a37f; font-weight: 600;">archer</code> / パスワード: <code style="color: #10a37f; font-weight: 600;">kyudo123</code>
-            </div>
-            """, unsafe_allow_html=True)
+
             
         with tab_register:
             with st.form("reg_form", clear_on_submit=False):
