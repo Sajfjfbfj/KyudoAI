@@ -1816,6 +1816,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 # ==================== 🔄 再生成リクエスト処理（session_stateフラグ方式 — メッセージループ外で確実実行） ====================
 if st.session_state.get("regen_requested", False):
     st.session_state.regen_requested = False
+    regen_char = st.session_state.pop("regen_char", None)  # None = 同じキャラ
     # 直前のユーザー発言を取得
     last_u_text = None
     for prev_m in reversed(st.session_state.messages):
@@ -1823,15 +1824,21 @@ if st.session_state.get("regen_requested", False):
             last_u_text = prev_m["content"]
             break
     if last_u_text:
+        # 再生成に使うキャラクターを決定（別キャラ指定 or 現在選択中キャラ）
+        if regen_char and regen_char in CHARACTERS:
+            use_char = regen_char
+        else:
+            use_char = selected_char
         # 最後のアシスタントメッセージを除去
         if st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
             st.session_state.messages.pop()
         # 別の角度から再生成
-        with st.spinner(f"{selected_char}が別の視点から思考を深めて再構成中..."):
-            reply = generate_response(last_u_text, selected_char, active_api_key, is_regenerate=True)
+        use_char_info = CHARACTERS[use_char]
+        with st.spinner(f"{use_char_info['icon']} {use_char}が別の視点から思考を深めて再構成中..."):
+            reply = generate_response(last_u_text, use_char, active_api_key, is_regenerate=True)
         st.session_state.messages.append({
             "role": "assistant",
-            "char": selected_char,
+            "char": use_char,
             "content": reply
         })
         if "current_session_id" in st.session_state:
@@ -1922,9 +1929,25 @@ for idx, msg in enumerate(st.session_state.messages):
             # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン（ユーザーの質問が存在する場合のみ表示）
             has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
             if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant" and has_user_prompt:
-                if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="別の言い方や指導観点で回答を再生成"):
-                    st.session_state.regen_requested = True
-                    st.rerun()
+                regen_cols = st.columns([0.42, 0.58])
+                with regen_cols[0]:
+                    if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="同じキャラクターで別の視点から回答を再生成"):
+                        st.session_state.regen_requested = True
+                        st.session_state.regen_char = None  # 同じキャラ
+                        st.rerun()
+                with regen_cols[1]:
+                    # 別キャラで再生成：現在の回答キャラを除外した選択肢
+                    current_msg_char = msg.get("char", selected_char)
+                    other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
+                    if other_chars:
+                        with st.popover("🎭 別のキャラで再生成", use_container_width=True):
+                            st.caption("別のAIキャラクターの視点から回答し直します")
+                            for oc in other_chars:
+                                oc_info = CHARACTERS[oc]
+                                if st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True, help=oc_info["desc"]):
+                                    st.session_state.regen_requested = True
+                                    st.session_state.regen_char = oc
+                                    st.rerun()
 
 
 
