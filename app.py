@@ -239,7 +239,68 @@ st.markdown(f"""
         font-size: 12px !important;
         color: #6b7280 !important;
     }}
-    
+
+    /* ChatGPT風「🧠 メモリを更新しました」バッジ */
+    .memory-badge {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px !important;
+        font-weight: 500;
+        background-color: #f0fdf4 !important;
+        color: #166534 !important;
+        border: 1px solid #bbf7d0 !important;
+        margin-bottom: 8px;
+        animation: fadeIn 0.4s ease-out;
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(-4px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
+
+    /* ChatGPT風のアクションバー（コピー・読み上げ・再生成ボタン） */
+    .chatgpt-action-bar {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 6px;
+    }}
+    .chatgpt-action-btn {{
+        background: transparent !important;
+        border: 1px solid #e5e7eb !important;
+        color: #6b7280 !important;
+        border-radius: 8px !important;
+        padding: 4px 10px !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }}
+    .chatgpt-action-btn:hover {{
+        background: #f3f4f6 !important;
+        color: #111827 !important;
+        border-color: #d1d5db !important;
+    }}
+    .chatgpt-action-btn:active {{
+        transform: scale(0.96) !important;
+    }}
+
+    /* ChatGPT風 思考プロセスのボックス */
+    .reasoning-box {{
+        background-color: #f9fafb !important;
+        border-left: 3px solid #9ca3af !important;
+        border-radius: 0 8px 8px 0 !important;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+        color: #4b5563 !important;
+        margin-bottom: 10px !important;
+    }}
+
     /* サイドバー（ChatGPT風のライトグレー） */
     section[data-testid="stSidebar"] {{
         background-color: #f9fafb !important;
@@ -498,15 +559,15 @@ def build_memory_prompt_section(username: str) -> str:
         f"これまでの稽古の文脈に寄り添い、射手にとって最適なアドバイスを行ってください。\n\n"
     )
 
-def auto_extract_and_save_memory(username: str, user_text: str, api_key: str):
-    """ユーザーの発言から弓道に関する自己情報（弓力・段位・悩みなど）をAIが自動抽出し記憶に追加"""
+def auto_extract_and_save_memory(username: str, user_text: str, api_key: str) -> list[str]:
+    """ユーザーの発言から弓道に関する自己情報（弓力・段位・悩みなど）をAIが自動抽出し記憶に追加。抽出した項目一覧を返す。"""
     if not api_key or not user_text or len(user_text.strip()) < 4:
-        return
-    # 自己情報が含まれそうなキーワードの簡易フィルター
+        return []
     trigger_words = ["弓力", "kg", "キロ", "段", "級", "高校", "大学", "部活", "矢尺", "cm", "流派", "直心", "肥後", "グラス", "カーボン", "早気", "もたれ", "手の内", "審査", "大会", "歴", "年目"]
     if not any(w in user_text for w in trigger_words):
-        return
+        return []
 
+    new_items = []
     try:
         client = genai.Client(api_key=api_key)
         extract_prompt = f"""
@@ -531,8 +592,104 @@ def auto_extract_and_save_memory(username: str, user_text: str, api_key: str):
             for item in lines:
                 if item and not item.startswith("なし") and len(item) <= 40:
                     add_user_memory_item(username, item)
+                    new_items.append(item)
     except Exception:
         pass
+    return new_items
+
+# ==================== ChatGPT風 カスタム指示（Custom Instructions） ====================
+CUSTOM_INSTR_DIR = os.path.join(os.path.dirname(__file__), "data", "custom_instructions")
+
+def get_custom_instructions_path(username: str) -> str:
+    os.makedirs(CUSTOM_INSTR_DIR, exist_ok=True)
+    user_safe = "".join(c for c in username if c.isalnum() or c in ("-", "_")) or "default"
+    return os.path.join(CUSTOM_INSTR_DIR, f"{user_safe}.json")
+
+def load_custom_instructions(username: str) -> dict:
+    """ユーザー独自のカスタム指示を取得"""
+    path = get_custom_instructions_path(username)
+    if not os.path.exists(path):
+        return {"profile": "", "response_pref": ""}
+    try:
+        with open(path, "r", encoding="utf-8") as fp:
+            return json.load(fp)
+    except Exception:
+        return {"profile": "", "response_pref": ""}
+
+def save_custom_instructions(username: str, profile: str, response_pref: str):
+    """ユーザー独自のカスタム指示を保存"""
+    path = get_custom_instructions_path(username)
+    data = {
+        "profile": profile.strip(),
+        "response_pref": response_pref.strip(),
+        "updated_at": time.strftime("%Y-%m-%d %H:%M")
+    }
+    try:
+        with open(path, "w", encoding="utf-8") as fp:
+            json.dump(data, fp, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def build_custom_instructions_prompt(username: str) -> str:
+    """プロンプトに注入するカスタム指示ブロックを生成"""
+    inst = load_custom_instructions(username)
+    profile = inst.get("profile", "").strip()
+    resp_pref = inst.get("response_pref", "").strip()
+    if not profile and not resp_pref:
+        return ""
+    parts = []
+    if profile:
+        parts.append(f"【射手自身について知っておくべき追加事項】\n{profile}")
+    if resp_pref:
+        parts.append(f"【射手が希望するAIの応答スタイル・特別ルール】\n{resp_pref}")
+    return "\n\n" + "\n\n".join(parts) + "\n\n"
+
+# ==================== 会話履歴の管理（名前変更・削除・スマート要約） ====================
+
+def rename_session(session_id: str, new_title: str):
+    """セッションのタイトルを変更"""
+    if not new_title.strip():
+        return
+    h_dir = get_current_history_dir()
+    path = os.path.join(h_dir, f"{session_id}.json")
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                data = json.load(fp)
+            data["title"] = new_title.strip()
+            with open(path, "w", encoding="utf-8") as fp:
+                json.dump(data, fp, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+def delete_session(session_id: str):
+    """セッションを削除"""
+    h_dir = get_current_history_dir()
+    path = os.path.join(h_dir, f"{session_id}.json")
+    if os.path.exists(path):
+        try:
+            os.remove(path)
+        except Exception:
+            pass
+
+def generate_smart_title(user_text: str, api_key: str) -> str:
+    """ChatGPT風：最初の質問内容からAIが12文字前後の的確なタイトルを自動生成"""
+    if not user_text:
+        return "弓道稽古録"
+    if not api_key:
+        return user_text[:15] + ("..." if len(user_text) > 15 else "")
+    try:
+        client = genai.Client(api_key=api_key)
+        res = client.models.generate_content(
+            model="gemini-3.5-flash-lite",
+            contents=f"以下の弓道の質問から、ChatGPTの会話履歴一覧に並ぶような簡潔で分かりやすいタイトル（日本語10〜15文字程度・カギカッコや句読点なし）を1つだけ作成してください。\n\n質問: {user_text}"
+        )
+        if res.text:
+            return res.text.strip().replace("「", "").replace("」", "").replace("『", "").replace("』", "")[:20]
+    except Exception:
+        pass
+    return user_text[:15] + ("..." if len(user_text) > 15 else "")
+
 
 # ==================== 会話履歴の永続化・記録機能 ====================
 
@@ -570,24 +727,36 @@ def load_session_messages(session_id: str):
             pass
     return None
 
-def save_current_session(session_id: str, messages: list):
-    """現在の会話履歴を自動保存"""
+def save_current_session(session_id: str, messages: list, custom_title: str = None):
+    """現在の会話履歴を自動保存（既存タイトルや手動命名を保護）"""
     if not messages:
         return
     h_dir = get_current_history_dir()
-        
-    # タイトルを最初のユーザー発言から自動生成
-    title = "弓道相談・稽古録"
-    for m in messages:
-        if m["role"] == "user":
-            first_text = m.get("content", "").replace("🎥 **射形分析をお願いします**\n\n【気になっていること】: ", "").strip()
-            first_line = first_text.split("\n")[0]
-            if first_line:
-                title = first_line[:20] + ("..." if len(first_line) > 20 else "")
-            break
-            
-    now_str = time.strftime("%Y-%m-%d %H:%M")
     path = os.path.join(h_dir, f"{session_id}.json")
+
+    existing_title = None
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as fp:
+                existing_title = json.load(fp).get("title")
+        except Exception:
+            pass
+
+    if custom_title:
+        title = custom_title
+    elif existing_title and existing_title not in ("弓道相談・稽古録", "無題の稽古録"):
+        title = existing_title
+    else:
+        title = "弓道稽古録"
+        for m in messages:
+            if m["role"] == "user":
+                first_text = m.get("content", "").replace("🎥 **射形分析をお願いします**\n\n【気になっていること】: ", "").strip()
+                first_line = first_text.split("\n")[0]
+                if first_line:
+                    title = first_line[:16] + ("..." if len(first_line) > 16 else "")
+                break
+
+    now_str = time.strftime("%Y-%m-%d %H:%M")
     data = {
         "id": session_id,
         "title": title,
@@ -596,6 +765,7 @@ def save_current_session(session_id: str, messages: list):
     }
     with open(path, "w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
+
 
 def export_session_to_text(messages: list) -> str:
     """会話履歴を読みやすいテキスト・Markdownに整形"""
@@ -791,6 +961,29 @@ with st.sidebar:
                 st.session_state.messages = loaded
             st.rerun()
 
+        # ChatGPT風：選択中のチャットの名前変更＆削除
+        col_s1, col_s2 = st.columns([1, 1])
+        with col_s1:
+            with st.popover("✏️ 名前変更", use_container_width=True):
+                cur_title = sess_options.get(selected_sess_id, "")
+                rename_val = st.text_input("新しいタイトル", value=cur_title, key=f"rename_input_{selected_sess_id}")
+                if st.button("更新", key=f"btn_rename_{selected_sess_id}", use_container_width=True):
+                    rename_session(selected_sess_id, rename_val)
+                    st.rerun()
+        with col_s2:
+            if st.button("🗑️ 削除", use_container_width=True, key=f"del_sess_{selected_sess_id}", help="このチャットを削除"):
+                delete_session(selected_sess_id)
+                remains = get_all_sessions()
+                if remains:
+                    st.session_state.current_session_id = remains[0]["id"]
+                    st.session_state.messages = load_session_messages(remains[0]["id"]) or []
+                else:
+                    new_id = f"session_{int(time.time())}"
+                    st.session_state.current_session_id = new_id
+                    st.session_state.messages = []
+                st.rerun()
+
+
     st.divider()
 
     # キャラクター選択
@@ -932,7 +1125,34 @@ with st.sidebar:
                 time.sleep(0.3)
                 st.rerun()
 
+    # ChatGPT風 カスタム指示（Custom Instructions）
+    with st.expander("🎯 カスタム指示（パーソナライズ）", expanded=False):
+        st.caption("AIに常に知っておいてほしい前提や、希望する回答スタイルを設定できます。全チャットに適用されます。")
+        cur_user = st.session_state.get("logged_in_user", "default")
+        cur_ci = load_custom_instructions(cur_user)
+
+        ci_profile = st.text_area(
+            "① あなた自身について知っておいてほしいこと:",
+            value=cur_ci.get("profile", ""),
+            placeholder="例: 弓道歴5年、参段。左利き。高校弓道部顧問。直心II 15kg使用。",
+            height=75,
+            key="ci_profile_input"
+        )
+        ci_pref = st.text_area(
+            "② AIにどのように応答してほしいか:",
+            value=cur_ci.get("response_pref", ""),
+            placeholder="例: 結論から先に伝えてほしい。専門用語は必ずわかりやすく解説してほしい。時には厳しく指導してほしい。",
+            height=75,
+            key="ci_pref_input"
+        )
+        if st.button("カスタム指示を保存", use_container_width=True, key="save_ci_btn"):
+            save_custom_instructions(cur_user, ci_profile, ci_pref)
+            st.success("カスタム指示を保存しました！")
+            time.sleep(0.3)
+            st.rerun()
+
     # サイドバー最下部：ChatGPT風ログインユーザー情報 ＆ ログアウトボタン
+
     st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
     users_db = load_users()
@@ -993,15 +1213,18 @@ def generate_response(user_input: str, char_name: str, api_key: str) -> str:
             contents.append(f"user: {user_input}")
 
             memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
+            custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
             
             prompt_text = (
                 f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
                 f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
                 f"{memory_section}"
+                f"{custom_instructions}"
                 f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
                 f"{system_instruction}\n\n"
                 f"【会話内容】\n" + "\n".join(contents)
             )
+
 
             
             # 最新の高速モデルを順に試行
@@ -1034,6 +1257,64 @@ def generate_response(user_input: str, char_name: str, api_key: str) -> str:
 
     # APIキーがない、またはエラー時のローカル知識ベース応答
     return get_local_response(user_input, char_name)
+
+def generate_response_stream(user_input: str, char_name: str, api_key: str):
+    """ChatGPT風：リアルタイムに文字が流れるストリーミング応答ジェネレーター"""
+    current_char = CHARACTERS[char_name]
+    if not api_key:
+        local_ans = get_local_response(user_input, char_name)
+        for char in local_ans:
+            time.sleep(0.015)
+            yield char
+        return
+
+    try:
+        client = genai.Client(api_key=api_key)
+        system_instruction = current_char["prompt"]
+        
+        contents = []
+        for m in st.session_state.messages[-6:]:
+            role = "user" if m["role"] == "user" else "model"
+            contents.append(f"{role}: {m['content']}")
+        contents.append(f"user: {user_input}")
+
+        memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
+        custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
+        
+        prompt_text = (
+            f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
+            f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
+            f"{memory_section}"
+            f"{custom_instructions}"
+            f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
+            f"{system_instruction}\n\n"
+            f"【会話内容】\n" + "\n".join(contents)
+        )
+
+        model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
+        for m_name in model_candidates:
+            try:
+                response = client.models.generate_content_stream(
+                    model=m_name,
+                    contents=prompt_text,
+                    config=types.GenerateContentConfig(
+                        temperature=0.7,
+                    )
+                )
+                for chunk in response:
+                    if chunk.text:
+                        yield chunk.text
+                return
+            except Exception:
+                continue
+
+        # モデル試行失敗時のフォールバック
+        local_ans = get_local_response(user_input, char_name)
+        for char in local_ans:
+            yield char
+    except Exception as e:
+        yield f"⚠️ 応答ストリーミング中にエラーが発生しました: {str(e)}"
+
 
 def get_local_response(user_input: str, char_name: str) -> str:
     for kw, resp_dict in LOCAL_RESPONSES.items():
@@ -1225,6 +1506,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                 raise ValueError("動画の処理に失敗しました。別の形式や短めの動画をお試しください。")
 
         memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
+        custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
 
         # 立体バイオメカニクス＆筋肉感知コーチングプロンプト
         analysis_prompt = f"""
@@ -1235,7 +1517,9 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 {KYUDO_SCIENTIFIC_EVIDENCE}
 
 {memory_section}
+{custom_instructions}
 外見のポーズだけでなく、**「深層筋（インナーマッスル）が使えているか」「表層筋（僧帽筋などの首肩）が力みすぎてブレーキになっていないか」**を立体的に感知・推定してください。
+
 
 【射手からのコメント・気になっている点】
 {user_note if user_note else "特になし（全体的な射形・筋肉の使い方を見てほしい）"}
@@ -1413,7 +1697,12 @@ for idx, msg in enumerate(st.session_state.messages):
         c_info = CHARACTERS.get(msg_char, char_info)
         with st.chat_message("assistant", avatar=c_info["icon"]):
             st.markdown(f'<span class="char-badge {c_info["badge_class"]}">{c_info["icon"]} {msg_char}</span>', unsafe_allow_html=True)
-            
+
+            # ChatGPT風：メモリ更新バッジ通知
+            if msg.get("memory_items"):
+                mem_tags = "、".join(msg["memory_items"])
+                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+
             # 3D立体骨格 ＆ 筋活動レーダーチャートがメッセージに含まれる場合
             if "muscle_data" in msg and "posture_data" in msg:
                 st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
@@ -1429,6 +1718,43 @@ for idx, msg in enumerate(st.session_state.messages):
                 st.divider()
 
             st.markdown(msg["content"])
+
+            # ChatGPT風：アクションバー（コピー・音声読み上げ・停止）
+            safe_content = msg.get("content", "").replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+            st.markdown(f"""
+            <div class="chatgpt-action-bar">
+                <button class="chatgpt-action-btn" onclick="navigator.clipboard.writeText(`{safe_content}`); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
+                    📋 コピー
+                </button>
+                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(`{safe_content}`); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
+                    🔊 読み上げ
+                </button>
+                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel();">
+                    ⏹️ 停止
+                </button>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン
+            if idx == len(st.session_state.messages) - 1:
+                col_rg, _ = st.columns([0.45, 0.55])
+                with col_rg:
+                    if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help="別の言い方や指導観点で回答を再生成"):
+                        prev_user_msgs = [m for m in st.session_state.messages[:idx] if m["role"] == "user"]
+                        if prev_user_msgs:
+                            last_u_text = prev_user_msgs[-1]["content"]
+                            st.session_state.messages.pop()
+                            with st.spinner(f"{selected_char}が思考を深めて再構成中..."):
+                                reply = generate_response(last_u_text, selected_char, active_api_key)
+                            st.session_state.messages.append({
+                                "role": "assistant",
+                                "char": selected_char,
+                                "content": reply
+                            })
+                            if "current_session_id" in st.session_state:
+                                save_current_session(st.session_state.current_session_id, st.session_state.messages)
+                            st.rerun()
+
 
 # チャット入力欄（ChatGPT風カプセルバー、左端に「＋」添付ボタン）
 chat_submission = st.chat_input(
@@ -1499,35 +1825,73 @@ if text_to_send or files_to_send:
                 "content": err_text
             })
 
-    # B. 通常のテキスト質問の場合
+        if "current_session_id" in st.session_state:
+            save_current_session(st.session_state.current_session_id, st.session_state.messages)
+        st.rerun()
+
+    # B. 通常のテキスト質問の場合（ChatGPT風リアルタイム・ストリーミング）
+
     else:
         st.session_state.messages.append({"role": "user", "content": text_to_send})
 
-        # テキスト回答もspinnerのみ（chat_messageブロックをここで開かない）
-        try:
-            with st.spinner(f"{selected_char}が科学的文献エビデンスに基づき回答中..."):
-                reply = generate_response(text_to_send, selected_char, active_api_key)
-            st.session_state.messages.append({
-                "role": "assistant",
-                "char": selected_char,
-                "content": reply
-            })
-        except Exception as e:
-            st.session_state.messages.append({
-                "role": "assistant",
-                "char": selected_char,
-                "content": f"⚠️ エラーが発生しました: {str(e)}"
-            })
+        # ChatGPT風：ユーザー発言から個人情報（弓力・段位・悩み・弓具など）を自動学習して射手カルテに保存
+        new_mem_items = []
+        if active_api_key:
+            cur_user = st.session_state.get("logged_in_user", "default")
+            new_mem_items = auto_extract_and_save_memory(cur_user, text_to_send, active_api_key)
 
-    # ChatGPT風：ユーザー発言から個人情報（弓力・段位・悩み・弓具など）を自動学習して射手カルテに保存
-    if text_to_send and active_api_key:
-        cur_user = st.session_state.get("logged_in_user", "default")
-        auto_extract_and_save_memory(cur_user, text_to_send, active_api_key)
+        # 画面にリアルタイムでストリーミング描画（ChatGPT完全再現）
+        with st.chat_message("user"):
+            st.markdown(text_to_send)
 
-    # 会話を即時自動保存してからrerun（描画済みUIが一切ない状態でrerunするのが安全）
-    if "current_session_id" in st.session_state:
-        save_current_session(st.session_state.current_session_id, st.session_state.messages)
+        with st.chat_message("assistant", avatar=char_info["icon"]):
+            st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
+            if new_mem_items:
+                mem_tags = "、".join(new_mem_items)
+                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
 
-    st.rerun()
+            try:
+                stream_gen = generate_response_stream(text_to_send, selected_char, active_api_key)
+                full_reply = st.write_stream(stream_gen)
+            except Exception as e:
+                full_reply = f"⚠️ エラーが発生しました: {str(e)}"
+                st.markdown(full_reply)
+
+            # ChatGPT風：回答アクションバー（コピー・読み上げ・停止）
+            safe_c = full_reply.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+            st.markdown(f"""
+            <div class="chatgpt-action-bar">
+                <button class="chatgpt-action-btn" onclick="navigator.clipboard.writeText(`{safe_c}`); this.innerText='✅ コピー完了'; setTimeout(() => this.innerText='📋 コピー', 2000);">
+                    📋 コピー
+                </button>
+                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(`{safe_c}`); u.lang='ja-JP'; u.rate=1.05; window.speechSynthesis.speak(u);">
+                    🔊 読み上げ
+                </button>
+                <button class="chatgpt-action-btn" onclick="window.speechSynthesis.cancel();">
+                    ⏹️ 停止
+                </button>
+            </div>
+            """, unsafe_allow_html=True)
+
+        asst_msg = {
+            "role": "assistant",
+            "char": selected_char,
+            "content": full_reply
+        }
+        if new_mem_items:
+            asst_msg["memory_items"] = new_mem_items
+        st.session_state.messages.append(asst_msg)
+
+        # 会話を即時自動保存（最初の質問ならAIが12文字前後のスマート要約タイトルを自動生成）
+        if "current_session_id" in st.session_state:
+            user_msg_count = sum(1 for m in st.session_state.messages if m["role"] == "user")
+            smart_title = None
+            if user_msg_count == 1 and active_api_key:
+                smart_title = generate_smart_title(text_to_send, active_api_key)
+            save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
+
+        # 動画と異なり、ストリーミング完了後はチラつきやDOMエラーを防ぐためrerunせずそのまま快適に維持
+        # 次のユーザー入力時に自然に再描画されます
+
 
 
