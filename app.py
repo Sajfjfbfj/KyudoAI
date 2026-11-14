@@ -188,52 +188,54 @@ font_sizes = {
 # ChatGPT風モダンUIカスタムCSS（スマホ・タブレット・PC完全レスポンシブ対応）
 st.markdown(f"""
 <style>
-    /* 全体フォントと背景（ChatGPT風のクリーンホワイト） */
+    /* ==================== ChatGPT公式Web UI完全再現スタイル ==================== */
+    
+    /* 1. 全体フォント・背景（クリーンホワイト & サンセリフ） */
     .stApp {{
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
         background-color: #ffffff !important;
         color: #0d0d0d !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }}
     
-    /* メインチャットコンテナ（PC・タブレット・スマホで自然に伸縮） */
+    /* 2. メインチャットコンテナ（最大幅768px・ChatGPT標準幅に統一） */
     .main .block-container {{
-        max-width: 820px !important;
-        padding-top: 20px !important;
-        padding-bottom: 140px !important;
+        max-width: 768px !important;
+        padding-top: 10px !important;
+        padding-bottom: 130px !important;
         margin: 0 auto !important;
     }}
     
-    /* 下部固定入力バーエリア（スマホのセーフエリア対応） */
+    /* 3. 下部固定入力バーエリア（背景フェード & セーフエリア） */
     div[data-testid="stBottom"] {{
-        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.92) 25%, #ffffff 100%) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.92) 20%, #ffffff 100%) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 9999 !important;
     }}
     div[data-testid="stBottom"] > div {{
-        max-width: 820px !important;
+        max-width: 768px !important;
         margin: 0 auto !important;
-        padding: 0 12px !important;
+        padding: 0 8px !important;
     }}
 
-    /* ChatGPT風の角丸ピル型入力バー */
+    /* 4. ChatGPT純正ピル型入力ボックス */
     div[data-testid="stChatInput"] {{
-        border: 1px solid #dcdfe4 !important;
-        border-radius: 26px !important;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 28px !important;
         background-color: #ffffff !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03) !important;
-        padding: 6px 12px !important;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.02) !important;
+        padding: 6px 14px !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     div[data-testid="stChatInput"]:focus-within {{
-        border-color: #10a37f !important;
-        box-shadow: 0 6px 24px rgba(16,163,127,0.15), 0 1px 4px rgba(16,163,127,0.08) !important;
+        border-color: #0d0d0d !important;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.08) !important;
     }}
     div[data-testid="stChatInput"] textarea {{
-        font-size: 16px !important;
+        font-size: 15px !important;
         color: #0d0d0d !important;
         background-color: transparent !important;
         line-height: 1.6 !important;
@@ -241,42 +243,26 @@ st.markdown(f"""
     }}
     /* 入力欄の添付プラスボタン */
     div[data-testid="stChatInput"] button {{
-        color: #4b5563 !important;
-        transition: color 0.15s ease, transform 0.15s ease !important;
+        color: #5d5d5d !important;
         border-radius: 50% !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
+        min-width: 34px !important;
+        min-height: 34px !important;
+        transition: all 0.15s ease !important;
     }}
     div[data-testid="stChatInput"] button:hover {{
-        color: #10a37f !important;
-        background-color: #f0fdf4 !important;
-        transform: scale(1.05) !important;
-    }}
-
-    /* マークダウンテキスト */
-    .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
+        background-color: #f3f3f3 !important;
         color: #0d0d0d !important;
-        font-size: 16px !important;
-        line-height: 1.8 !important;
-        letter-spacing: 0.01em;
-    }}
-    /* マークダウンコンテナのオーバーフロー完全防止 */
-    div[data-testid="stMarkdownContainer"] {{
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        overflow-wrap: break-word !important;
     }}
 
-    /* チャット吹き出し（ChatGPTスタイル・横幅崩れ完全防止） */
+    /* 5. チャットメッセージのベースコンテナ */
     div[data-testid="stChatMessage"] {{
         display: flex !important;
         flex-direction: row !important;
         background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 12px 0 !important;
-        margin-bottom: 14px !important;
+        padding: 10px 0 !important;
+        margin-bottom: 12px !important;
         width: 100% !important;
         min-width: 0 !important;
     }}
@@ -289,108 +275,126 @@ st.markdown(f"""
         word-break: normal !important;
         white-space: normal !important;
     }}
-    /* iframe（ツールバー）の横幅崩れ完全防止 */
     div[data-testid="stChatMessageContent"] iframe {{
         width: 100% !important;
         max-width: 100% !important;
         display: block !important;
     }}
-    /* Streamlit内部のカラム化を防止 */
     div[data-testid="stChatMessageContent"] > div {{
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
     }}
 
-
-    /* ユーザーメッセージ（右側・丸み吹き出し） */
+    /* 6. 【ChatGPT完全再現】ユーザーメッセージ：アバター非表示・右寄せグレー吹き出し */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-        background-color: #f3f4f6 !important;
-        border-radius: 20px 20px 4px 20px !important;
-        padding: 12px 20px !important;
-        max-width: 82% !important;
+        background-color: #f4f4f4 !important;
+        border-radius: 22px 22px 4px 22px !important;
+        padding: 10px 18px !important;
+        max-width: 75% !important;
         margin-left: auto !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+        box-shadow: none !important;
+    }}
+    /* ユーザー側のアバターアイコンを完全消去（ChatGPT仕様） */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageAvatar"],
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) div[data-testid="chatAvatarIcon-user"] {{
+        display: none !important;
     }}
 
-    /* アシスタントメッセージ（枠線なし、横幅いっぱいにすっきりプレーン表示） */
+    /* 7. 【ChatGPT完全再現】アシスタントメッセージ：背景透明・左揃え */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
         background-color: transparent !important;
         border: none !important;
-        padding: 8px 0 !important;
+        padding: 6px 0 !important;
         width: 100% !important;
     }}
+    /* アシスタントアバターの丸型スタイリング */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
+        border-radius: 50% !important;
+        width: 32px !important;
+        height: 32px !important;
+        margin-right: 12px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    }}
 
+    /* 8. テキストタイポグラフィ（ChatGPTの読みやすさ） */
+    .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
+        color: #0d0d0d !important;
+        font-size: 16px !important;
+        line-height: 1.8 !important;
+        letter-spacing: 0.01em;
+    }}
+    div[data-testid="stMarkdownContainer"] {{
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow-wrap: break-word !important;
+    }}
 
-    /* キャラクターバッジ（ChatGPT風の控えめなpill） */
+    /* 9. キャラクターバッジ（ChatGPT風の控えめな丸角ピル） */
     .char-badge {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 4px 12px;
-        border-radius: 14px;
-        font-size: 13px !important;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px !important;
         font-weight: 600 !important;
         margin-bottom: 8px;
-        background-color: #f3f4f6 !important;
-        color: #1f2937 !important;
-        border: 1px solid #e5e7eb !important;
+        background-color: #f4f4f4 !important;
+        color: #262626 !important;
+        border: 1px solid #e5e5e5 !important;
     }}
-    .char-master {{ border-left: 3px solid #b8860b !important; }}
-    .char-senior {{ border-left: 3px solid #10a37f !important; }}
-    .char-analyst {{ border-left: 3px solid #3b82f6 !important; }}
 
-    /* ChatGPT風の提案カード（ウェルカム画面） */
+    /* 10. ChatGPT風の初期提案カード（ウェルカム画面） */
     .suggest-card-btn button {{
         background-color: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 14px !important;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 16px !important;
         padding: 14px 18px !important;
         text-align: left !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.02) !important;
         white-space: pre-wrap !important;
         min-height: 72px !important;
-        color: #111827 !important;
+        color: #0d0d0d !important;
         font-size: 14px !important;
         font-weight: 500 !important;
     }}
     .suggest-card-btn button:hover {{
-        border-color: #10a37f !important;
-        background-color: #f0fdf4 !important;
-        box-shadow: 0 4px 12px rgba(16,163,127,0.1) !important;
-        transform: translateY(-2px) !important;
+        border-color: #a3a3a3 !important;
+        background-color: #fafafa !important;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06) !important;
     }}
 
-    /* ChatGPT風の添付ファイルカード */
+    /* 11. ChatGPT風の添付ファイルカード */
     .file-attachment-card {{
         display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         background-color: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
+        border: 1px solid #e5e5e5 !important;
         border-radius: 12px !important;
-        padding: 10px 16px !important;
-        margin-bottom: 10px !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+        padding: 8px 14px !important;
+        margin-bottom: 8px !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
         max-width: 100% !important;
-        word-break: break-all !important;
     }}
     .file-attachment-icon {{
-        font-size: 24px !important;
+        font-size: 22px !important;
         flex-shrink: 0;
     }}
     .file-attachment-name {{
         font-weight: 600 !important;
-        font-size: 14px !important;
-        color: #111827 !important;
+        font-size: 13px !important;
+        color: #0d0d0d !important;
     }}
     .file-attachment-meta {{
-        font-size: 12px !important;
-        color: #6b7280 !important;
+        font-size: 11px !important;
+        color: #737373 !important;
     }}
 
-    /* ChatGPT風「🧠 メモリを更新しました」バッジ */
+    /* 12. ChatGPT風「🧠 メモリを更新しました」バッジ */
     .memory-badge {{
         display: inline-flex;
         align-items: center;
@@ -403,62 +407,16 @@ st.markdown(f"""
         color: #166534 !important;
         border: 1px solid #bbf7d0 !important;
         margin-bottom: 8px;
-        animation: fadeIn 0.4s ease-out;
-    }}
-    @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(-4px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
     }}
 
-    /* ChatGPT風のアクションバー（コピー・読み上げ・再生成ボタン） */
-    .chatgpt-action-bar {{
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 8px;
-        padding-top: 6px;
-    }}
-    .chatgpt-action-btn {{
-        background: transparent !important;
-        border: 1px solid #e5e7eb !important;
-        color: #6b7280 !important;
-        border-radius: 8px !important;
-        padding: 4px 10px !important;
-        font-size: 12px !important;
-        cursor: pointer !important;
-        transition: all 0.15s ease !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-    }}
-    .chatgpt-action-btn:hover {{
-        background: #f3f4f6 !important;
-        color: #111827 !important;
-        border-color: #d1d5db !important;
-    }}
-    .chatgpt-action-btn:active {{
-        transform: scale(0.96) !important;
-    }}
-
-    /* ChatGPT風 思考プロセスのボックス */
-    .reasoning-box {{
-        background-color: #f9fafb !important;
-        border-left: 3px solid #9ca3af !important;
-        border-radius: 0 8px 8px 0 !important;
-        padding: 8px 12px !important;
-        font-size: 13px !important;
-        color: #4b5563 !important;
-        margin-bottom: 10px !important;
-    }}
-
-    /* サイドバー（ChatGPT風のライトグレー・ミニマルデザイン） */
+    /* 13. サイドバー（ChatGPT風のライトグレー・ミニマルデザイン） */
     section[data-testid="stSidebar"] {{
         background-color: #f9f9f9 !important;
         border-right: 1px solid #e5e5e5 !important;
     }}
     section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] label {{
         color: #374151 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
     }}
 
     /* サイドバーの「新規チャット」ボタン（ChatGPT風ピル） */
@@ -469,8 +427,8 @@ st.markdown(f"""
         border-radius: 24px !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
-        padding: 9px 16px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+        padding: 8px 16px !important;
         transition: all 0.15s ease !important;
         display: flex !important;
         align-items: center !important;
@@ -480,7 +438,6 @@ st.markdown(f"""
     .sidebar-new-chat-btn button:hover {{
         background-color: #f3f3f3 !important;
         border-color: #d1d1d1 !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.06) !important;
     }}
 
     /* チャット履歴リストの各項目ボタン（ChatGPTライクなフラットリスト） */
@@ -488,17 +445,17 @@ st.markdown(f"""
         background: transparent !important;
         border: none !important;
         border-radius: 8px !important;
-        color: #374151 !important;
+        color: #404040 !important;
         text-align: left !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        padding: 7px 10px !important;
-        transition: all 0.15s ease !important;
+        padding: 6px 10px !important;
+        transition: all 0.12s ease !important;
         justify-content: flex-start !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
-        margin-bottom: 2px !important;
+        margin-bottom: 1px !important;
     }}
     .chat-history-item button:hover {{
         background-color: #ebebeb !important;
@@ -510,45 +467,20 @@ st.markdown(f"""
         font-weight: 600 !important;
     }}
 
-    /* ChatGPT風トップモデル選択ヘッダー */
-    .chatgpt-top-nav {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 0 14px 0;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #f3f4f6;
-    }}
-    .chatgpt-model-badge {{
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 17px;
-        font-weight: 700;
-        color: #0d0d0d;
-        padding: 4px 10px;
-        border-radius: 10px;
-        transition: background 0.15s ease;
-    }}
-    .chatgpt-model-badge:hover {{
-        background-color: #f3f4f6;
-    }}
-
     /* ChatGPT風のアクションボタングループ（再生成・キャラ変更） */
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
         background: transparent !important;
         border: 1px solid #e5e7eb !important;
-        color: #6b7280 !important;
+        color: #737373 !important;
         border-radius: 8px !important;
-        padding: 3px 10px !important;
+        padding: 3px 8px !important;
         font-size: 12px !important;
         font-weight: 500 !important;
-        transition: all 0.15s ease !important;
-        margin-top: 4px !important;
+        transition: all 0.12s ease !important;
     }}
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
         background: #f3f4f6 !important;
-        color: #111827 !important;
+        color: #0d0d0d !important;
         border-color: #d1d5db !important;
     }}
 
@@ -943,6 +875,37 @@ def get_all_sessions():
     sessions.sort(key=lambda s: s["updated_at"], reverse=True)
     return sessions
 
+def group_sessions_by_date(sessions: list) -> dict:
+    """ChatGPT風：会話履歴を『今日』『昨日』『過去7日間』『それ以前』に分類"""
+    import datetime
+    today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    seven_days_ago = today - datetime.timedelta(days=7)
+    
+    groups = {
+        "今日": [],
+        "昨日": [],
+        "過去7日間": [],
+        "それ以前": []
+    }
+    
+    for s in sessions:
+        up_str = s.get("updated_at", "")
+        try:
+            s_date = datetime.datetime.strptime(up_str.split()[0], "%Y-%m-%d").date()
+            if s_date == today:
+                groups["今日"].append(s)
+            elif s_date == yesterday:
+                groups["昨日"].append(s)
+            elif s_date >= seven_days_ago:
+                groups["過去7日間"].append(s)
+            else:
+                groups["それ以前"].append(s)
+        except Exception:
+            groups["今日"].append(s)
+            
+    return {k: v for k, v in groups.items() if v}
+
 def load_session_messages(session_id: str):
     """セッションIDからメッセージ履歴を復元"""
     h_dir = get_current_history_dir()
@@ -1155,48 +1118,50 @@ with st.sidebar:
 
     st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
 
-    # ChatGPT風：過去のチャット履歴（縦並びスクロールリスト）
+    # ChatGPT風：過去のチャット履歴（日付別グループ分け縦並びリスト）
     all_sess = get_all_sessions()
     if all_sess:
-        st.markdown("<div style='font-size: 11px; font-weight: 600; color: #8e8e8e; margin: 0 0 6px 8px; letter-spacing: 0.05em;'>チャット履歴</div>", unsafe_allow_html=True)
+        grouped_sess = group_sessions_by_date(all_sess)
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
         
-        for sess in all_sess[:15]:
-            is_active = (sess["id"] == cur_id)
-            active_cls = "chat-history-active" if is_active else ""
-            st.markdown(f'<div class="chat-history-item {active_cls}">', unsafe_allow_html=True)
-            
-            # アクティブなセッションの場合、タイトルボタンと操作メニューを配置
-            if is_active:
-                col_btn, col_opt = st.columns([0.80, 0.20])
-                with col_btn:
-                    st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
-                with col_opt:
-                    with st.popover("•••", use_container_width=True):
-                        st.caption("チャット設定")
-                        rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
-                        if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
-                            rename_session(sess["id"], rename_val)
-                            st.rerun()
-                        if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
-                            delete_session(sess["id"])
-                            remains = get_all_sessions()
-                            if remains:
-                                st.session_state.current_session_id = remains[0]["id"]
-                                st.session_state.messages = load_session_messages(remains[0]["id"]) or []
-                            else:
-                                new_id = f"session_{int(time.time())}"
-                                st.session_state.current_session_id = new_id
-                                st.session_state.messages = []
-                            st.rerun()
-            else:
-                if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
-                    st.session_state.current_session_id = sess["id"]
-                    loaded = load_session_messages(sess["id"])
-                    if loaded:
-                        st.session_state.messages = loaded
-                    st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        for g_label, sess_list in grouped_sess.items():
+            st.markdown(f"<div style='font-size: 11px; font-weight: 600; color: #8e8e8e; margin: 12px 0 4px 8px; letter-spacing: 0.05em;'>{g_label}</div>", unsafe_allow_html=True)
+            for sess in sess_list[:10]:
+                is_active = (sess["id"] == cur_id)
+                active_cls = "chat-history-active" if is_active else ""
+                st.markdown(f'<div class="chat-history-item {active_cls}">', unsafe_allow_html=True)
+                
+                # アクティブなセッションの場合、タイトルボタンと操作メニューを配置
+                if is_active:
+                    col_btn, col_opt = st.columns([0.80, 0.20])
+                    with col_btn:
+                        st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
+                    with col_opt:
+                        with st.popover("•••", use_container_width=True):
+                            st.caption("チャット設定")
+                            rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
+                            if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
+                                rename_session(sess["id"], rename_val)
+                                st.rerun()
+                            if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
+                                delete_session(sess["id"])
+                                remains = get_all_sessions()
+                                if remains:
+                                    st.session_state.current_session_id = remains[0]["id"]
+                                    st.session_state.messages = load_session_messages(remains[0]["id"]) or []
+                                else:
+                                    new_id = f"session_{int(time.time())}"
+                                    st.session_state.current_session_id = new_id
+                                    st.session_state.messages = []
+                                st.rerun()
+                else:
+                    if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
+                        st.session_state.current_session_id = sess["id"]
+                        loaded = load_session_messages(sess["id"])
+                        if loaded is not None:
+                            st.session_state.messages = loaded
+                        st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top: 18px;'></div>", unsafe_allow_html=True)
 
@@ -1973,15 +1938,15 @@ if "pending_regen" in st.session_state:
 
 # チャット入力欄（ChatGPT風カプセルバー、左端に「＋」添付ボタン）
 chat_submission = st.chat_input(
-    placeholder="弓道の質問を入力するか、左の「＋」から動画を送信...",
+    placeholder="弓道AI道場にメッセージを送信する...",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
 
 # ChatGPT風のフッター注釈テキスト
 st.markdown("""
-<div style="text-align: center; font-size: 11px; color: #8e8e8e; margin-top: 8px;">
-    弓道AI道場は射技向上のヒントを提供します。ご自身の感覚や道場の指導者と相談しながら試行錯誤してください。
+<div style="text-align: center; font-size: 11px; color: #9ca3af; margin-top: 6px; letter-spacing: 0.01em;">
+    弓道AI道場は間違いを犯すことがあります。重要な判断は道場の指導者等にご確認ください。
 </div>
 """, unsafe_allow_html=True)
 
