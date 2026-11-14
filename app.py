@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 
 def render_chatgpt_toolbar(text_content: str):
-    """ChatGPT風アクションツールバー（iframe内で確実に動作するクリップボードコピー＆ブラウザ音声読み上げ）"""
+    """ChatGPT風アクションツールバー（ミニマル・アイコンバー：コピー＆ブラウザ音声読み上げ）"""
     safe_text_json = json.dumps(text_content)
     toolbar_html = f"""
     <!DOCTYPE html>
@@ -29,22 +29,22 @@ def render_chatgpt_toolbar(text_content: str):
             .bar {{
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                padding-top: 4px;
+                gap: 6px;
+                padding-top: 2px;
             }}
             .btn {{
-                background: #ffffff;
+                background: transparent;
                 border: 1px solid #e5e7eb;
-                color: #4b5563;
-                border-radius: 8px;
-                padding: 4px 12px;
-                font-size: 13px;
+                color: #6b7280;
+                border-radius: 6px;
+                padding: 3px 8px;
+                font-size: 12px;
                 font-weight: 500;
                 cursor: pointer;
                 display: inline-flex;
                 align-items: center;
                 gap: 4px;
-                transition: all 0.15s ease;
+                transition: all 0.12s ease;
             }}
             .btn:hover {{
                 background: #f3f4f6;
@@ -68,8 +68,8 @@ def render_chatgpt_toolbar(text_content: str):
             function doCopy() {{
                 const onSuccess = () => {{
                     const b = document.getElementById('copyBtn');
-                    b.innerText = '✅ コピー完了';
-                    setTimeout(() => b.innerText = '📋 コピー', 2000);
+                    b.innerText = '✅ コピー済';
+                    setTimeout(() => b.innerText = '📋 コピー', 1800);
                 }};
                 if (navigator.clipboard && navigator.clipboard.writeText) {{
                     navigator.clipboard.writeText(textToProcess).then(onSuccess).catch(() => fallbackCopy(onSuccess));
@@ -105,7 +105,7 @@ def render_chatgpt_toolbar(text_content: str):
                 u.lang = 'ja-JP';
                 u.rate = 1.05;
                 const b = document.getElementById('speakBtn');
-                b.innerText = '🗣️ 再生中...';
+                b.innerText = '🗣️ 再生中';
                 u.onend = () => b.innerText = '🔊 読み上げ';
                 u.onerror = () => b.innerText = '🔊 読み上げ';
                 window.speechSynthesis.speak(u);
@@ -122,7 +122,7 @@ def render_chatgpt_toolbar(text_content: str):
     </body>
     </html>
     """
-    st.iframe(toolbar_html, height=44)
+    st.iframe(toolbar_html, height=36)
 
 
 
@@ -451,31 +451,105 @@ st.markdown(f"""
         margin-bottom: 10px !important;
     }}
 
-    /* サイドバー（ChatGPT風のライトグレー） */
+    /* サイドバー（ChatGPT風のライトグレー・ミニマルデザイン） */
     section[data-testid="stSidebar"] {{
-        background-color: #f9fafb !important;
-        border-right: 1px solid #e5e7eb !important;
+        background-color: #f9f9f9 !important;
+        border-right: 1px solid #e5e5e5 !important;
     }}
     section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] label {{
         color: #374151 !important;
         font-size: 14px !important;
     }}
 
-    /* サイドバーの「新規チャット」ボタン */
+    /* サイドバーの「新規チャット」ボタン（ChatGPT風ピル） */
     .sidebar-new-chat-btn button {{
         background-color: #ffffff !important;
-        color: #111827 !important;
-        border: 1px solid #d1d5db !important;
-        border-radius: 20px !important;
+        color: #0d0d0d !important;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 24px !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
-        padding: 10px 16px !important;
-        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+        padding: 9px 16px !important;
+        transition: all 0.15s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
     }}
     .sidebar-new-chat-btn button:hover {{
-        background-color: #f3f4f6 !important;
-        border-color: #9ca3af !important;
+        background-color: #f3f3f3 !important;
+        border-color: #d1d1d1 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.06) !important;
+    }}
+
+    /* チャット履歴リストの各項目ボタン（ChatGPTライクなフラットリスト） */
+    .chat-history-item button {{
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #374151 !important;
+        text-align: left !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 7px 10px !important;
+        transition: all 0.15s ease !important;
+        justify-content: flex-start !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        margin-bottom: 2px !important;
+    }}
+    .chat-history-item button:hover {{
+        background-color: #ebebeb !important;
+        color: #0d0d0d !important;
+    }}
+    .chat-history-active button {{
+        background-color: #ececec !important;
+        color: #000000 !important;
+        font-weight: 600 !important;
+    }}
+
+    /* ChatGPT風トップモデル選択ヘッダー */
+    .chatgpt-top-nav {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0 14px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f3f4f6;
+    }}
+    .chatgpt-model-badge {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 17px;
+        font-weight: 700;
+        color: #0d0d0d;
+        padding: 4px 10px;
+        border-radius: 10px;
+        transition: background 0.15s ease;
+    }}
+    .chatgpt-model-badge:hover {{
+        background-color: #f3f4f6;
+    }}
+
+    /* ChatGPT風のアクションボタングループ（再生成・キャラ変更） */
+    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
+        background: transparent !important;
+        border: 1px solid #e5e7eb !important;
+        color: #6b7280 !important;
+        border-radius: 8px !important;
+        padding: 3px 10px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        transition: all 0.15s ease !important;
+        margin-top: 4px !important;
+    }}
+    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
+        background: #f3f4f6 !important;
+        color: #111827 !important;
+        border-color: #d1d5db !important;
     }}
 
     /* スマートフォン・タブレット最適化（レスポンシブデザイン） */
@@ -1062,20 +1136,11 @@ if "current_session_id" not in st.session_state:
         latest = existing_sessions[0]
         st.session_state.current_session_id = latest["id"]
         loaded = load_session_messages(latest["id"])
-        st.session_state.messages = loaded if loaded else [{
-            "role": "assistant",
-            "char": list(CHARACTERS.keys())[0],
-            "content": CHARACTERS[list(CHARACTERS.keys())[0]]["welcome"]
-        }]
+        st.session_state.messages = loaded if loaded is not None else []
     else:
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
-        st.session_state.messages = [{
-            "role": "assistant",
-            "char": list(CHARACTERS.keys())[0],
-            "content": CHARACTERS[list(CHARACTERS.keys())[0]]["welcome"]
-        }]
-        save_current_session(new_id, st.session_state.messages)
+        st.session_state.messages = []
 
 # サイドバー構成（ChatGPT風左メニュー）
 with st.sidebar:
@@ -1084,75 +1149,56 @@ with st.sidebar:
     if st.button("＋ 新しいチャット", use_container_width=True):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
-        st.session_state.messages = [{
-            "role": "assistant",
-            "char": selected_char if "selected_char" in locals() else list(CHARACTERS.keys())[0],
-            "content": CHARACTERS[list(CHARACTERS.keys())[0]]["welcome"]
-        }]
-        save_current_session(new_id, st.session_state.messages)
+        st.session_state.messages = []
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # 過去のチャット履歴一覧
+    st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+
+    # ChatGPT風：過去のチャット履歴（縦並びスクロールリスト）
     all_sess = get_all_sessions()
     if all_sess:
-        st.caption("過去のチャット履歴")
-        sess_options = {s["id"]: s["title"] for s in all_sess}
+        st.markdown("<div style='font-size: 11px; font-weight: 600; color: #8e8e8e; margin: 0 0 6px 8px; letter-spacing: 0.05em;'>チャット履歴</div>", unsafe_allow_html=True)
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
-        default_idx = list(sess_options.keys()).index(cur_id) if cur_id in sess_options else 0
         
-        selected_sess_id = st.selectbox(
-            "履歴選択",
-            options=list(sess_options.keys()),
-            index=default_idx,
-            format_func=lambda x: sess_options[x],
-            label_visibility="collapsed"
-        )
-        
-        if selected_sess_id != st.session_state.get("current_session_id"):
-            st.session_state.current_session_id = selected_sess_id
-            loaded = load_session_messages(selected_sess_id)
-            if loaded:
-                st.session_state.messages = loaded
-            st.rerun()
-
-        # ChatGPT風：選択中のチャットの名前変更＆削除
-        col_s1, col_s2 = st.columns([1, 1])
-        with col_s1:
-            with st.popover("✏️ 名前変更", use_container_width=True):
-                cur_title = sess_options.get(selected_sess_id, "")
-                rename_val = st.text_input("新しいタイトル", value=cur_title, key=f"rename_input_{selected_sess_id}")
-                if st.button("更新", key=f"btn_rename_{selected_sess_id}", use_container_width=True):
-                    rename_session(selected_sess_id, rename_val)
+        for sess in all_sess[:15]:
+            is_active = (sess["id"] == cur_id)
+            active_cls = "chat-history-active" if is_active else ""
+            st.markdown(f'<div class="chat-history-item {active_cls}">', unsafe_allow_html=True)
+            
+            # アクティブなセッションの場合、タイトルボタンと操作メニューを配置
+            if is_active:
+                col_btn, col_opt = st.columns([0.80, 0.20])
+                with col_btn:
+                    st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
+                with col_opt:
+                    with st.popover("•••", use_container_width=True):
+                        st.caption("チャット設定")
+                        rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
+                        if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
+                            rename_session(sess["id"], rename_val)
+                            st.rerun()
+                        if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
+                            delete_session(sess["id"])
+                            remains = get_all_sessions()
+                            if remains:
+                                st.session_state.current_session_id = remains[0]["id"]
+                                st.session_state.messages = load_session_messages(remains[0]["id"]) or []
+                            else:
+                                new_id = f"session_{int(time.time())}"
+                                st.session_state.current_session_id = new_id
+                                st.session_state.messages = []
+                            st.rerun()
+            else:
+                if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
+                    st.session_state.current_session_id = sess["id"]
+                    loaded = load_session_messages(sess["id"])
+                    if loaded:
+                        st.session_state.messages = loaded
                     st.rerun()
-        with col_s2:
-            if st.button("🗑️ 削除", use_container_width=True, key=f"del_sess_{selected_sess_id}", help="このチャットを削除"):
-                delete_session(selected_sess_id)
-                remains = get_all_sessions()
-                if remains:
-                    st.session_state.current_session_id = remains[0]["id"]
-                    st.session_state.messages = load_session_messages(remains[0]["id"]) or []
-                else:
-                    new_id = f"session_{int(time.time())}"
-                    st.session_state.current_session_id = new_id
-                    st.session_state.messages = []
-                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
-
-    st.divider()
-
-    # キャラクター選択
-    st.caption("AIキャラクター設定")
-    selected_char = st.selectbox(
-        "対話相手を選択:",
-        options=list(CHARACTERS.keys()),
-        index=0,
-        label_visibility="collapsed"
-    )
-    char_info = CHARACTERS[selected_char]
-    st.caption(f"{char_info['desc']}")
-
-    st.divider()
+    st.markdown("<div style='margin-top: 18px;'></div>", unsafe_allow_html=True)
 
     # 射法八節早見表
     with st.expander("📖 射法八節 早見表"):
@@ -1167,188 +1213,143 @@ with st.sidebar:
         8. **残心** : 矢が放たれた後の姿勢と精神を保つ。
         """)
 
-    # 詳細設定アコーディオン（API、文字サイズ、テキスト保存）
-    with st.expander("⚙️ 設定・エクスポート"):
-        font_size_choice = st.radio(
-            "文字の大きさ:",
-            options=["標準 (16px)", "大きめ (18px)", "特大 (22px)"],
-            index=0,
-            help="チャットの文字サイズを変更できます。"
-        )
-        size_map = {"標準 (16px)": "16px", "大きめ (18px)": "18px", "特大 (22px)": "22px"}
-        cur_size = size_map[font_size_choice]
-        st.markdown(f"""
-        <style>
-            .stMarkdown p, div[data-testid="stChatMessage"] p {{ font-size: {cur_size} !important; }}
-        </style>
-        """, unsafe_allow_html=True)
-        
-        env_api_key = os.environ.get("GEMINI_API_KEY", "")
-        if not env_api_key:
-            try:
-                if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
-                    env_api_key = st.secrets["GEMINI_API_KEY"]
-            except Exception:
-                pass
-        # ローカルの .streamlit/secrets.toml も直接確認
-        if not env_api_key:
-            local_sec = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
-            if os.path.exists(local_sec):
-                try:
-                    with open(local_sec, "r", encoding="utf-8") as sf:
-                        for line in sf:
-                            if "GEMINI_API_KEY" in line and "=" in line:
-                                env_api_key = line.split("=", 1)[1].strip().strip('"').strip("'")
-                                break
-                except Exception:
-                    pass
-            
-        # APIキーはバックグラウンド（secrets.toml / 環境変数）から安全に自動読み込み
-        # 画面上にはキー入力欄やキー文字列を一切露出・表示させない（セキュリティ完全保護）
-        active_api_key = env_api_key
-        
-        if active_api_key:
-            st.markdown("""
-            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 13px; color: #166534; font-weight: 600; margin-bottom: 8px;">
-                <span>🔒</span><span>Gemini AI 接続：保護完了</span>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; color: #475569; font-weight: 600; margin-bottom: 8px;">
-                <span>💡</span><span>模擬AIモード（ローカル応答）</span>
-            </div>
-            """, unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-        if "messages" in st.session_state and st.session_state.messages:
-            export_txt = export_session_to_text(st.session_state.messages)
-            st.download_button(
-                label="📥 会話をテキスト保存",
-                data=export_txt,
-                file_name=f"弓道AIチャット_{time.strftime('%Y%m%d_%H%M')}.txt",
-                mime="text/plain",
-                use_container_width=True
-            )
-
-        st.markdown("""
-        <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px; margin: 14px 0 10px 0; font-size: 12px; color: #166534;">
-            <div style="font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
-                <span>🛡️</span><span>個人情報保護・完全消去システム</span>
-            </div>
-            送信された射形動画・画像は、AI分析完了直後にローカルPCから物理上書き（シュレッダー消去）され、クラウド上からも即座に完全抹消されます。端末内やサーバーに動画は一切残りません。
-        </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("🗑️ このチャットを初期化", use_container_width=True):
-            st.session_state.messages = [{
-                "role": "assistant",
-                "char": selected_char,
-                "content": char_info["welcome"]
-            }]
-            if "current_session_id" in st.session_state:
-                save_current_session(st.session_state.current_session_id, st.session_state.messages)
-            st.rerun()
-
-    # ChatGPT風 射手カルテ（AIメモリー管理）
-    with st.expander("🧠 射手カルテ（AIメモリー）", expanded=False):
-        st.caption("AIが対話から覚えた情報です。新しい会話や動画分析にも自動で反映されます。")
-        cur_user = st.session_state.get("logged_in_user", "default")
-        user_notes = load_user_memory(cur_user)
-
-        if user_notes:
-            for idx, note in enumerate(user_notes):
-                col_n1, col_n2 = st.columns([0.82, 0.18])
-                with col_n1:
-                    st.markdown(f"<div style='font-size: 13px; padding: 4px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 4px;'>📌 {note}</div>", unsafe_allow_html=True)
-                with col_n2:
-                    if st.button("✕", key=f"del_mem_{idx}", help="この記憶を削除"):
-                        remove_user_memory_item(cur_user, idx)
-                        st.rerun()
-            if st.button("🗑️ すべての記憶を消去", use_container_width=True, key="clear_all_mem"):
-                clear_all_user_memory(cur_user)
-                st.rerun()
-        else:
-            st.info("まだ記憶はありません。会話を重ねるとAIが自動で記憶するか、下から手動で登録できます。")
-
-        st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-        st.caption("＋ 手動で記憶を追加")
-        new_note = st.text_input("追加する情報:", key="new_memory_input", placeholder="例: 弓力14kg、参段目標、早気")
-        if st.button("記憶を登録", use_container_width=True, key="add_mem_btn"):
-            if new_note.strip():
-                add_user_memory_item(cur_user, new_note.strip())
-                st.success("記憶を追加しました！")
-                time.sleep(0.3)
-                st.rerun()
-
-    # ChatGPT風 カスタム指示（Custom Instructions）
-    with st.expander("🎯 カスタム指示（パーソナライズ）", expanded=False):
-        st.caption("AIに常に知っておいてほしい前提や、希望する回答スタイルを設定できます。全チャットに適用されます。")
-        cur_user = st.session_state.get("logged_in_user", "default")
-        cur_ci = load_custom_instructions(cur_user)
-
-        ci_profile = st.text_area(
-            "① あなた自身について知っておいてほしいこと:",
-            value=cur_ci.get("profile", ""),
-            placeholder="例: 弓道歴5年、参段。左利き。高校弓道部顧問。直心II 15kg使用。",
-            height=75,
-            key="ci_profile_input"
-        )
-        ci_pref = st.text_area(
-            "② AIにどのように応答してほしいか:",
-            value=cur_ci.get("response_pref", ""),
-            placeholder="例: 結論から先に伝えてほしい。専門用語は必ずわかりやすく解説してほしい。時には厳しく指導してほしい。",
-            height=75,
-            key="ci_pref_input"
-        )
-        if st.button("カスタム指示を保存", use_container_width=True, key="save_ci_btn"):
-            save_custom_instructions(cur_user, ci_profile, ci_pref)
-            st.success("カスタム指示を保存しました！")
-            time.sleep(0.3)
-            st.rerun()
-
-    # サイドバー最下部：ChatGPT風ログインユーザー情報 ＆ ログアウトボタン
-
-    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-
+    # ==================== ChatGPT風最下部：ユーザープロフィール ＆ 設定ポップオーバー ====================
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
     disp_name = cur_uinfo.get("display_name", st.session_state.get("logged_in_user", "射手"))
+    cur_user = st.session_state.get("logged_in_user", "default")
 
-    st.markdown(f"""
-    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 22px;">👤</span>
-            <div>
-                <div style="font-size: 13px; font-weight: 700; color: #0f172a;">{disp_name}</div>
-                <div style="font-size: 11px; color: #64748b;">@{st.session_state.get('logged_in_user', '')}</div>
+    with st.popover(f"👤 {disp_name}  ⚙️", use_container_width=True):
+        st.markdown(f"**{disp_name}** (`@{cur_user}`)")
+        st.caption("弓道AI道場 アカウント＆稽古設定")
+        st.divider()
+
+        tab_profile, tab_memory, tab_inst, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ", "🎯 カスタム指示", "💾 会話"])
+
+        with tab_profile:
+            font_size_choice = st.radio(
+                "文字の大きさ:",
+                options=["標準 (16px)", "大きめ (18px)", "特大 (22px)"],
+                index=0,
+                key="sb_font_size_choice"
+            )
+            size_map = {"標準 (16px)": "16px", "大きめ (18px)": "18px", "特大 (22px)": "22px"}
+            cur_size = size_map[font_size_choice]
+            st.markdown(f"<style>.stMarkdown p, div[data-testid='stChatMessage'] p {{ font-size: {cur_size} !important; }}</style>", unsafe_allow_html=True)
+            
+            if st.button("🗑️ この会話をリセット", use_container_width=True, key="reset_chat_sb"):
+                cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+                st.session_state.messages = [{
+                    "role": "assistant",
+                    "char": cur_c,
+                    "content": CHARACTERS[cur_c]["welcome"]
+                }]
+                if "current_session_id" in st.session_state:
+                    save_current_session(st.session_state.current_session_id, st.session_state.messages)
+                st.rerun()
+
+            st.divider()
+            if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
+                st.session_state.authenticated = False
+                st.session_state.logged_in_user = ""
+                st.session_state.messages = []
+                if "current_session_id" in st.session_state:
+                    del st.session_state["current_session_id"]
+                st.rerun()
+
+        with tab_memory:
+            st.caption("AIが対話から覚えた情報です。")
+            user_notes = load_user_memory(cur_user)
+            if user_notes:
+                for idx, note in enumerate(user_notes):
+                    col_n1, col_n2 = st.columns([0.80, 0.20])
+                    with col_n1:
+                        st.markdown(f"<div style='font-size: 12px; padding: 3px 6px; background: #f8fafc; border-radius: 4px; margin-bottom: 3px;'>📌 {note}</div>", unsafe_allow_html=True)
+                    with col_n2:
+                        if st.button("✕", key=f"del_mem_p_{idx}", help="削除"):
+                            remove_user_memory_item(cur_user, idx)
+                            st.rerun()
+                if st.button("すべての記憶を消去", use_container_width=True, key="clear_all_mem_p"):
+                    clear_all_user_memory(cur_user)
+                    st.rerun()
+            else:
+                st.info("記憶はまだありません。")
+
+            new_note = st.text_input("追加する情報:", key="new_mem_pop", placeholder="例: 弓力14kg、参段目標")
+            if st.button("記憶を追加", use_container_width=True, key="add_mem_pop_btn"):
+                if new_note.strip():
+                    add_user_memory_item(cur_user, new_note.strip())
+                    st.rerun()
+
+        with tab_inst:
+            st.caption("AIへの前提知識や希望スタイル")
+            cur_ci = load_custom_instructions(cur_user)
+            ci_prof = st.text_area("あなた自身について:", value=cur_ci.get("profile", ""), height=65, key="ci_p_pop")
+            ci_p = st.text_area("AIの応答スタイル:", value=cur_ci.get("response_pref", ""), height=65, key="ci_r_pop")
+            if st.button("指示を保存", use_container_width=True, key="save_ci_pop"):
+                save_custom_instructions(cur_user, ci_prof, ci_p)
+                st.success("保存しました！")
+                time.sleep(0.3)
+                st.rerun()
+
+        with tab_appset:
+            if "messages" in st.session_state and st.session_state.messages:
+                export_txt = export_session_to_text(st.session_state.messages)
+                st.download_button(
+                    label="📥 会話をテキスト保存",
+                    data=export_txt,
+                    file_name=f"弓道AIチャット_{time.strftime('%Y%m%d_%H%M')}.txt",
+                    mime="text/plain",
+                    use_container_width=True
+                )
+            st.markdown("""
+            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px; font-size: 11px; color: #166534; margin-top: 8px;">
+                🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
-        </div>
-        <span style="font-size: 11px; color: #10a37f; font-weight: 600;">● 稽古中</span>
+            """, unsafe_allow_html=True)
+
+# APIキーの安全な読み込み
+env_api_key = os.environ.get("GEMINI_API_KEY", "")
+if not env_api_key:
+    try:
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            env_api_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+if not env_api_key:
+    local_sec = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+    if os.path.exists(local_sec):
+        try:
+            with open(local_sec, "r", encoding="utf-8") as sf:
+                for line in sf:
+                    if "GEMINI_API_KEY" in line and "=" in line:
+                        env_api_key = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        break
+        except Exception:
+            pass
+active_api_key = env_api_key
+
+# ==================== ChatGPT風トップバー（ヘッダー・モデル/キャラクター選択ピル） ====================
+top_col1, top_col2 = st.columns([0.65, 0.35])
+with top_col1:
+    selected_char = st.selectbox(
+        "AIキャラクター選択",
+        options=list(CHARACTERS.keys()),
+        index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
+        label_visibility="collapsed",
+        key="main_character_picker"
+    )
+    st.session_state.current_selected_char = selected_char
+    char_info = CHARACTERS[selected_char]
+
+with top_col2:
+    st.markdown("""
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 5px;">
+        <span style="font-size: 11px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 3px 8px; border-radius: 12px; font-weight: 500;">🔬 弓道生体力学エビデンス</span>
     </div>
     """, unsafe_allow_html=True)
-
-    if st.button("🚪 ログアウト", use_container_width=True):
-        st.session_state.authenticated = False
-        st.session_state.logged_in_user = ""
-        st.session_state.messages = []
-        if "current_session_id" in st.session_state:
-            del st.session_state["current_session_id"]
-        st.rerun()
-
-# ChatGPT風トップバー（レスポンシブ・モデル・キャラクター表示）
-st.markdown(f"""
-<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 4px 0 16px 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 18px;">
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 22px;">🏹</span>
-        <span style="font-weight: 700; font-size: 18px; color: #111827; letter-spacing: -0.01em;">弓道AI道場</span>
-        <span style="font-size: 12px; font-weight: 600; color: #10a37f; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 10px; border-radius: 12px;">{selected_char}</span>
-    </div>
-    <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-        <span style="font-size: 11px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-weight: 500;">🔬 論文・生体力学</span>
-        <span style="font-size: 12px; color: #9ca3af;">Gemini</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
 # 応答生成関数（テキスト用）
 def generate_response(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False) -> str:
@@ -1827,19 +1828,18 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 # ==================== チャット統合型メイン画面 ====================
 
 # ユーザーメッセージがまだない場合はChatGPT風のウェルカムサジェストを表示
-has_user_msg = any(m["role"] == "user" for m in st.session_state.messages)
 quick_prompt = None
 
-if not has_user_msg:
+if not st.session_state.messages:
     st.markdown(f"""
-    <div style="text-align: center; margin: 40px 0 35px 0;">
-        <div style="font-size: 48px; margin-bottom: 12px;">🏹</div>
-        <div style="font-size: 26px; font-weight: 700; color: #0d0d0d; margin-bottom: 8px;">何をお手伝いしましょうか？</div>
-        <div style="font-size: 15px; color: #666666;">射法八節の疑問・射癖の相談・動画による立体分析までサポートします</div>
+    <div style="text-align: center; margin: 60px 0 40px 0;">
+        <div style="width: 58px; height: 58px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 16px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">🏹</div>
+        <div style="font-size: 26px; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; letter-spacing: -0.02em;">何をお手伝いしましょうか？</div>
+        <div style="font-size: 14px; color: #737373;">射法八節の疑問・射癖の改善・動画からの3D骨格分析まで何でもどうぞ</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # 2x2のモダンサジェストカード
+    # 2x2のモダンサジェストカード（ChatGPTスタイル）
     st.markdown('<div class="suggest-card-btn">', unsafe_allow_html=True)
     s_col1, s_col2 = st.columns(2)
     with s_col1:
@@ -1850,8 +1850,8 @@ if not has_user_msg:
     with s_col2:
         if st.button("📜 射法八節のチェックポイント\n足踏みから残心までの要点と身体の連動", use_container_width=True):
             quick_prompt = "射法八節それぞれのフェーズで、最も大切にすべき要点を教えてください。"
-        if st.button("🎖️ 審査での心構え・体配\n段位審査で見られる入退場と息合いのポイント", use_container_width=True):
-            quick_prompt = "弓道の段位審査を控えています。体配（入退場や息合い）と審査員が見ているポイントを教えてください。"
+        if st.button("🎬 射形動画の3D分析\n下部の「＋」から動画を添付して立体解析", use_container_width=True):
+            quick_prompt = "射形動画を分析してもらう際の撮影のコツ（アングルや秒数など）を教えてください。"
     st.markdown('</div><div style="margin-bottom: 25px;"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
