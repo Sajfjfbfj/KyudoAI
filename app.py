@@ -24,7 +24,7 @@ def render_chatgpt_toolbar(text_content: str):
                 margin: 0;
                 padding: 0;
                 background: transparent;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
             }}
             .bar {{
                 display: flex;
@@ -33,13 +33,13 @@ def render_chatgpt_toolbar(text_content: str):
                 padding-top: 2px;
             }}
             .btn {{
-                background: transparent;
-                border: 1px solid #e5e7eb;
-                color: #6b7280;
-                border-radius: 6px;
+                background: #ffffff;
+                border: 1px solid #d1d5db;
+                color: #111111;
+                border-radius: 0px;
                 padding: 3px 8px;
-                font-size: 12px;
-                font-weight: 500;
+                font-size: 11px;
+                font-weight: 700;
                 cursor: pointer;
                 display: inline-flex;
                 align-items: center;
@@ -47,9 +47,9 @@ def render_chatgpt_toolbar(text_content: str):
                 transition: all 0.12s ease;
             }}
             .btn:hover {{
-                background: #f3f4f6;
-                color: #111827;
-                border-color: #d1d5db;
+                background: #e60012;
+                color: #ffffff;
+                border-color: #e60012;
             }}
             .btn:active {{
                 transform: scale(0.96);
@@ -188,81 +188,82 @@ font_sizes = {
 # ChatGPT風モダンUIカスタムCSS（スマホ・タブレット・PC完全レスポンシブ対応）
 st.markdown(f"""
 <style>
-    /* ==================== ChatGPT公式Web UI完全再現スタイル ==================== */
+    /* ==================== UNIQLO（ユニクロ）アプリ公式UI完全再現スタイル ==================== */
     
-    /* 1. 全体フォント・背景（クリーンホワイト & サンセリフ） */
+    /* 1. 全体フォント・背景（徹底した白・黒・UNIQLOレッドの機能美ミニマリズム） */
     .stApp {{
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif !important;
         background-color: #ffffff !important;
-        color: #0d0d0d !important;
+        color: #000000 !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }}
     
-    /* 2. メインチャットコンテナ（最大幅768px・ChatGPT公式標準幅に統一） */
+    /* 2. メインコンテナ（整然としたモジュラーグリッド幅） */
     .main .block-container {{
-        max-width: 768px !important;
-        padding-top: 8px !important;
-        padding-bottom: 135px !important;
+        max-width: 820px !important;
+        padding-top: 10px !important;
+        padding-bottom: 140px !important;
         margin: 0 auto !important;
     }}
     
-    /* 3. 下部固定入力バーエリア（背景フェード & セーフエリア） */
+    /* 3. 下部固定入力バーエリア（白背景・シャープな上部境界線） */
     div[data-testid="stBottom"] {{
-        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.94) 22%, #ffffff 100%) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+        background: #ffffff !important;
+        border-top: 1px solid #e5e5e5 !important;
+        padding-top: 8px !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 9999 !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.03) !important;
     }}
     div[data-testid="stBottom"] > div {{
-        max-width: 768px !important;
+        max-width: 820px !important;
         margin: 0 auto !important;
-        padding: 0 8px !important;
+        padding: 0 10px !important;
     }}
 
-    /* 4. 【ChatGPT公式Web UI完全一致】ピル型入力ボックス */
+    /* 4. 【UNIQLO検索バー風】シャープな入力ボックス */
     div[data-testid="stChatInput"] {{
-        border: 1px solid #e5e5e5 !important;
-        border-radius: 28px !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 4px 18px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02) !important;
-        padding: 6px 14px !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        border: 1px solid #cccccc !important;
+        border-radius: 2px !important;
+        background-color: #f7f7f7 !important;
+        box-shadow: none !important;
+        padding: 4px 12px !important;
+        transition: all 0.15s ease !important;
     }}
     div[data-testid="stChatInput"]:focus-within {{
-        border-color: #0d0d0d !important;
-        box-shadow: 0 6px 22px rgba(0,0,0,0.07) !important;
+        border-color: #e60012 !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 1px #e60012 !important;
     }}
     div[data-testid="stChatInput"] textarea {{
         font-size: 15px !important;
-        color: #0d0d0d !important;
+        font-weight: 500 !important;
+        color: #000000 !important;
         background-color: transparent !important;
-        line-height: 1.6 !important;
+        line-height: 1.5 !important;
         min-height: 38px !important;
     }}
     /* 入力欄の添付プラスボタン */
     div[data-testid="stChatInput"] button {{
-        color: #5d5d5d !important;
-        border-radius: 50% !important;
-        min-width: 34px !important;
-        min-height: 34px !important;
+        color: #111111 !important;
+        border-radius: 2px !important;
         transition: all 0.15s ease !important;
     }}
     div[data-testid="stChatInput"] button:hover {{
-        background-color: #f3f3f3 !important;
-        color: #0d0d0d !important;
+        background-color: #e60012 !important;
+        color: #ffffff !important;
     }}
 
-    /* 5. チャットメッセージのベースコンテナ */
+    /* 5. チャットメッセージコンテナ */
     div[data-testid="stChatMessage"] {{
         display: flex !important;
         flex-direction: row !important;
         background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 8px 0 !important;
-        margin-bottom: 10px !important;
+        padding: 12px 0 !important;
+        margin-bottom: 14px !important;
         width: 100% !important;
         min-width: 0 !important;
     }}
@@ -286,12 +287,13 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* 6. 【ChatGPT完全再現】ユーザーメッセージ：アバター非表示・右寄せグレー吹き出し */
+    /* 6. 【UNIQLO仕様】ユーザーメッセージ：シャープな枠線・黒文字・右寄せ */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
         background-color: #f4f4f4 !important;
-        border-radius: 22px 22px 4px 22px !important;
-        padding: 10px 18px !important;
-        max-width: 76% !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 2px !important;
+        padding: 12px 18px !important;
+        max-width: 78% !important;
         margin-left: auto !important;
         box-shadow: none !important;
     }}
@@ -300,7 +302,7 @@ st.markdown(f"""
         display: none !important;
     }}
 
-    /* 7. 【ChatGPT完全再現】アシスタントメッセージ：背景透明・左揃え */
+    /* 7. 【UNIQLO仕様】アシスタントメッセージ：白背景・シャープな四角アバター */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
         background-color: transparent !important;
         border: none !important;
@@ -308,19 +310,21 @@ st.markdown(f"""
         width: 100% !important;
     }}
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
-        border-radius: 50% !important;
-        width: 32px !important;
-        height: 32px !important;
-        margin-right: 12px !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+        border-radius: 2px !important;
+        width: 34px !important;
+        height: 34px !important;
+        background-color: #e60012 !important;
+        color: #ffffff !important;
+        margin-right: 14px !important;
+        border: 1px solid #e60012 !important;
     }}
 
-    /* 8. テキストタイポグラフィ（ChatGPT公式の読みやすさ） */
+    /* 8. テキストタイポグラフィ（UNIQLOの明瞭・高コントラスト） */
     .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
-        color: #0d0d0d !important;
-        font-size: 16px !important;
-        line-height: 1.8 !important;
-        letter-spacing: 0.01em;
+        color: #111111 !important;
+        font-size: 15.5px !important;
+        line-height: 1.85 !important;
+        letter-spacing: 0.02em;
     }}
     div[data-testid="stMarkdownContainer"] {{
         width: 100% !important;
@@ -329,174 +333,240 @@ st.markdown(f"""
         overflow-wrap: break-word !important;
     }}
 
-    /* 9. キャラクターバッジ（ChatGPT風の控えめな丸角ピル） */
+    /* 9. 【UNIQLOレッドタグ】キャラクター＆カテゴリーバッジ */
     .char-badge {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        margin-bottom: 6px;
-        background-color: #f4f4f4 !important;
-        color: #262626 !important;
-        border: 1px solid #e5e5e5 !important;
+        padding: 2px 8px;
+        border-radius: 0px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em;
+        margin-bottom: 8px;
+        background-color: #e60012 !important;
+        color: #ffffff !important;
+        text-transform: uppercase;
     }}
 
-    /* 10. 【ChatGPT公式Web UI完全一致】初期提案サジェストチップ（ピル型） */
-    .chatgpt-suggest-chips button {{
+    /* 10. 【UNIQLOコレクションカード風】初期提案カード */
+    .uniqlo-collection-grid button {{
         background-color: #ffffff !important;
         border: 1px solid #e5e5e5 !important;
-        border-radius: 20px !important;
-        padding: 9px 14px !important;
-        text-align: center !important;
-        color: #404040 !important;
-        font-size: 13.5px !important;
-        font-weight: 500 !important;
+        border-radius: 0px !important;
+        padding: 16px 18px !important;
+        text-align: left !important;
+        color: #000000 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
         box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
         transition: all 0.15s ease !important;
-        margin-bottom: 6px !important;
-        justify-content: center !important;
-        display: flex !important;
+        margin-bottom: 8px !important;
+        min-height: 80px !important;
+        border-left: 3px solid #111111 !important;
     }}
-    .chatgpt-suggest-chips button:hover {{
-        background-color: #f7f7f8 !important;
-        border-color: #d1d1d1 !important;
-        color: #0d0d0d !important;
-        transform: translateY(-1px) !important;
+    .uniqlo-collection-grid button:hover {{
+        border-color: #e60012 !important;
+        border-left: 3px solid #e60012 !important;
+        background-color: #fafafa !important;
+        transform: translateY(-2px) !important;
     }}
 
-    /* 11. ChatGPT風の添付ファイルカード */
+    /* 11. UNIQLO風 添付ファイルカード */
     .file-attachment-card {{
         display: inline-flex;
         align-items: center;
         gap: 10px;
         background-color: #ffffff !important;
-        border: 1px solid #e5e5e5 !important;
-        border-radius: 12px !important;
+        border: 1px solid #000000 !important;
+        border-radius: 0px !important;
         padding: 8px 14px !important;
         margin-bottom: 8px !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
         max-width: 100% !important;
     }}
     .file-attachment-icon {{
-        font-size: 22px !important;
+        font-size: 20px !important;
         flex-shrink: 0;
     }}
     .file-attachment-name {{
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         font-size: 13px !important;
-        color: #0d0d0d !important;
+        color: #000000 !important;
     }}
     .file-attachment-meta {{
         font-size: 11px !important;
-        color: #737373 !important;
+        color: #e60012 !important;
+        font-weight: 600 !important;
     }}
 
-    /* 12. ChatGPT風「🧠 メモリを更新しました」バッジ */
+    /* 12. メモリ更新バッジ（赤黒タグ） */
     .memory-badge {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 12px !important;
-        font-weight: 500;
-        background-color: #f0fdf4 !important;
-        color: #166534 !important;
-        border: 1px solid #bbf7d0 !important;
+        padding: 2px 8px;
+        border-radius: 0px !important;
+        font-size: 11px !important;
+        font-weight: 600;
+        background-color: #f4f4f4 !important;
+        color: #111111 !important;
+        border-left: 3px solid #e60012 !important;
         margin-bottom: 8px;
     }}
 
-    /* 13. サイドバー（ChatGPT公式ライトモード仕様：#f9f9f9） */
+    /* 13. 【UNIQLOサイドバー】クリーンホワイト & シャープリスト */
     section[data-testid="stSidebar"] {{
-        background-color: #f9f9f9 !important;
+        background-color: #ffffff !important;
         border-right: 1px solid #e5e5e5 !important;
     }}
     section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] label {{
-        color: #374151 !important;
+        color: #111111 !important;
         font-size: 13px !important;
     }}
 
-    /* サイドバーの「新規チャット」ボタン（ChatGPT風ピル） */
+    /* サイドバーの「新規チャット」ボタン（UNIQLOプライマリ赤ボタン） */
     .sidebar-new-chat-btn button {{
-        background-color: #ffffff !important;
-        color: #0d0d0d !important;
-        border: 1px solid #e5e5e5 !important;
-        border-radius: 24px !important;
-        font-weight: 600 !important;
-        font-size: 14px !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
-        padding: 8px 16px !important;
+        background-color: #e60012 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 0px !important;
+        font-weight: 700 !important;
+        font-size: 13.5px !important;
+        letter-spacing: 0.05em !important;
+        padding: 10px 16px !important;
         transition: all 0.15s ease !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 8px !important;
+        justify-content: center !important;
     }}
     .sidebar-new-chat-btn button:hover {{
-        background-color: #f3f3f3 !important;
-        border-color: #d1d1d1 !important;
+        background-color: #cc0010 !important;
+        color: #ffffff !important;
     }}
 
-    /* チャット履歴リストの各項目ボタン（ChatGPTライクなフラットリスト） */
+    /* チャット履歴リスト（UNIQLO風のシャープなアイテムリスト） */
     .chat-history-item button {{
         background: transparent !important;
         border: none !important;
-        border-radius: 8px !important;
-        color: #404040 !important;
+        border-radius: 0px !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        color: #111111 !important;
         text-align: left !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        padding: 6px 10px !important;
+        padding: 8px 10px !important;
         transition: all 0.12s ease !important;
         justify-content: flex-start !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
-        margin-bottom: 1px !important;
     }}
     .chat-history-item button:hover {{
-        background-color: #ebebeb !important;
-        color: #0d0d0d !important;
+        background-color: #f7f7f7 !important;
+        color: #e60012 !important;
+        padding-left: 14px !important;
     }}
     .chat-history-active button {{
-        background-color: #ececec !important;
-        color: #000000 !important;
-        font-weight: 600 !important;
+        background-color: #f4f4f4 !important;
+        color: #e60012 !important;
+        font-weight: 700 !important;
+        border-left: 3px solid #e60012 !important;
     }}
 
-    /* ChatGPT風トップモデル選択セレクトボックスのボーダー消去 */
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {{
-        background-color: transparent !important;
-        border: 1px solid transparent !important;
-        border-radius: 10px !important;
-        font-size: 17px !important;
-        font-weight: 700 !important;
-        color: #0d0d0d !important;
-        box-shadow: none !important;
-        transition: background 0.15s ease !important;
+    /* 【UNIQLO公式アプリ風】カテゴリーナビゲーションタブ（WOMEN/MEN/KIDS風） */
+    div[data-testid="stRadio"] {{
+        background: #ffffff !important;
+        border-bottom: 2px solid #e5e5e5 !important;
+        margin-bottom: 16px !important;
+        padding-bottom: 0px !important;
     }}
-    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:hover {{
-        background-color: #f3f4f6 !important;
+    div[data-testid="stRadio"] > div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        gap: 6px !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+    }}
+    div[data-testid="stRadio"] > div[role="radiogroup"]::-webkit-scrollbar {{
+        display: none !important;
+    }}
+    div[data-testid="stRadio"] label {{
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0px !important;
+        padding: 8px 16px !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        border-bottom: 3px solid transparent !important;
+    }}
+    /* 丸いラジオボタンのポッチを非表示化してフラットタブに */
+    div[data-testid="stRadio"] label > div:first-child:not(:has([data-testid="stMarkdownContainer"])) {{
+        display: none !important;
+    }}
+    div[data-testid="stRadio"] label input[type="radio"] {{
+        display: none !important;
+    }}
+    div[data-testid="stRadio"] label p,
+    div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {{
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        color: #737373 !important;
+        letter-spacing: 0.05em !important;
+        margin: 0 !important;
+        transition: color 0.15s ease !important;
+    }}
+    div[data-testid="stRadio"] label:hover p,
+    div[data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {{
+        color: #000000 !important;
+    }}
+    /* 選択中タブ：太字ブラック & UNIQLOレッドのアンダーライン */
+    div[data-testid="stRadio"] label[aria-checked="true"],
+    div[data-testid="stRadio"] label:has(input:checked) {{
+        border-bottom: 3px solid #e60012 !important;
+    }}
+    div[data-testid="stRadio"] label[aria-checked="true"] p,
+    div[data-testid="stRadio"] label:has(input:checked) p,
+    div[data-testid="stRadio"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {{
+        color: #000000 !important;
+        font-weight: 900 !important;
+    }}
+
+    /* 【UNIQLO会員証風】ARCHER MEMBERSHIP CARD */
+    .uniqlo-membership-card {{
+        background: #ffffff;
+        border: 1px solid #000000;
+        padding: 12px;
+        margin-top: 14px;
+        border-radius: 0px;
+    }}
+    .uniqlo-logo-sq {{
+        background: #e60012;
+        color: #ffffff;
+        font-weight: 900;
+        font-size: 13px;
+        padding: 4px 6px;
+        display: inline-block;
+        letter-spacing: -0.05em;
+        line-height: 1;
     }}
 
     /* アクションボタングループ（再生成・キャラ変更） */
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
-        background: transparent !important;
-        border: 1px solid #e5e7eb !important;
-        color: #737373 !important;
-        border-radius: 8px !important;
+        background: #ffffff !important;
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
+        border-radius: 0px !important;
         padding: 3px 8px !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
         transition: all 0.12s ease !important;
     }}
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
-        background: #f3f4f6 !important;
-        color: #0d0d0d !important;
-        border-color: #d1d5db !important;
+        background: #e60012 !important;
+        color: #ffffff !important;
+        border-color: #e60012 !important;
     }}
 
     /* スマートフォン・タブレット最適化（レスポンシブデザイン） */
@@ -513,7 +583,7 @@ st.markdown(f"""
             font-size: 15px !important;
         }}
         div[data-testid="stChatInput"] {{
-            border-radius: 24px !important;
+            border-radius: 2px !important;
             padding: 4px 8px !important;
         }}
         .file-attachment-card {{
@@ -1195,16 +1265,26 @@ with st.sidebar:
 
     st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-    # ==================== ChatGPT風最下部：ユーザープロフィール ＆ 設定ポップオーバー ====================
+    # ==================== UNIQLO風最下部：ARCHER MEMBERSHIP CARD（会員証） ＆ 設定 ====================
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
     disp_name = cur_uinfo.get("display_name", st.session_state.get("logged_in_user", "射手"))
     cur_user = st.session_state.get("logged_in_user", "default")
+    user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"👤 {disp_name}  ⚙️", use_container_width=True):
-        st.markdown(f"**{disp_name}** (`@{cur_user}`)")
-        st.caption("弓道AI道場 アカウント＆稽古設定")
-        st.divider()
+    with st.popover(f"🪪 MEMBERSHIP | {disp_name}", use_container_width=True):
+        st.markdown(f"""
+        <div style="border: 2px solid #000000; padding: 14px; margin-bottom: 14px; background: #ffffff; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="background: #e60012; color: #ffffff; font-weight: 900; font-size: 12px; padding: 2px 6px; letter-spacing: -0.05em;">弓道</span>
+                <span style="font-size: 10px; font-weight: 700; color: #111111; letter-spacing: 0.1em;">ARCHER ID CARD</span>
+            </div>
+            <div style="font-size: 18px; font-weight: 900; color: #000000; letter-spacing: 0.05em; margin: 4px 0 2px 0;">{disp_name}</div>
+            <div style="font-size: 11px; color: #737373; font-family: monospace; letter-spacing: 0.15em; margin-bottom: 10px;">ID: KYD-8820-{user_id_num}</div>
+            <div style="background: repeating-linear-gradient(90deg, #000 0px, #000 2px, #fff 2px, #fff 4px, #000 4px, #000 7px, #fff 7px, #fff 9px); height: 32px; width: 90%; margin: 0 auto 8px auto;"></div>
+            <div style="font-size: 9px; font-weight: 700; color: #555555; letter-spacing: 0.15em;">• 道場認証済・稽古カルテ連動 •</div>
+        </div>
+        """, unsafe_allow_html=True)
 
         tab_profile, tab_memory, tab_inst, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ", "🎯 カスタム指示", "💾 会話"])
 
@@ -1311,26 +1391,35 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== ChatGPT風トップバー（ヘッダー・モデル/キャラクター選択ピル） ====================
-top_col1, top_col2 = st.columns([0.65, 0.35])
-with top_col1:
-    selected_char = st.selectbox(
-        "AIキャラクター選択",
-        options=list(CHARACTERS.keys()),
-        index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
-        format_func=lambda x: f"🏹 {x} ▾",
-        label_visibility="collapsed",
-        key="main_character_picker"
-    )
-    st.session_state.current_selected_char = selected_char
-    char_info = CHARACTERS[selected_char]
-
-with top_col2:
-    st.markdown("""
-    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 5px;">
-        <span style="font-size: 11px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 3px 8px; border-radius: 12px; font-weight: 500;">🔬 弓道生体力学エビデンス</span>
+# ==================== UNIQLO公式アプリ風トップバー（ヘッダー・ブランドロゴ＆カテゴリータブ） ====================
+st.markdown("""
+<div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid #111111;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="background-color: #e60012; color: #ffffff; font-weight: 900; font-size: 14px; padding: 4px 7px; letter-spacing: -0.05em; line-height: 1; border-radius: 0px;">弓道</div>
+        <div>
+            <div style="font-size: 16px; font-weight: 900; color: #000000; letter-spacing: 0.05em; line-height: 1.1;">KYUDO AI DOJO</div>
+            <div style="font-size: 10px; font-weight: 700; color: #737373; letter-spacing: 0.08em;">LifeWear for Archers | 弓道AI道場</div>
+        </div>
     </div>
-    """, unsafe_allow_html=True)
+    <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 10px; font-weight: 700; background: #e60012; color: #ffffff; padding: 3px 6px; letter-spacing: 0.06em;">BIOMECHANICS</span>
+        <span style="font-size: 10px; font-weight: 700; background: #000000; color: #ffffff; padding: 3px 6px; letter-spacing: 0.06em;">EVIDENCE</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# UNIQLO風 カテゴリータブ（WOMEN / MEN / KIDS 風の切り替え）
+selected_char = st.radio(
+    "指導陣（カテゴリー）を選択",
+    options=list(CHARACTERS.keys()),
+    index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
+    horizontal=True,
+    label_visibility="collapsed",
+    key="uniqlo_character_picker"
+)
+st.session_state.current_selected_char = selected_char
+char_info = CHARACTERS[selected_char]
+st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
 
 # 応答生成関数（テキスト用）
 def generate_response(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False) -> str:
@@ -1808,29 +1897,44 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 # ==================== チャット統合型メイン画面 ====================
 
-# ユーザーメッセージがまだない場合はChatGPT風のウェルカムサジェストを表示
+# ユーザーメッセージがまだない場合はUNIQLO公式アプリ風の特集バナー＆コレクションを表示
 quick_prompt = None
 
 if not st.session_state.messages:
     st.markdown(f"""
-    <div style="text-align: center; margin: 90px 0 35px 0;">
-        <div style="width: 52px; height: 52px; background: #0d0d0d; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 18px auto; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">🏹</div>
-        <div style="font-size: 28px; font-weight: 700; color: #0d0d0d; margin-bottom: 6px; letter-spacing: -0.02em;">今日はどうされましたか？</div>
+    <div style="margin: 30px 0 24px 0; border: 1px solid #000000; padding: 24px 22px; background: #ffffff;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="background: #e60012; color: #ffffff; font-weight: 900; font-size: 11px; padding: 3px 6px; letter-spacing: 0.05em;">SPECIAL FEATURE</span>
+                <span style="font-size: 11px; font-weight: 700; color: #111111; letter-spacing: 0.08em;">KYUDO LifeWear | 射技特集</span>
+            </div>
+            <span style="font-size: 10px; font-weight: 700; color: #e60012; border: 1px solid #e60012; padding: 2px 6px;">2026 COLLECTION</span>
+        </div>
+        <div style="font-size: 26px; font-weight: 900; color: #000000; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 8px;">
+            機能美と科学で、射技を究める。
+        </div>
+        <div style="font-size: 13px; color: #555555; line-height: 1.6;">
+            筑波大・鹿屋体育大等の筋電図（EMG）・重心力学研究知見に基づき、八節の連動と射癖を論理的に解説・コーチングします。
+        </div>
+    </div>
+
+    <div style="font-size: 12px; font-weight: 900; color: #000000; letter-spacing: 0.1em; margin-bottom: 10px; border-left: 3px solid #e60012; padding-left: 8px;">
+        RECOMMENDED TOPICS | おすすめの稽古メニュー
     </div>
     """, unsafe_allow_html=True)
     
-    # 【ChatGPT公式Web UI完全一致】サジェストチップ
-    st.markdown('<div class="chatgpt-suggest-chips">', unsafe_allow_html=True)
+    # 【UNIQLOコレクションカード風グリッド】
+    st.markdown('<div class="uniqlo-collection-grid">', unsafe_allow_html=True)
     s_col1, s_col2 = st.columns(2)
     with s_col1:
-        if st.button("🎯 早気の改善アドバイスをもらう", use_container_width=True):
+        if st.button("🎯 早気の改善ワーク\n会で保てずにすぐ離れてしまう神経反射の克服", use_container_width=True):
             quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("✋ 手の内（角見）の正しい整え方", use_container_width=True):
+        if st.button("✋ 手の内・角見マスター\n握り込まずに弓返りと矢飛びを向上させる整え方", use_container_width=True):
             quick_prompt = "手の内（角見）がうまく利かず、握り込んでしまいます。正しい手の内の整え方と利かせ方を教えてください。"
     with s_col2:
-        if st.button("📜 射法八節のポイントを確認", use_container_width=True):
+        if st.button("📜 射法八節の連動チェック\n足踏みから残心までの身体アライメントと呼吸", use_container_width=True):
             quick_prompt = "射法八節それぞれのフェーズで、最も大切にすべき要点を教えてください。"
-        if st.button("🎬 射形動画の3D骨格分析について", use_container_width=True):
+        if st.button("🎬 射形動画の3D骨格分析\n下部の「＋」から動画を送信して立体診断", use_container_width=True):
             quick_prompt = "射形動画を分析してもらう際の撮影のコツ（アングルや秒数など）を教えてください。"
     st.markdown('</div><div style="margin-bottom: 25px;"></div>', unsafe_allow_html=True)
 
@@ -1951,17 +2055,17 @@ if "pending_regen" in st.session_state:
 
 
 
-# チャット入力欄（ChatGPT公式Web UI完全一致：プレースホルダー「メッセージを入力」）
+# チャット入力欄（UNIQLO風 検索＆相談バー）
 chat_submission = st.chat_input(
-    placeholder="メッセージを入力",
+    placeholder="質問や知りたい技・課題を入力（例: 早気、手の内、動画分析）...",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
 
-# ChatGPT公式フッター注釈テキスト
+# UNIQLO公式アプリ風 ブランドフッター注釈テキスト
 st.markdown("""
-<div style="text-align: center; font-size: 11px; color: #9ca3af; margin-top: 6px; letter-spacing: 0.01em;">
-    弓道AI道場 は間違いを犯すことがあります。重要な情報は確認してください。
+<div style="text-align: center; font-size: 11px; color: #737373; margin-top: 6px; letter-spacing: 0.04em;">
+    KYUDO LifeWear | 科学と伝統で導く弓道AI道場（AIの回答は参考情報としてご活用ください）
 </div>
 """, unsafe_allow_html=True)
 
