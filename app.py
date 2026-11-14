@@ -199,20 +199,20 @@ st.markdown(f"""
         -moz-osx-font-smoothing: grayscale;
     }}
     
-    /* 2. メインチャットコンテナ（最大幅768px・ChatGPT標準幅に統一） */
+    /* 2. メインチャットコンテナ（最大幅768px・ChatGPT公式標準幅に統一） */
     .main .block-container {{
         max-width: 768px !important;
-        padding-top: 10px !important;
-        padding-bottom: 130px !important;
+        padding-top: 8px !important;
+        padding-bottom: 135px !important;
         margin: 0 auto !important;
     }}
     
     /* 3. 下部固定入力バーエリア（背景フェード & セーフエリア） */
     div[data-testid="stBottom"] {{
-        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.92) 20%, #ffffff 100%) !important;
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.94) 22%, #ffffff 100%) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 9999 !important;
     }}
     div[data-testid="stBottom"] > div {{
@@ -221,18 +221,18 @@ st.markdown(f"""
         padding: 0 8px !important;
     }}
 
-    /* 4. ChatGPT純正ピル型入力ボックス */
+    /* 4. 【ChatGPT公式Web UI完全一致】ピル型入力ボックス */
     div[data-testid="stChatInput"] {{
         border: 1px solid #e5e5e5 !important;
         border-radius: 28px !important;
         background-color: #ffffff !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.02) !important;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02) !important;
         padding: 6px 14px !important;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     div[data-testid="stChatInput"]:focus-within {{
         border-color: #0d0d0d !important;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.08) !important;
+        box-shadow: 0 6px 22px rgba(0,0,0,0.07) !important;
     }}
     div[data-testid="stChatInput"] textarea {{
         font-size: 15px !important;
@@ -261,8 +261,8 @@ st.markdown(f"""
         background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 10px 0 !important;
-        margin-bottom: 12px !important;
+        padding: 8px 0 !important;
+        margin-bottom: 10px !important;
         width: 100% !important;
         min-width: 0 !important;
     }}
@@ -291,11 +291,10 @@ st.markdown(f"""
         background-color: #f4f4f4 !important;
         border-radius: 22px 22px 4px 22px !important;
         padding: 10px 18px !important;
-        max-width: 75% !important;
+        max-width: 76% !important;
         margin-left: auto !important;
         box-shadow: none !important;
     }}
-    /* ユーザー側のアバターアイコンを完全消去（ChatGPT仕様） */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageAvatar"],
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) div[data-testid="chatAvatarIcon-user"] {{
         display: none !important;
@@ -305,10 +304,9 @@ st.markdown(f"""
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
         background-color: transparent !important;
         border: none !important;
-        padding: 6px 0 !important;
+        padding: 4px 0 !important;
         width: 100% !important;
     }}
-    /* アシスタントアバターの丸型スタイリング */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
         border-radius: 50% !important;
         width: 32px !important;
@@ -317,7 +315,7 @@ st.markdown(f"""
         box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
     }}
 
-    /* 8. テキストタイポグラフィ（ChatGPTの読みやすさ） */
+    /* 8. テキストタイポグラフィ（ChatGPT公式の読みやすさ） */
     .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
         color: #0d0d0d !important;
         font-size: 16px !important;
@@ -336,35 +334,37 @@ st.markdown(f"""
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 3px 10px;
+        padding: 2px 10px;
         border-radius: 12px;
         font-size: 12px !important;
         font-weight: 600 !important;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         background-color: #f4f4f4 !important;
         color: #262626 !important;
         border: 1px solid #e5e5e5 !important;
     }}
 
-    /* 10. ChatGPT風の初期提案カード（ウェルカム画面） */
-    .suggest-card-btn button {{
+    /* 10. 【ChatGPT公式Web UI完全一致】初期提案サジェストチップ（ピル型） */
+    .chatgpt-suggest-chips button {{
         background-color: #ffffff !important;
         border: 1px solid #e5e5e5 !important;
-        border-radius: 16px !important;
-        padding: 14px 18px !important;
-        text-align: left !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.02) !important;
-        white-space: pre-wrap !important;
-        min-height: 72px !important;
-        color: #0d0d0d !important;
-        font-size: 14px !important;
+        border-radius: 20px !important;
+        padding: 9px 14px !important;
+        text-align: center !important;
+        color: #404040 !important;
+        font-size: 13.5px !important;
         font-weight: 500 !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+        transition: all 0.15s ease !important;
+        margin-bottom: 6px !important;
+        justify-content: center !important;
+        display: flex !important;
     }}
-    .suggest-card-btn button:hover {{
-        border-color: #a3a3a3 !important;
-        background-color: #fafafa !important;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.06) !important;
+    .chatgpt-suggest-chips button:hover {{
+        background-color: #f7f7f8 !important;
+        border-color: #d1d1d1 !important;
+        color: #0d0d0d !important;
+        transform: translateY(-1px) !important;
     }}
 
     /* 11. ChatGPT風の添付ファイルカード */
@@ -409,7 +409,7 @@ st.markdown(f"""
         margin-bottom: 8px;
     }}
 
-    /* 13. サイドバー（ChatGPT風のライトグレー・ミニマルデザイン） */
+    /* 13. サイドバー（ChatGPT公式ライトモード仕様：#f9f9f9） */
     section[data-testid="stSidebar"] {{
         background-color: #f9f9f9 !important;
         border-right: 1px solid #e5e5e5 !important;
@@ -467,7 +467,22 @@ st.markdown(f"""
         font-weight: 600 !important;
     }}
 
-    /* ChatGPT風のアクションボタングループ（再生成・キャラ変更） */
+    /* ChatGPT風トップモデル選択セレクトボックスのボーダー消去 */
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {{
+        background-color: transparent !important;
+        border: 1px solid transparent !important;
+        border-radius: 10px !important;
+        font-size: 17px !important;
+        font-weight: 700 !important;
+        color: #0d0d0d !important;
+        box-shadow: none !important;
+        transition: background 0.15s ease !important;
+    }}
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:hover {{
+        background-color: #f3f4f6 !important;
+    }}
+
+    /* アクションボタングループ（再生成・キャラ変更） */
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
         background: transparent !important;
         border: 1px solid #e5e7eb !important;
@@ -1303,6 +1318,7 @@ with top_col1:
         "AIキャラクター選択",
         options=list(CHARACTERS.keys()),
         index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
+        format_func=lambda x: f"🏹 {x} ▾",
         label_visibility="collapsed",
         key="main_character_picker"
     )
@@ -1797,25 +1813,24 @@ quick_prompt = None
 
 if not st.session_state.messages:
     st.markdown(f"""
-    <div style="text-align: center; margin: 60px 0 40px 0;">
-        <div style="width: 58px; height: 58px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 16px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">🏹</div>
-        <div style="font-size: 26px; font-weight: 700; color: #0d0d0d; margin-bottom: 8px; letter-spacing: -0.02em;">何をお手伝いしましょうか？</div>
-        <div style="font-size: 14px; color: #737373;">射法八節の疑問・射癖の改善・動画からの3D骨格分析まで何でもどうぞ</div>
+    <div style="text-align: center; margin: 90px 0 35px 0;">
+        <div style="width: 52px; height: 52px; background: #0d0d0d; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 18px auto; box-shadow: 0 4px 14px rgba(0,0,0,0.12);">🏹</div>
+        <div style="font-size: 28px; font-weight: 700; color: #0d0d0d; margin-bottom: 6px; letter-spacing: -0.02em;">今日はどうされましたか？</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # 2x2のモダンサジェストカード（ChatGPTスタイル）
-    st.markdown('<div class="suggest-card-btn">', unsafe_allow_html=True)
+    # 【ChatGPT公式Web UI完全一致】サジェストチップ
+    st.markdown('<div class="chatgpt-suggest-chips">', unsafe_allow_html=True)
     s_col1, s_col2 = st.columns(2)
     with s_col1:
-        if st.button("🎯 早気を克服したい\n会で保てずにすぐ離れてしまう悩みの改善法", use_container_width=True):
+        if st.button("🎯 早気の改善アドバイスをもらう", use_container_width=True):
             quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("✋ 手の内（角見）のコツ\n握り込まずに弓返りと矢飛びを良くする整え方", use_container_width=True):
+        if st.button("✋ 手の内（角見）の正しい整え方", use_container_width=True):
             quick_prompt = "手の内（角見）がうまく利かず、握り込んでしまいます。正しい手の内の整え方と利かせ方を教えてください。"
     with s_col2:
-        if st.button("📜 射法八節のチェックポイント\n足踏みから残心までの要点と身体の連動", use_container_width=True):
+        if st.button("📜 射法八節のポイントを確認", use_container_width=True):
             quick_prompt = "射法八節それぞれのフェーズで、最も大切にすべき要点を教えてください。"
-        if st.button("🎬 射形動画の3D分析\n下部の「＋」から動画を添付して立体解析", use_container_width=True):
+        if st.button("🎬 射形動画の3D骨格分析について", use_container_width=True):
             quick_prompt = "射形動画を分析してもらう際の撮影のコツ（アングルや秒数など）を教えてください。"
     st.markdown('</div><div style="margin-bottom: 25px;"></div>', unsafe_allow_html=True)
 
@@ -1936,17 +1951,17 @@ if "pending_regen" in st.session_state:
 
 
 
-# チャット入力欄（ChatGPT風カプセルバー、左端に「＋」添付ボタン）
+# チャット入力欄（ChatGPT公式Web UI完全一致：プレースホルダー「メッセージを入力」）
 chat_submission = st.chat_input(
-    placeholder="弓道AI道場にメッセージを送信する...",
+    placeholder="メッセージを入力",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
 
-# ChatGPT風のフッター注釈テキスト
+# ChatGPT公式フッター注釈テキスト
 st.markdown("""
 <div style="text-align: center; font-size: 11px; color: #9ca3af; margin-top: 6px; letter-spacing: 0.01em;">
-    弓道AI道場は間違いを犯すことがあります。重要な判断は道場の指導者等にご確認ください。
+    弓道AI道場 は間違いを犯すことがあります。重要な情報は確認してください。
 </div>
 """, unsafe_allow_html=True)
 
