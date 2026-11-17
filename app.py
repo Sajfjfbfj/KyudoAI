@@ -12,72 +12,91 @@ from google import genai
 from google.genai import types
 
 def render_chatgpt_toolbar(text_content: str):
-    """ChatGPTモバイル（2024-10仕様）ミニマル・アクションツールバー"""
-    safe_text_json = json.dumps(text_content)
-    toolbar_html = f"""
+    """ChatGPT（2026年版）風：アイコンのみのアクションバー（コピー／読み上げ）。ダークテーマ対応"""
+    safe_text_json = json.dumps(text_content).replace("</", "<\\/")
+    toolbar_html = """
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <style>
-            body {{
+            body {
                 margin: 0;
                 padding: 0;
                 background: transparent;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            }}
-            .bar {{
+            }
+            .bar {
                 display: flex;
                 align-items: center;
-                gap: 6px;
+                gap: 0;
                 padding-top: 4px;
-            }}
-            .btn {{
-                background: transparent;
+            }
+            .btn {
+                width: 32px;
+                height: 32px;
                 border: none;
-                color: #71717a;
-                border-radius: 6px;
-                padding: 4px 8px;
-                font-size: 12px;
-                font-weight: 500;
-                cursor: pointer;
+                border-radius: 8px;
+                background: transparent;
+                color: #b4b4b4;
                 display: inline-flex;
                 align-items: center;
-                gap: 4px;
-                transition: all 0.15s ease;
-            }}
-            .btn:hover {{
-                background: #f4f4f5;
-                color: #0d0d0d;
-            }}
-            .btn:active {{
-                transform: scale(0.96);
-            }}
+                justify-content: center;
+                cursor: pointer;
+                transition: background 0.15s ease, color 0.15s ease;
+            }
+            .btn:hover {
+                background: rgba(255, 255, 255, 0.15);
+                color: #ffffff;
+            }
+            .btn:active {
+                transform: scale(0.94);
+            }
+            .btn svg {
+                width: 18px;
+                height: 18px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 1.8;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
         </style>
     </head>
     <body>
         <div class="bar">
-            <button class="btn" id="copyBtn" onclick="doCopy()">📋 コピー</button>
-            <button class="btn" id="speakBtn" onclick="doSpeak()">🔊 読み上げ</button>
-            <button class="btn" id="stopBtn" onclick="doStop()">⏹️ 停止</button>
+            <button class="btn" id="copyBtn" title="コピーする" aria-label="コピーする" onclick="doCopy()"></button>
+            <button class="btn" id="speakBtn" title="読み上げ" aria-label="読み上げ" onclick="doSpeakToggle()"></button>
         </div>
         <script>
-            const textToProcess = {safe_text_json};
+            const textToProcess = __TEXT__;
+            const ICONS = {
+                copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+                check: '<path d="M20 6 9 17l-5-5"/>',
+                speak: '<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>',
+                stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>'
+            };
+            let speaking = false;
 
-            function doCopy() {{
-                const onSuccess = () => {{
-                    const b = document.getElementById('copyBtn');
-                    b.innerText = '✅ コピー済';
-                    setTimeout(() => b.innerText = '📋 コピー', 1800);
-                }};
-                if (navigator.clipboard && navigator.clipboard.writeText) {{
+            function setIcon(id, name) {
+                document.getElementById(id).innerHTML = '<svg viewBox="0 0 24 24">' + ICONS[name] + '</svg>';
+            }
+            setIcon('copyBtn', 'copy');
+            setIcon('speakBtn', 'speak');
+
+            function doCopy() {
+                const onSuccess = () => {
+                    setIcon('copyBtn', 'check');
+                    setTimeout(() => setIcon('copyBtn', 'copy'), 1800);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(textToProcess).then(onSuccess).catch(() => fallbackCopy(onSuccess));
-                }} else {{
+                } else {
                     fallbackCopy(onSuccess);
-                }}
-            }}
+                }
+            }
 
-            function fallbackCopy(cb) {{
+            function fallbackCopy(cb) {
                 const ta = document.createElement('textarea');
                 ta.value = textToProcess;
                 ta.style.position = 'fixed';
@@ -85,43 +104,51 @@ def render_chatgpt_toolbar(text_content: str):
                 document.body.appendChild(ta);
                 ta.focus();
                 ta.select();
-                try {{
+                try {
                     document.execCommand('copy');
                     if (cb) cb();
-                }} catch (e) {{
+                } catch (e) {
                     console.error('Copy failed', e);
-                }}
+                }
                 document.body.removeChild(ta);
-            }}
+            }
 
-            function doSpeak() {{
-                if (!('speechSynthesis' in window)) {{
+            function resetSpeak() {
+                speaking = false;
+                setIcon('speakBtn', 'speak');
+                document.getElementById('speakBtn').title = '読み上げ';
+            }
+
+            function doSpeakToggle() {
+                if (!('speechSynthesis' in window)) {
                     alert('お使いの端末はブラウザ音声読み上げに対応していません。');
                     return;
-                }}
+                }
+                if (speaking) {
+                    window.speechSynthesis.cancel();
+                    resetSpeak();
+                    return;
+                }
                 window.speechSynthesis.cancel();
                 const u = new SpeechSynthesisUtterance(textToProcess);
                 u.lang = 'ja-JP';
                 u.rate = 1.05;
-                const b = document.getElementById('speakBtn');
-                b.innerText = '🗣️ 再生中';
-                u.onend = () => b.innerText = '🔊 読み上げ';
-                u.onerror = () => b.innerText = '🔊 読み上げ';
+                u.onend = resetSpeak;
+                u.onerror = resetSpeak;
+                speaking = true;
+                setIcon('speakBtn', 'stop');
+                document.getElementById('speakBtn').title = '読み上げを停止';
                 window.speechSynthesis.speak(u);
-            }}
-
-            function doStop() {{
-                if ('speechSynthesis' in window) {{
-                    window.speechSynthesis.cancel();
-                    const b = document.getElementById('speakBtn');
-                    if (b) b.innerText = '🔊 読み上げ';
-                }}
-            }}
+            }
         </script>
     </body>
     </html>
-    """
-    components.html(toolbar_html, height=38)
+    """.replace("__TEXT__", safe_text_json)
+    # components.html は非推奨のため、st.iframe があればそちらを優先（旧バージョンはフォールバック）
+    if hasattr(st, "iframe"):
+        st.iframe(toolbar_html.strip(), height=40)
+    else:
+        components.html(toolbar_html, height=40)
 
 
 
@@ -762,6 +789,236 @@ st.markdown(f"""
         .file-attachment-card {{ padding: 8px 12px !important; }}
         .file-attachment-name {{ font-size: 13px !important; }}
     }}
+
+    /* =====================================================================
+       24. ChatGPT（2026年版）リファイン：後勝ちで上書き
+       ===================================================================== */
+
+    /* Streamlitヘッダーを透明化（罫線なし） */
+    header[data-testid="stHeader"] {{
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: none !important;
+    }}
+
+    header[data-testid="stHeader"] button {{
+        color: #ececec !important;
+    }}
+
+    /* アシスタント／ユーザーのアバターを非表示（ChatGPTはアバターなし） */
+    div[data-testid="stChatMessageAvatarAssistant"],
+    div[data-testid="stChatMessageAvatarUser"],
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
+        display: none !important;
+    }}
+
+    /* ユーザーバブル：右寄せ・大きめ角丸 */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]),
+    div[data-testid="stChatMessage"]:has(div[data-testid="stChatMessageAvatarUser"]) {{
+        border-radius: 22px !important;
+        max-width: 70% !important;
+        padding: 10px 18px !important;
+        margin-left: auto !important;
+    }}
+
+    /* キャラバッジ：ピルをやめて控えめなラベルに */
+    .char-badge {{
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        color: #8e8ea0 !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+        margin-bottom: 4px !important;
+    }}
+
+    /* コードブロック */
+    div[data-testid="stCode"], div[data-testid="stMarkdownContainer"] pre {{
+        background: #0d0d0d !important;
+        border: none !important;
+        border-radius: 12px !important;
+    }}
+
+    /* ---------- 入力欄（コンポーザー）：28px角丸・枠なし ---------- */
+    div[data-testid="stChatInput"] {{
+        border-radius: 28px !important;
+        background-color: #2f2f2f !important;
+        border: 1px solid transparent !important;
+        box-shadow: none !important;
+        padding: 6px 10px 6px 16px !important;
+    }}
+    div[data-testid="stChatInput"]:focus-within {{
+        border-color: rgba(255,255,255,0.12) !important;
+        box-shadow: none !important;
+    }}
+    div[data-testid="stChatInput"] div[data-baseweb] {{
+        background: transparent !important;
+        border: none !important;
+    }}
+    /* 添付（＋）など：背景なしの丸ボタン */
+    div[data-testid="stChatInput"] button {{
+        background: transparent !important;
+        color: #b4b4b4 !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        border-radius: 50% !important;
+        transform: none !important;
+    }}
+    div[data-testid="stChatInput"] button:hover {{
+        background: rgba(255,255,255,0.12) !important;
+        color: #ffffff !important;
+        transform: none !important;
+    }}
+    /* 送信ボタン：入力あり=白丸＋黒矢印／空=グレー */
+    div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {{
+        background: #ffffff !important;
+        color: #000000 !important;
+    }}
+    div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {{
+        background: #e5e5e5 !important;
+        color: #000000 !important;
+    }}
+    div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:disabled {{
+        background: #4a4a4a !important;
+        color: #8e8ea0 !important;
+        opacity: 0.6 !important;
+    }}
+
+    /* ---------- サイドバー：フラットなナビ ---------- */
+    .sb-brand {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px 12px 10px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #ececec;
+        letter-spacing: -0.01em;
+    }}
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button,
+    section[data-testid="stSidebar"] .stButton > button,
+    section[data-testid="stSidebar"] div[data-testid="stPopover"] > button {{
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #ececec !important;
+        min-height: 38px !important;
+        padding: 6px 10px !important;
+        border-radius: 10px !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        width: 100% !important;
+        transition: background 0.12s ease !important;
+    }}
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover,
+    section[data-testid="stSidebar"] .stButton > button:hover,
+    section[data-testid="stSidebar"] div[data-testid="stPopover"] > button:hover {{
+        background: #212121 !important;
+        color: #ffffff !important;
+    }}
+    section[data-testid="stSidebar"] button > div {{
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }}
+    section[data-testid="stSidebar"] button p {{
+        font-size: 14px !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+        color: inherit !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }}
+    section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {{
+        background: #2f2f2f !important;
+        color: #ffffff !important;
+    }}
+    .sb-section-label {{
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        color: #8e8ea0 !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        padding: 16px 10px 4px 10px !important;
+    }}
+
+    /* ---------- トップバー ---------- */
+    .st-key-topbar {{
+        margin-bottom: 4px;
+    }}
+    .st-key-topbar div[data-testid="stButton"] > button {{
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #ececec !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 !important;
+        border-radius: 10px !important;
+    }}
+    .st-key-topbar div[data-testid="stPopover"] > button {{
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #ececec !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        padding: 6px 12px !important;
+        border-radius: 10px !important;
+    }}
+    .st-key-topbar div[data-testid="stButton"] > button:hover,
+    .st-key-topbar div[data-testid="stPopover"] > button:hover {{
+        background: #2f2f2f !important;
+    }}
+
+    /* ---------- ウェルカム画面のクイックリスト ---------- */
+    .st-key-quick_list button {{
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #b4b4b4 !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        padding: 10px 16px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+    }}
+    .st-key-quick_list button > div {{
+        justify-content: flex-start !important;
+        gap: 12px !important;
+    }}
+    .st-key-quick_list button:hover {{
+        background: #2f2f2f !important;
+        color: #ffffff !important;
+    }}
+
+    /* ---------- メッセージ下の再生成ボタン：ゴースト ---------- */
+    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button,
+    div[data-testid="stChatMessage"] div[data-testid="stPopover"] > button {{
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #b4b4b4 !important;
+        border-radius: 8px !important;
+        min-height: 32px !important;
+        padding: 4px 10px !important;
+        font-size: 13px !important;
+        justify-content: flex-start !important;
+    }}
+    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover,
+    div[data-testid="stChatMessage"] div[data-testid="stPopover"] > button:hover {{
+        background: rgba(255,255,255,0.12) !important;
+        color: #ffffff !important;
+    }}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1367,48 +1624,33 @@ def switch_ai_character(new_char: str):
                 "content": CHARACTERS[new_char]["welcome"]
             }]
 
-# ==================== ChatGPT公式サイト完全再現サイドバー ====================
+# ==================== ChatGPT風サイドバー（フラットなナビ ＋ 日付グループ履歴） ====================
 with st.sidebar:
 
-    # ── ヘッダー：ChatGPTロゴ + 検索・サイドバーアイコン ─────────
+    # ── ブランド ──────────────────────────────────────────────
     st.markdown("""
-    <div style="display: flex; align-items: center; justify-content: space-between;
-                padding: 4px 6px 14px 6px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px;">
-        <span style="font-size: 16px; font-weight: 700; color: #ececec; letter-spacing: -0.02em;">
-            ChatGPT
-        </span>
-        <div style="display: flex; align-items: center; gap: 12px; color: #8e8ea0; font-size: 14px;">
-            <span style="cursor: pointer;" title="検索">🔍</span>
-            <span style="cursor: pointer;" title="サイドバー">📑</span>
-        </div>
-    </div>
+    <div class="sb-brand"><span>🏹</span><span>弓道AI道場</span></div>
     """, unsafe_allow_html=True)
 
-    # ── メインナビゲーションメニュー ──────────────────────────────
-    st.markdown('<div class="sb-nav">', unsafe_allow_html=True)
-
-    # 1. 新しいチャット
-    if st.button("✏️　新しいチャット", key="sidebar_new_chat_btn", use_container_width=True):
+    # ── メインナビゲーション ──────────────────────────────────
+    if st.button("新しいチャット", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
         st.rerun()
 
-    # 2. 画像・動画分析
-    with st.popover("🖼️　画像・3D動画分析", use_container_width=True):
+    with st.popover("画像・3D動画分析", icon=":material/image:", use_container_width=True):
         st.markdown("<div style='font-size: 12px; font-weight: 600; color: #ececec; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
         st.caption("画面下の入力欄の「＋」ボタンから動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
 
-    # 3. スケジュール（稽古計画・記録）
-    with st.popover("⏱️　スケジュール", use_container_width=True):
+    with st.popover("スケジュール", icon=":material/schedule:", use_container_width=True):
         st.markdown("<div style='font-size: 12px; font-weight: 600; color: #ececec; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
         st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
         st.text_input("今日の稽古目標:", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
         if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
             st.success("稽古目標を記録しました！")
 
-    # 4. ライブラリ（射法八節・教本）
-    with st.popover("📚　ライブラリ", use_container_width=True):
+    with st.popover("ライブラリ", icon=":material/menu_book:", use_container_width=True):
         st.markdown("""
         <div style='font-size: 12px; font-weight: 700; color: #ececec; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
         <div style='font-size: 12px; color: #c5c5d2; line-height: 1.6;'>
@@ -1423,16 +1665,14 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
 
-    # 5. プラグイン（生体力学・筋電図解析）
-    with st.popover("🧩　プラグイン", use_container_width=True):
+    with st.popover("プラグイン", icon=":material/extension:", use_container_width=True):
         st.markdown("<div style='font-size: 12px; font-weight: 700; color: #ececec; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
         st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
 
-    # 6. 探索（指導陣キャラクター切替）
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
-    with st.popover("···　探索", use_container_width=True):
-        st.markdown("<div style='font-size: 11px; font-weight: 700; color: #8e8ea0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;'>指導陣（AIモデル）を探す</div>", unsafe_allow_html=True)
+    with st.popover("探索", icon=":material/more_horiz:", use_container_width=True):
+        st.markdown("<div style='font-size: 12px; font-weight: 500; color: #8e8ea0; margin-bottom: 8px;'>指導陣（AIモデル）を探す</div>", unsafe_allow_html=True)
         for cname in CHARACTERS.keys():
             c_info_item = CHARACTERS[cname]
             is_active = (cname == cur_c)
@@ -1445,77 +1685,70 @@ with st.sidebar:
                 switch_ai_character(cname)
                 st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # ── セクション：ピン留め ──────────────────────────────────────
+    # ── ピン留め ──────────────────────────────────────────────
     st.markdown("<div class='sb-section-label'>ピン留め</div>", unsafe_allow_html=True)
-    st.markdown('<div class="sb-item">', unsafe_allow_html=True)
-    if st.button("🎯 弓道中と斜の使い方", key="pin_chu_sha", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": "弓道における『中（ちゅう）』と『斜（しゃ）』の使い方・身体の意識の相違点を教えてください。"})
-        st.rerun()
-    if st.button("📊 弓道大会記録システム", key="pin_taikai", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": "弓道の大会や記録会で的中率を安定させるためのルーティンと記録分析方法を教えてください。"})
-        st.rerun()
-    if st.button("🏹 早気の克服と会の伸び合い", key="pin_hayake", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": "会でじっくり保てず早く離れてしまう早気の原因と、科学的な克服ドリルを教えてください。"})
-        st.rerun()
-    if st.button("✋ 手の内と角見のトルク力学", key="pin_tsunomi", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": "左手の手の内（角見）の正しい効かせ方と、弓返りを生み出す回転モーメントの力学を教えてください。"})
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    sidebar_pins = [
+        ("pin_chu_sha", "弓道中と斜の使い方", "弓道における『中（ちゅう）』と『斜（しゃ）』の使い方・身体の意識の相違点を教えてください。"),
+        ("pin_taikai", "弓道大会記録システム", "弓道の大会や記録会で的中率を安定させるためのルーティンと記録分析方法を教えてください。"),
+        ("pin_hayake", "早気の克服と会の伸び合い", "会でじっくり保てず早く離れてしまう早気の原因と、科学的な克服ドリルを教えてください。"),
+        ("pin_tsunomi", "手の内と角見のトルク力学", "左手の手の内（角見）の正しい効かせ方と、弓返りを生み出す回転モーメントの力学を教えてください。"),
+    ]
+    for pin_key, pin_label, pin_prompt in sidebar_pins:
+        if st.button(pin_label, key=pin_key, icon=":material/push_pin:", use_container_width=True):
+            st.session_state["sidebar_prompt"] = pin_prompt
+            st.rerun()
 
-    # ── セクション：プロジェクト ──────────────────────────────────
+    # ── プロジェクト ──────────────────────────────────────────
     st.markdown("<div class='sb-section-label'>プロジェクト</div>", unsafe_allow_html=True)
-    st.markdown('<div class="sb-item">', unsafe_allow_html=True)
-    if st.button("📁 昇段審査対策（参段・四段）", key="proj_shinsa", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": "昇段審査（参段・四段）で審査員が特に重視する射品射格、体配、射法八節の減点ポイントを教えてください。"})
-        st.rerun()
-    if st.button("🎓 射法八節バイオメカニクス研究", key="proj_biomech", use_container_width=True):
-        st.session_state.messages.append({"role": "user", "content": "射法八節における筋電図（EMG）と床反力データに基づいた最適な運動連鎖について詳しく教えてください。"})
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    sidebar_projects = [
+        ("proj_shinsa", "昇段審査対策（参段・四段）", "昇段審査（参段・四段）で審査員が特に重視する射品射格、体配、射法八節の減点ポイントを教えてください。"),
+        ("proj_biomech", "射法八節バイオメカニクス研究", "射法八節における筋電図（EMG）と床反力データに基づいた最適な運動連鎖について詳しく教えてください。"),
+    ]
+    for proj_key, proj_label, proj_prompt in sidebar_projects:
+        if st.button(proj_label, key=proj_key, icon=":material/folder:", use_container_width=True):
+            st.session_state["sidebar_prompt"] = proj_prompt
+            st.rerun()
 
-    # ── セクション：最近の項目 ──────────────────────────────────
+    # ── 履歴（今日／昨日／過去7日間／それ以前） ──────────────
     all_sess = get_all_sessions()
     if all_sess:
-        st.markdown("<div class='sb-section-label'>最近の項目</div>", unsafe_allow_html=True)
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
 
-        for sess in all_sess[:10]:
-            is_active = (sess["id"] == cur_id)
-            active_cls = "sb-item-active" if is_active else ""
-            st.markdown(f'<div class="sb-item {active_cls}">', unsafe_allow_html=True)
+        for group_name, group_items in group_sessions_by_date(all_sess[:30]).items():
+            st.markdown(f"<div class='sb-section-label'>{group_name}</div>", unsafe_allow_html=True)
 
-            if is_active:
-                col_btn, col_opt = st.columns([0.82, 0.18])
-                with col_btn:
-                    st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
-                with col_opt:
-                    with st.popover("···", use_container_width=True):
-                        st.caption("チャット設定")
-                        rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
-                        if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
-                            rename_session(sess["id"], rename_val)
-                            st.rerun()
-                        if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
-                            delete_session(sess["id"])
-                            remains = get_all_sessions()
-                            if remains:
-                                st.session_state.current_session_id = remains[0]["id"]
-                                st.session_state.messages = load_session_messages(remains[0]["id"]) or []
-                            else:
-                                new_id = f"session_{int(time.time())}"
-                                st.session_state.current_session_id = new_id
-                                st.session_state.messages = []
-                            st.rerun()
-            else:
-                if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
-                    st.session_state.current_session_id = sess["id"]
-                    loaded = load_session_messages(sess["id"])
-                    if loaded is not None:
-                        st.session_state.messages = loaded
-                    st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+            for sess in group_items:
+                is_active = (sess["id"] == cur_id)
+
+                if is_active:
+                    col_btn, col_opt = st.columns([0.82, 0.18])
+                    with col_btn:
+                        st.button(sess["title"], key=f"sess_active_{sess['id']}", use_container_width=True)
+                    with col_opt:
+                        with st.popover("···", use_container_width=True):
+                            st.caption("チャット設定")
+                            rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
+                            if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
+                                rename_session(sess["id"], rename_val)
+                                st.rerun()
+                            if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
+                                delete_session(sess["id"])
+                                remains = get_all_sessions()
+                                if remains:
+                                    st.session_state.current_session_id = remains[0]["id"]
+                                    st.session_state.messages = load_session_messages(remains[0]["id"]) or []
+                                else:
+                                    new_id = f"session_{int(time.time())}"
+                                    st.session_state.current_session_id = new_id
+                                    st.session_state.messages = []
+                                st.rerun()
+                else:
+                    if st.button(sess["title"], key=f"sess_btn_{sess['id']}", use_container_width=True):
+                        st.session_state.current_session_id = sess["id"]
+                        loaded = load_session_messages(sess["id"])
+                        if loaded is not None:
+                            st.session_state.messages = loaded
+                        st.rerun()
 
     # ── スペーサー ──────────────────────────────────────────────
     st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
@@ -1527,11 +1760,11 @@ with st.sidebar:
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"👤  {disp_name}  （無料）", use_container_width=True):
+    with st.popover(f"{disp_name}", icon=":material/account_circle:", use_container_width=True):
         st.markdown(f"""
         <div style="border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.06);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">ChatGPT Plus</span>
+                <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">弓道AI</span>
                 <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● 有効</span>
             </div>
             <div style="font-size: 15px; font-weight: 600; color: #ececec; margin: 2px 0;">{disp_name}</div>
@@ -1622,20 +1855,6 @@ with st.sidebar:
                 🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
             """, unsafe_allow_html=True)
-            if "messages" in st.session_state and st.session_state.messages:
-                export_txt = export_session_to_text(st.session_state.messages)
-                st.download_button(
-                    label="📥 会話をテキスト保存",
-                    data=export_txt,
-                    file_name=f"弓道AIチャット_{time.strftime('%Y%m%d_%H%M')}.txt",
-                    mime="text/plain",
-                    use_container_width=True
-                )
-            st.markdown("""
-            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px; font-size: 11px; color: #166534; margin-top: 8px;">
-                🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
-            </div>
-            """, unsafe_allow_html=True)
 
 # APIキーの安全な読み込み
 env_api_key = os.environ.get("GEMINI_API_KEY", "")
@@ -1658,40 +1877,27 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== ChatGPT Web公式 単一統一トップバー（ダークモード） ====================
+# ==================== ChatGPT風トップバー（新規チャット ＋ モデルピッカー） ====================
 cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 short_char_name = cur_char_val.split("（")[0]
 
-st.markdown('<div class="chatgpt-top-header">', unsafe_allow_html=True)
-top_cols = st.columns([0.65, 0.35])
-with top_cols[0]:
-    with st.popover(f"ChatGPT  {short_char_name} ▾", use_container_width=False):
-        st.markdown("<div style='font-size: 11px; font-weight: 700; color: #8e8ea0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em;'>指導陣（モデル）を選択</div>", unsafe_allow_html=True)
-        for cname in CHARACTERS.keys():
-            c_info_item = CHARACTERS[cname]
-            is_active = (cname == cur_char_val)
-            btn_prefix = "✓ " if is_active else "　 "
-            if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
-                switch_ai_character(cname)
-                st.rerun()
-
-with top_cols[1]:
-    top_r1, top_r2 = st.columns([0.55, 0.45])
-    with top_r1:
-        with st.popover("✦ アップグレード", use_container_width=True):
-            st.markdown("""
-            <div style="font-size: 14px; font-weight: 700; color: #ececec; margin-bottom: 4px;">ChatGPT Plus 弓道AI</div>
-            <div style="font-size: 12px; color: #8e8ea0; line-height: 1.5; margin-bottom: 10px;">
-                最上位の生体力学解析AI・無制限の3D動画解析が常時解放されています。
-            </div>
-            """, unsafe_allow_html=True)
-            st.button("現在のプラン: 有効", disabled=True, use_container_width=True)
-    with top_r2:
-        if st.button("✏️ 新規", key="top_new_chat_btn", use_container_width=True):
+with st.container(key="topbar"):
+    top_cols = st.columns([0.12, 0.88])
+    with top_cols[0]:
+        if st.button(" ", key="top_new_chat_btn", icon=":material/edit_square:", help="新しいチャット"):
             st.session_state.messages = []
             st.session_state.current_session_id = f"session_{int(time.time())}"
             st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
+    with top_cols[1]:
+        with st.popover(f"弓道AI　{short_char_name}", use_container_width=False):
+            st.markdown("<div style='font-size: 12px; font-weight: 500; color: #8e8ea0; margin-bottom: 8px;'>指導陣（モデル）を選択</div>", unsafe_allow_html=True)
+            for cname in CHARACTERS.keys():
+                c_info_item = CHARACTERS[cname]
+                is_active = (cname == cur_char_val)
+                btn_prefix = "✓ " if is_active else "　 "
+                if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
+                    switch_ai_character(cname)
+                    st.rerun()
 
 selected_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 char_info = CHARACTERS[selected_char]
@@ -2175,53 +2381,28 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 # ==================== チャット統合型メイン画面 ====================
 
 # ユーザーメッセージがまだない場合はChatGPTモバイル（2024-10）風のウェルカム画面を表示
-quick_prompt = None
+quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバーのピン留め／プロジェクトからの質問
 
 if not st.session_state.messages:
     # ===== ChatGPT公式サイト（ダークモード）完全再現ウェルカム画面 =====
     st.markdown("""
-    <div style="text-align: center; margin: 90px 0 36px 0; animation: fadeInUp 0.4s ease;">
+    <div style="text-align: center; margin: 12vh 0 28px 0; animation: fadeInUp 0.4s ease;">
         <h1 style="font-size: 30px; font-weight: 600; color: #ececec; margin-bottom: 24px; letter-spacing: -0.025em;">
             今日は何をしましょうか？
         </h1>
     </div>
     """, unsafe_allow_html=True)
 
-    # ChatGPT公式風クイックサジェストリスト（画像完全一致）
-    st.markdown("""
-    <style>
-        .chatgpt-quick-list button {
-            background: transparent !important;
-            border: none !important;
-            color: #b4b4b4 !important;
-            font-size: 14.5px !important;
-            font-weight: 400 !important;
-            text-align: left !important;
-            justify-content: flex-start !important;
-            padding: 10px 16px !important;
-            border-radius: 12px !important;
-            transition: all 0.15s ease !important;
-            margin-bottom: 4px !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-        }
-        .chatgpt-quick-list button:hover {
-            background: #2f2f2f !important;
-            color: #ffffff !important;
-        }
-    </style>
-    <div class="chatgpt-quick-list">
-    """, unsafe_allow_html=True)
+    # ChatGPT風クイックサジェスト（key付きコンテナでCSSを確実に適用）
+    with st.container(key="quick_list"):
+        if st.button("射形動画または写真を3D分析", key="quick_act_1", icon=":material/image:", use_container_width=True):
+            quick_prompt = "射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。"
+        if st.button("射癖（早気・もたれ）の改善相談", key="quick_act_2", icon=":material/edit:", use_container_width=True):
+            quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
+        if st.button("射法八節・審査の要点を整理", key="quick_act_3", icon=":material/menu_book:", use_container_width=True):
+            quick_prompt = "射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。"
 
-    if st.button("🖼️　射形動画または写真を3D分析", key="quick_act_1", use_container_width=True):
-        quick_prompt = "射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。"
-    if st.button("✏️　射癖（早気・もたれ）の改善相談", key="quick_act_2", use_container_width=True):
-        quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-    if st.button("🌐　射法八節・審査の要点を検索", key="quick_act_3", use_container_width=True):
-        quick_prompt = "射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。"
-
-    st.markdown('</div><div style="margin-bottom: 40px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="margin-bottom: 40px;"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
@@ -2273,16 +2454,17 @@ for idx, msg in enumerate(st.session_state.messages):
 
             st.markdown(msg["content"])
 
-            # ChatGPT風：アクションツールバー（コピー・読み上げ・停止）
-            render_chatgpt_toolbar(msg.get("content", ""))
-
-            # ChatGPT風：最新の回答に対する「🔄 回答を再生成」ボタン（ユーザーの質問が存在する場合のみ表示）
+            # ChatGPT風：アイコンのみのアクションバー（コピー／読み上げ）＋ 最新回答のみ再生成
+            is_last_msg = (idx == len(st.session_state.messages) - 1)
             has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
-            if idx == len(st.session_state.messages) - 1 and msg["role"] == "assistant" and has_user_prompt:
-                regen_cols = st.columns([0.48, 0.52])
+            if is_last_msg and has_user_prompt:
                 current_msg_char = msg.get("char", selected_char)
-                with regen_cols[0]:
-                    if st.button("🔄 別の角度から再生成", key=f"btn_regen_{idx}", help=f"{current_msg_char}の別の視点から回答を再生成"):
+                bar_cols = st.columns([0.30, 0.34, 0.36])
+                with bar_cols[0]:
+                    render_chatgpt_toolbar(msg.get("content", ""))
+                with bar_cols[1]:
+                    if st.button("再生成", key=f"btn_regen_{idx}", icon=":material/refresh:",
+                                 help=f"{current_msg_char}の別の視点から回答を再生成", use_container_width=True):
                         last_u_text = None
                         for prev_m in reversed(st.session_state.messages[:idx]):
                             if prev_m["role"] == "user":
@@ -2292,11 +2474,11 @@ for idx, msg in enumerate(st.session_state.messages):
                             st.session_state.messages.pop()
                             st.session_state.pending_regen = {"text": last_u_text, "char": current_msg_char}
                             st.rerun()
-                with regen_cols[1]:
+                with bar_cols[2]:
                     # 別キャラで再生成：現在の回答キャラを除外した選択肢
                     other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
                     if other_chars:
-                        with st.popover("🎭 別のキャラで再生成", use_container_width=True):
+                        with st.popover("別のキャラで", icon=":material/switch_account:", use_container_width=True):
                             st.caption("別のAIキャラクターの視点から回答し直します")
                             for oc in other_chars:
                                 oc_info = CHARACTERS[oc]
@@ -2310,6 +2492,8 @@ for idx, msg in enumerate(st.session_state.messages):
                                         st.session_state.messages.pop()
                                         st.session_state.pending_regen = {"text": last_u_text, "char": oc}
                                         st.rerun()
+            else:
+                render_chatgpt_toolbar(msg.get("content", ""))
 
 # ==================== ChatGPT完全再現：再生成リアルタイム・ストリーミング描画 ====================
 if "pending_regen" in st.session_state:
@@ -2342,7 +2526,7 @@ if "pending_regen" in st.session_state:
 
 # チャット入力欄（ChatGPT Web公式完全一致：プレースホルダー「ChatGPT に聞く」）
 chat_submission = st.chat_input(
-    placeholder="ChatGPT に聞く",
+    placeholder="何でも聞いてください",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
@@ -2469,7 +2653,3 @@ if text_to_send or files_to_send:
             save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
 
         st.rerun()
-
-
-
-
