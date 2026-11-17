@@ -184,34 +184,34 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ==================== ChatGPT 公式サイト（chatgpt.com/ja-JP）完全再現スタイル ====================
+# ==================== ChatGPT 公式サイト（chatgpt.com/ja-JP）完全ダークモード再現スタイル ====================
 st.markdown(f"""
 <style>
     /* ===== Google Fonts: Inter ===== */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* ===== 1. ベース：ChatGPT公式 ホワイトメイン + ダークサイドバー ===== */
+    /* ===== 1. ベース：ChatGPT公式 完全ダークモード #212121 + #171717 ===== */
     .stApp {{
         font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
             "Hiragino Sans", "Noto Sans JP", sans-serif !important;
-        background-color: #ffffff !important;
-        color: #0d0d0d !important;
+        background-color: #212121 !important;
+        color: #ececec !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }}
 
-    /* ===== スクロールバー（極細） ===== */
+    /* ===== スクロールバー（極細ダーク） ===== */
     ::-webkit-scrollbar {{ width: 5px !important; height: 5px !important; }}
     ::-webkit-scrollbar-track {{ background: transparent !important; }}
-    ::-webkit-scrollbar-thumb {{ background: rgba(0,0,0,0.15) !important; border-radius: 9999px !important; }}
-    ::-webkit-scrollbar-thumb:hover {{ background: rgba(0,0,0,0.3) !important; }}
+    ::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.15) !important; border-radius: 9999px !important; }}
+    ::-webkit-scrollbar-thumb:hover {{ background: rgba(255,255,255,0.3) !important; }}
 
-    /* ===== Streamlit ヘッダー非表示 ===== */
+    /* ===== Streamlit ヘッダー ===== */
     header[data-testid="stHeader"] {{
-        background: rgba(255,255,255,0.95) !important;
+        background: rgba(33, 33, 33, 0.95) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
-        border-bottom: 1px solid #e5e5e5 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         z-index: 999 !important;
     }}
     header[data-testid="stHeader"] div[data-testid="stToolbar"],
@@ -230,47 +230,47 @@ st.markdown(f"""
         font-size: 20px !important;
     }}
 
-    /* ===== 2. メインコンテナ（最大幅 760px 中央揃え） ===== */
+    /* ===== 2. メインコンテナ（最大幅 768px 中央揃え） ===== */
     .main .block-container {{
-        max-width: 760px !important;
+        max-width: 768px !important;
         padding-top: 8px !important;
-        padding-bottom: 148px !important;
+        padding-bottom: 156px !important;
         padding-left: 20px !important;
         padding-right: 20px !important;
         margin: 0 auto !important;
     }}
 
-    /* ===== 3. チャット入力エリア下部フェード ===== */
+    /* ===== 3. チャット入力エリア下部フェード（ダーク） ===== */
     div[data-testid="stBottom"] {{
-        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 18%, #ffffff 100%) !important;
+        background: linear-gradient(180deg, rgba(33,33,33,0) 0%, rgba(33,33,33,0.92) 20%, #212121 100%) !important;
         padding-top: 12px !important;
         padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
         border-top: none !important;
         z-index: 9999 !important;
     }}
     div[data-testid="stBottom"] > div {{
-        max-width: 760px !important;
+        max-width: 768px !important;
         margin: 0 auto !important;
         padding: 0 16px !important;
     }}
 
-    /* ===== 4. ChatGPT公式チャット入力ボックス ===== */
+    /* ===== 4. ChatGPT公式チャット入力ボックス（ダーク #2f2f2f） ===== */
     div[data-testid="stChatInput"] {{
-        border: 1.5px solid #e5e5e5 !important;
-        border-radius: 16px !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-        padding: 4px 12px !important;
+        border: 1px solid #383838 !important;
+        border-radius: 24px !important;
+        background-color: #2f2f2f !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+        padding: 4px 14px !important;
         transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
     }}
     div[data-testid="stChatInput"]:focus-within {{
-        border-color: #d1d5db !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+        border-color: #555555 !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
     }}
     div[data-testid="stChatInput"] textarea {{
         font-size: 15px !important;
         font-weight: 400 !important;
-        color: #0d0d0d !important;
+        color: #ececec !important;
         background-color: transparent !important;
         line-height: 1.6 !important;
         min-height: 44px !important;
@@ -287,7 +287,7 @@ st.markdown(f"""
         min-height: 32px !important;
         width: 32px !important;
         height: 32px !important;
-        background: #000000 !important;
+        background: #676767 !important;
         border: none !important;
         transition: all 0.15s ease !important;
         display: flex !important;
@@ -295,8 +295,9 @@ st.markdown(f"""
         justify-content: center !important;
     }}
     div[data-testid="stChatInput"] button:hover {{
-        background: #333333 !important;
-        transform: scale(1.04) !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        transform: scale(1.05) !important;
     }}
 
     /* ===== 5. チャットメッセージ共通 ===== */
@@ -307,7 +308,7 @@ st.markdown(f"""
         border: none !important;
         box-shadow: none !important;
         padding: 6px 0 !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 6px !important;
         width: 100% !important;
         min-width: 0 !important;
     }}
@@ -331,13 +332,13 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* ===== 6. ユーザーバブル：右寄せ丸角グレー（ChatGPT公式） ===== */
+    /* ===== 6. ユーザーバブル：ダーク #2f2f2f 右寄せ丸角 ===== */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-        background-color: #f4f4f4 !important;
+        background-color: #2f2f2f !important;
         border: none !important;
         border-radius: 18px !important;
-        padding: 12px 16px !important;
-        max-width: 72% !important;
+        padding: 12px 18px !important;
+        max-width: 74% !important;
         margin-left: auto !important;
         margin-right: 0 !important;
         box-shadow: none !important;
@@ -347,7 +348,7 @@ st.markdown(f"""
         display: none !important;
     }}
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) p {{
-        color: #0d0d0d !important;
+        color: #ececec !important;
         font-size: 15px !important;
         line-height: 1.65 !important;
         margin: 0 !important;
@@ -373,42 +374,42 @@ st.markdown(f"""
         font-size: 15px !important;
     }}
 
-    /* ===== 8. タイポグラフィ（ChatGPT公式フォント） ===== */
+    /* ===== 8. タイポグラフィ（ダークモード） ===== */
     .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
-        color: #0d0d0d !important;
+        color: #ececec !important;
         font-size: 15px !important;
         line-height: 1.72 !important;
         letter-spacing: -0.003em;
         font-family: "Inter", -apple-system, sans-serif !important;
     }}
     h1, h2, h3, h4, h5, h6 {{
-        color: #000000 !important;
+        color: #ffffff !important;
         font-weight: 700 !important;
         letter-spacing: -0.025em;
         font-family: "Inter", -apple-system, sans-serif !important;
     }}
-    strong {{ color: #000000 !important; font-weight: 600 !important; }}
+    strong {{ color: #ffffff !important; font-weight: 600 !important; }}
     div[data-testid="stMarkdownContainer"] code {{
-        background: #f4f4f4 !important;
-        border: 1px solid #e5e5e5 !important;
-        color: #0d0d0d !important;
+        background: #2f2f2f !important;
+        border: 1px solid #383838 !important;
+        color: #ececec !important;
         border-radius: 6px !important;
         padding: 2px 6px !important;
         font-size: 13.5px !important;
         font-family: "SF Mono", "Fira Code", "Fira Mono", monospace !important;
     }}
     div[data-testid="stMarkdownContainer"] pre {{
-        background: #f4f4f4 !important;
-        border: 1px solid #e5e5e5 !important;
+        background: #171717 !important;
+        border: 1px solid #333333 !important;
         border-radius: 10px !important;
         padding: 14px 16px !important;
     }}
     div[data-testid="stMarkdownContainer"] blockquote {{
-        border-left: 3px solid #d1d5db !important;
-        background: #f9fafb !important;
+        border-left: 3px solid #555555 !important;
+        background: #2a2a2a !important;
         border-radius: 0 10px 10px 0 !important;
         padding: 8px 16px !important;
-        color: #374151 !important;
+        color: #c5c5d2 !important;
         margin: 8px 0 !important;
     }}
     div[data-testid="stMarkdownContainer"] {{
@@ -429,51 +430,33 @@ st.markdown(f"""
         font-weight: 600 !important;
         letter-spacing: 0.04em;
         margin-bottom: 8px;
-        background: #f4f4f4 !important;
-        border: 1px solid #e5e5e5 !important;
-        color: #565869 !important;
+        background: #2f2f2f !important;
+        border: 1px solid #383838 !important;
+        color: #8e8ea0 !important;
         text-transform: uppercase;
     }}
 
-    /* ===== 10. プロンプトサジェストカード ===== */
+    /* ===== 10. プロンプトサジェストカード（ダークモード） ===== */
     .suggest-grid button {{
-        background: #f9f9f9 !important;
-        border: 1px solid #e5e5e5 !important;
+        background: #2f2f2f !important;
+        border: 1px solid #383838 !important;
         border-radius: 14px !important;
         padding: 14px 16px !important;
         text-align: left !important;
-        color: #0d0d0d !important;
+        color: #ececec !important;
         font-size: 13.5px !important;
         font-weight: 500 !important;
         box-shadow: none !important;
         transition: all 0.15s ease !important;
         margin-bottom: 8px !important;
-        min-height: 68px !important;
+        min-height: 64px !important;
         line-height: 1.4 !important;
         font-family: "Inter", sans-serif !important;
     }}
     .suggest-grid button:hover {{
-        background: #f0f0f0 !important;
-        border-color: #c9c9c9 !important;
-        color: #000000 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
-    }}
-    .uniqlo-collection-grid button {{
-        background: #f9f9f9 !important;
-        border: 1px solid #e5e5e5 !important;
-        border-radius: 14px !important;
-        padding: 14px 16px !important;
-        text-align: left !important;
-        color: #0d0d0d !important;
-        font-size: 13.5px !important;
-        font-weight: 500 !important;
-        transition: all 0.15s ease !important;
-        margin-bottom: 8px !important;
-        min-height: 68px !important;
-    }}
-    .uniqlo-collection-grid button:hover {{
-        background: #f0f0f0 !important;
-        color: #000000 !important;
+        background: #383838 !important;
+        border-color: #4a4a4a !important;
+        color: #ffffff !important;
     }}
 
     /* ===== 11. 添付ファイルカード ===== */
@@ -481,15 +464,15 @@ st.markdown(f"""
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        background: #f4f4f4 !important;
-        border: 1px solid #e5e5e5 !important;
+        background: #2f2f2f !important;
+        border: 1px solid #383838 !important;
         border-radius: 12px !important;
         padding: 10px 14px !important;
         margin-bottom: 8px !important;
         max-width: 100% !important;
     }}
     .file-attachment-icon {{ font-size: 20px !important; flex-shrink: 0; }}
-    .file-attachment-name {{ font-weight: 600 !important; font-size: 13.5px !important; color: #0d0d0d !important; }}
+    .file-attachment-name {{ font-weight: 600 !important; font-size: 13.5px !important; color: #ececec !important; }}
     .file-attachment-meta {{ font-size: 11px !important; color: #10a37f !important; font-weight: 500 !important; }}
 
     /* ===== 12. メモリ更新バッジ ===== */
@@ -501,13 +484,13 @@ st.markdown(f"""
         border-radius: 9999px !important;
         font-size: 11px !important;
         font-weight: 500;
-        background: #f0fdf4 !important;
+        background: rgba(16, 163, 127, 0.15) !important;
         color: #10a37f !important;
-        border: 1px solid #c3e6d8 !important;
+        border: 1px solid rgba(16, 163, 127, 0.3) !important;
         margin-bottom: 8px;
     }}
 
-    /* ===== 13. サイドバー：ChatGPT公式ダークサイドバー ===== */
+    /* ===== 13. サイドバー：ChatGPT公式ダークサイドバー #171717 ===== */
     section[data-testid="stSidebar"] {{
         background-color: #171717 !important;
         border-right: none !important;
@@ -520,83 +503,12 @@ st.markdown(f"""
         font-size: 13px !important;
         font-family: "Inter", sans-serif !important;
     }}
-    section[data-testid="stSidebar"] .stSelectbox label {{
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        color: #8e8ea0 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }}
-
-    /* サイドバー新規チャットボタン */
-    .sidebar-new-chat-btn button {{
-        background: rgba(255,255,255,0.1) !important;
-        color: #ececec !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
-        border-radius: 10px !important;
-        font-weight: 500 !important;
-        font-size: 13.5px !important;
-        padding: 9px 14px !important;
-        transition: all 0.15s ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        letter-spacing: -0.01em !important;
-        gap: 8px !important;
-    }}
-    .sidebar-new-chat-btn button:hover {{
-        background: rgba(255,255,255,0.18) !important;
-        border-color: rgba(255,255,255,0.25) !important;
-        color: #ffffff !important;
-    }}
-
-    /* チャット履歴リスト */
-    .chat-history-item button {{
-        background: transparent !important;
-        border: none !important;
-        border-radius: 8px !important;
-        color: #c5c5d2 !important;
-        text-align: left !important;
-        font-size: 13px !important;
-        font-weight: 400 !important;
-        padding: 7px 10px !important;
-        transition: all 0.1s ease !important;
-        justify-content: flex-start !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        margin-bottom: 1px !important;
-    }}
-    .chat-history-item button:hover {{
-        background: rgba(255,255,255,0.08) !important;
-        color: #ececec !important;
-    }}
-    .chat-history-active button {{
-        background: rgba(255,255,255,0.1) !important;
-        color: #ffffff !important;
-        font-weight: 500 !important;
-    }}
-
-    /* サイドバー expander */
-    section[data-testid="stSidebar"] div[data-testid="stExpander"] {{
-        background: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 10px !important;
-    }}
-    section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{
-        color: #c5c5d2 !important;
-    }}
-    section[data-testid="stSidebar"] div[data-testid="stExpander"] p,
-    section[data-testid="stSidebar"] div[data-testid="stExpander"] li {{
-        color: #aeaebb !important;
-        font-size: 12px !important;
-    }}
 
     /* ===== 14. アクションボタン（再生成など） ===== */
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
         background: transparent !important;
-        border: 1px solid #e5e5e5 !important;
-        color: #565869 !important;
+        border: 1px solid #383838 !important;
+        color: #8e8ea0 !important;
         border-radius: 8px !important;
         padding: 5px 12px !important;
         font-size: 11.5px !important;
@@ -605,15 +517,15 @@ st.markdown(f"""
         transition: all 0.15s ease !important;
     }}
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
-        background: #f4f4f4 !important;
-        color: #0d0d0d !important;
-        border-color: #d1d1d1 !important;
+        background: #2f2f2f !important;
+        color: #ffffff !important;
+        border-color: #555555 !important;
     }}
 
-    /* ===== 15. Streamlit 汎用 UI ===== */
+    /* ===== 15. Streamlit 汎用 UI（ダークモード） ===== */
     div[data-baseweb="tab-list"] {{
         background-color: transparent !important;
-        border-bottom: 1px solid #e5e5e5 !important;
+        border-bottom: 1px solid #383838 !important;
     }}
     button[data-baseweb="tab"] {{
         color: #8e8ea0 !important;
@@ -622,23 +534,23 @@ st.markdown(f"""
         font-family: "Inter", sans-serif !important;
     }}
     button[data-baseweb="tab"][aria-selected="true"] {{
-        color: #000000 !important;
+        color: #ffffff !important;
         font-weight: 600 !important;
-        border-bottom-color: #000000 !important;
+        border-bottom-color: #ffffff !important;
     }}
-    div[data-baseweb="tab-highlight"] {{ background-color: #000000 !important; }}
+    div[data-baseweb="tab-highlight"] {{ background-color: #ffffff !important; }}
     div[data-testid="stExpander"] {{
-        background: #ffffff !important;
-        border: 1px solid #e5e5e5 !important;
+        background: #2f2f2f !important;
+        border: 1px solid #383838 !important;
         border-radius: 12px !important;
         box-shadow: none !important;
     }}
 
-    /* ===== 16. ポップオーバー ===== */
+    /* ===== 16. ポップオーバー（ダークモード） ===== */
     div[data-testid="stPopover"] > button {{
         background: transparent !important;
         border: none !important;
-        color: #0d0d0d !important;
+        color: #ececec !important;
         font-size: 15px !important;
         font-weight: 600 !important;
         border-radius: 10px !important;
@@ -648,77 +560,79 @@ st.markdown(f"""
         font-family: "Inter", sans-serif !important;
     }}
     div[data-testid="stPopover"] > button:hover {{
-        background: #f4f4f4 !important;
+        background: rgba(255,255,255,0.08) !important;
     }}
     div[data-testid="stPopoverBody"] {{
-        background: #ffffff !important;
-        border: 1px solid #e5e5e5 !important;
+        background: #2f2f2f !important;
+        border: 1px solid #383838 !important;
         border-radius: 14px !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
         padding: 8px !important;
     }}
     div[data-testid="stPopoverBody"] button {{
         border-radius: 8px !important;
         font-size: 14px !important;
         padding: 10px 14px !important;
+        color: #ececec !important;
     }}
 
-    /* ===== 17. 統一トップバー ===== */
+    /* ===== 17. 統一トップバー（ダークモード） ===== */
     .chatgpt-top-header {{
         margin-bottom: 8px !important;
         padding-bottom: 8px !important;
-        border-bottom: 1px solid #e5e5e5 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
         display: flex;
         align-items: center;
     }}
     .chatgpt-top-header div[data-testid="column"]:last-child button {{
         background: transparent !important;
-        border: 1px solid #e5e5e5 !important;
+        border: 1px solid #383838 !important;
         border-radius: 10px !important;
-        color: #0d0d0d !important;
+        color: #ececec !important;
         font-size: 13px !important;
         font-weight: 500 !important;
         padding: 6px 14px !important;
         box-shadow: none !important;
     }}
     .chatgpt-top-header div[data-testid="column"]:last-child button:hover {{
-        background: #f4f4f4 !important;
+        background: #2f2f2f !important;
+        color: #ffffff !important;
     }}
 
     /* ===== 18. フォーム要素 ===== */
     div[data-baseweb="input"] {{
-        background-color: #ffffff !important;
-        border: 1.5px solid #d9d9d9 !important;
+        background-color: #2f2f2f !important;
+        border: 1px solid #383838 !important;
         border-radius: 10px !important;
-        color: #0d0d0d !important;
+        color: #ececec !important;
     }}
     div[data-baseweb="input"]:focus-within {{
-        border-color: #0d0d0d !important;
-        box-shadow: 0 0 0 3px rgba(0,0,0,0.05) !important;
+        border-color: #555555 !important;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.05) !important;
     }}
-    div[data-baseweb="input"] input {{ color: #0d0d0d !important; font-size: 15px !important; }}
+    div[data-baseweb="input"] input {{ color: #ececec !important; font-size: 15px !important; }}
     button[kind="primary"] {{
-        background: #000000 !important;
+        background: #ffffff !important;
         border: none !important;
         border-radius: 10px !important;
-        color: #ffffff !important;
+        color: #000000 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
         box-shadow: none !important;
         letter-spacing: -0.01em !important;
     }}
     button[kind="primary"]:hover {{
-        background: #1a1a1a !important;
+        background: #e0e0e0 !important;
     }}
 
     /* ===== 19. セレクトボックス ===== */
     div[data-testid="stSelectbox"] [data-baseweb="select"] {{
         border-radius: 10px !important;
-        border: 1.5px solid #e5e5e5 !important;
-        background: #ffffff !important;
+        border: 1px solid #383838 !important;
+        background: #2f2f2f !important;
     }}
     div[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within {{
-        border-color: #0d0d0d !important;
+        border-color: #555555 !important;
     }}
 
     /* ===== 20. アニメーション ===== */
@@ -730,14 +644,14 @@ st.markdown(f"""
     /* ===== 21. サイドバー popover ボタン（プロフィール） ===== */
     section[data-testid="stSidebar"] div[data-testid="stPopover"] > button {{
         color: #ececec !important;
-        background: rgba(255,255,255,0.08) !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 10px !important;
         font-size: 13px !important;
         padding: 8px 12px !important;
     }}
     section[data-testid="stSidebar"] div[data-testid="stPopover"] > button:hover {{
-        background: rgba(255,255,255,0.14) !important;
+        background: rgba(255,255,255,0.12) !important;
         color: #ffffff !important;
     }}
 
@@ -822,12 +736,12 @@ st.markdown(f"""
         color: #ececec !important;
     }}
     .sb-item-active button {{
-        background: rgba(255,255,255,0.1) !important;
+        background: rgba(255,255,255,0.12) !important;
         color: #ffffff !important;
         font-weight: 500 !important;
     }}
     .sb-item-active button:hover {{
-        background: rgba(255,255,255,0.14) !important;
+        background: rgba(255,255,255,0.16) !important;
     }}
 
     /* ===== 23. モバイル最適化 ===== */
@@ -843,7 +757,7 @@ st.markdown(f"""
             padding: 10px 14px !important;
         }}
         div[data-testid="stChatInput"] {{
-            border-radius: 14px !important;
+            border-radius: 20px !important;
         }}
         .file-attachment-card {{ padding: 8px 12px !important; }}
         .file-attachment-name {{ font-size: 13px !important; }}
@@ -1456,129 +1370,172 @@ def switch_ai_character(new_char: str):
 # ==================== ChatGPT公式サイト完全再現サイドバー ====================
 with st.sidebar:
 
-    # ── ヘッダー：「ChatGPT」ロゴ ──────────────────────────────
+    # ── ヘッダー：ChatGPTロゴ + 検索・サイドバーアイコン ─────────
     st.markdown("""
     <div style="display: flex; align-items: center; justify-content: space-between;
-                padding: 6px 4px 14px 4px; margin-bottom: 2px;">
-        <div style="font-size: 16px; font-weight: 700; color: #ececec; letter-spacing: -0.02em;">
-            🏹 弓道AI
+                padding: 4px 6px 14px 6px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px;">
+        <span style="font-size: 16px; font-weight: 700; color: #ececec; letter-spacing: -0.02em;">
+            ChatGPT
+        </span>
+        <div style="display: flex; align-items: center; gap: 12px; color: #8e8ea0; font-size: 14px;">
+            <span style="cursor: pointer;" title="検索">🔍</span>
+            <span style="cursor: pointer;" title="サイドバー">📑</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── ナビゲーションメニュー（ChatGPT公式アイコン付き項目） ───────
+    # ── メインナビゲーションメニュー ──────────────────────────────
     st.markdown('<div class="sb-nav">', unsafe_allow_html=True)
 
-    # 新しいチャット
+    # 1. 新しいチャット
     if st.button("✏️　新しいチャット", key="sidebar_new_chat_btn", use_container_width=True):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
         st.rerun()
 
-    # キャラクター選択（ChatGPTの「画像」「スケジュール」相当の位置）
+    # 2. 画像・動画分析
+    with st.popover("🖼️　画像・3D動画分析", use_container_width=True):
+        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #ececec; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
+        st.caption("画面下の入力欄の「＋」ボタンから動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
+
+    # 3. スケジュール（稽古計画・記録）
+    with st.popover("⏱️　スケジュール", use_container_width=True):
+        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #ececec; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
+        st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
+        st.text_input("今日の稽古目標:", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
+        if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
+            st.success("稽古目標を記録しました！")
+
+    # 4. ライブラリ（射法八節・教本）
+    with st.popover("📚　ライブラリ", use_container_width=True):
+        st.markdown("""
+        <div style='font-size: 12px; font-weight: 700; color: #ececec; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
+        <div style='font-size: 12px; color: #c5c5d2; line-height: 1.6;'>
+        <b>1. 足踏み</b> : 両足を開く基本の土台<br>
+        <b>2. 胴造り</b> : 丹田に息を沈め姿勢を正す<br>
+        <b>3. 弓構え</b> : 取懸け・手の内・物見を整える<br>
+        <b>4. 打起し</b> : 静かに頭上へ持ち上げる<br>
+        <b>5. 引分け</b> : 左右均等に押し引き開く<br>
+        <b>6. 会</b> : 狙いと伸び合いの極致<br>
+        <b>7. 離れ</b> : 伸び合いの極まりで放たれる<br>
+        <b>8. 残心</b> : 姿勢と精神を保つ
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 5. プラグイン（生体力学・筋電図解析）
+    with st.popover("🧩　プラグイン", use_container_width=True):
+        st.markdown("<div style='font-size: 12px; font-weight: 700; color: #ececec; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
+        st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
+
+    # 6. 探索（指導陣キャラクター切替）
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
-    with st.popover(f"🎭　キャラクター選択", use_container_width=True):
-        st.markdown("<div style='font-size: 11px; font-weight: 700; color: #8e8ea0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;'>指導キャラクターを選択</div>", unsafe_allow_html=True)
+    with st.popover("···　探索", use_container_width=True):
+        st.markdown("<div style='font-size: 11px; font-weight: 700; color: #8e8ea0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;'>指導陣（AIモデル）を探す</div>", unsafe_allow_html=True)
         for cname in CHARACTERS.keys():
             c_info_item = CHARACTERS[cname]
             is_active = (cname == cur_c)
             if st.button(
                 f"{'✓' if is_active else '　'} {c_info_item['icon']} {cname}",
-                key=f"sb_char_{cname}",
+                key=f"sb_explore_char_{cname}",
                 use_container_width=True,
                 help=c_info_item["desc"]
             ):
                 switch_ai_character(cname)
                 st.rerun()
 
-    # 射法八節（ChatGPTの「ライブラリ」相当）
-    with st.popover("📖　射法八節 早見表", use_container_width=True):
-        st.markdown("""
-        **射法八節** — 弓道の基本動作
-        1. **足踏み** : 両足を踏み開く土台
-        2. **胴造り** : 上体を安定させ丹田に力を込める
-        3. **弓構え** : 取懸け・手の内・物見を整える
-        4. **打起し** : 弓矢を静かに頭上へ持ち上げる
-        5. **引分け** : 左右均等に押し引きしながら引き開く
-        6. **会** : 狙いと伸び合いの極致
-        7. **離れ** : 伸び合いの極まりにより矢が放たれる
-        8. **残心** : 矢が放たれた後の姿勢と精神を保つ
-        """)
-
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── セパレーター ────────────────────────────────────────
-    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+    # ── セクション：ピン留め ──────────────────────────────────────
+    st.markdown("<div class='sb-section-label'>ピン留め</div>", unsafe_allow_html=True)
+    st.markdown('<div class="sb-item">', unsafe_allow_html=True)
+    if st.button("🎯 弓道中と斜の使い方", key="pin_chu_sha", use_container_width=True):
+        st.session_state.messages.append({"role": "user", "content": "弓道における『中（ちゅう）』と『斜（しゃ）』の使い方・身体の意識の相違点を教えてください。"})
+        st.rerun()
+    if st.button("📊 弓道大会記録システム", key="pin_taikai", use_container_width=True):
+        st.session_state.messages.append({"role": "user", "content": "弓道の大会や記録会で的中率を安定させるためのルーティンと記録分析方法を教えてください。"})
+        st.rerun()
+    if st.button("🏹 早気の克服と会の伸び合い", key="pin_hayake", use_container_width=True):
+        st.session_state.messages.append({"role": "user", "content": "会でじっくり保てず早く離れてしまう早気の原因と、科学的な克服ドリルを教えてください。"})
+        st.rerun()
+    if st.button("✋ 手の内と角見のトルク力学", key="pin_tsunomi", use_container_width=True):
+        st.session_state.messages.append({"role": "user", "content": "左手の手の内（角見）の正しい効かせ方と、弓返りを生み出す回転モーメントの力学を教えてください。"})
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── 最近の項目（チャット履歴・日付グループ） ─────────────────
+    # ── セクション：プロジェクト ──────────────────────────────────
+    st.markdown("<div class='sb-section-label'>プロジェクト</div>", unsafe_allow_html=True)
+    st.markdown('<div class="sb-item">', unsafe_allow_html=True)
+    if st.button("📁 昇段審査対策（参段・四段）", key="proj_shinsa", use_container_width=True):
+        st.session_state.messages.append({"role": "user", "content": "昇段審査（参段・四段）で審査員が特に重視する射品射格、体配、射法八節の減点ポイントを教えてください。"})
+        st.rerun()
+    if st.button("🎓 射法八節バイオメカニクス研究", key="proj_biomech", use_container_width=True):
+        st.session_state.messages.append({"role": "user", "content": "射法八節における筋電図（EMG）と床反力データに基づいた最適な運動連鎖について詳しく教えてください。"})
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── セクション：最近の項目 ──────────────────────────────────
     all_sess = get_all_sessions()
     if all_sess:
-        grouped_sess = group_sessions_by_date(all_sess)
+        st.markdown("<div class='sb-section-label'>最近の項目</div>", unsafe_allow_html=True)
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
 
-        for g_label, sess_list in grouped_sess.items():
-            st.markdown(
-                f"<div class='sb-section-label'>{g_label}</div>",
-                unsafe_allow_html=True
-            )
-            for sess in sess_list[:12]:
-                is_active = (sess["id"] == cur_id)
-                active_cls = "sb-item-active" if is_active else ""
-                st.markdown(f'<div class="sb-item {active_cls}">', unsafe_allow_html=True)
+        for sess in all_sess[:10]:
+            is_active = (sess["id"] == cur_id)
+            active_cls = "sb-item-active" if is_active else ""
+            st.markdown(f'<div class="sb-item {active_cls}">', unsafe_allow_html=True)
 
-                if is_active:
-                    col_btn, col_opt = st.columns([0.82, 0.18])
-                    with col_btn:
-                        st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
-                    with col_opt:
-                        with st.popover("···", use_container_width=True):
-                            st.caption("チャット設定")
-                            rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
-                            if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
-                                rename_session(sess["id"], rename_val)
-                                st.rerun()
-                            if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
-                                delete_session(sess["id"])
-                                remains = get_all_sessions()
-                                if remains:
-                                    st.session_state.current_session_id = remains[0]["id"]
-                                    st.session_state.messages = load_session_messages(remains[0]["id"]) or []
-                                else:
-                                    new_id = f"session_{int(time.time())}"
-                                    st.session_state.current_session_id = new_id
-                                    st.session_state.messages = []
-                                st.rerun()
-                else:
-                    if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
-                        st.session_state.current_session_id = sess["id"]
-                        loaded = load_session_messages(sess["id"])
-                        if loaded is not None:
-                            st.session_state.messages = loaded
-                        st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+            if is_active:
+                col_btn, col_opt = st.columns([0.82, 0.18])
+                with col_btn:
+                    st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
+                with col_opt:
+                    with st.popover("···", use_container_width=True):
+                        st.caption("チャット設定")
+                        rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
+                        if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
+                            rename_session(sess["id"], rename_val)
+                            st.rerun()
+                        if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
+                            delete_session(sess["id"])
+                            remains = get_all_sessions()
+                            if remains:
+                                st.session_state.current_session_id = remains[0]["id"]
+                                st.session_state.messages = load_session_messages(remains[0]["id"]) or []
+                            else:
+                                new_id = f"session_{int(time.time())}"
+                                st.session_state.current_session_id = new_id
+                                st.session_state.messages = []
+                            st.rerun()
+            else:
+                if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
+                    st.session_state.current_session_id = sess["id"]
+                    loaded = load_session_messages(sess["id"])
+                    if loaded is not None:
+                        st.session_state.messages = loaded
+                    st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── スペーサー（下部プロフィールを底に押し下げる） ───────────────
-    st.markdown('<div style="flex:1; min-height: 40px;"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+    # ── スペーサー ──────────────────────────────────────────────
+    st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
 
-    # ── 下部：ユーザープロフィール（ChatGPT公式の「run_yoma / 無料 / アップグレード」） ─
+    # ── 最下部：ユーザープロフィール（ChatGPT公式：アバター + runtyoma + 無料 + アップグレード） ─
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
-    disp_name = cur_uinfo.get("display_name", st.session_state.get("logged_in_user", "射手"))
+    disp_name = cur_uinfo.get("display_name", "runtyoma")
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"👤  {disp_name}", use_container_width=True):
+    with st.popover(f"👤  {disp_name}  （無料）", use_container_width=True):
         st.markdown(f"""
         <div style="border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.06);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">弓道AI</span>
-                <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● オンライン</span>
+                <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">ChatGPT Plus</span>
+                <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● 有効</span>
             </div>
             <div style="font-size: 15px; font-weight: 600; color: #ececec; margin: 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: #8e8ea0; font-family: monospace;">ID: KYD-{user_id_num}</div>
+            <div style="font-size: 11px; color: #8e8ea0; font-family: monospace;">プラン: 無料 / Pro機能解放中</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1622,7 +1579,7 @@ with st.sidebar:
                 for idx, note in enumerate(user_notes):
                     col_n1, col_n2 = st.columns([0.80, 0.20])
                     with col_n1:
-                        st.markdown(f"<div style='font-size: 12px; padding: 3px 6px; background: #f8fafc; border-radius: 4px; margin-bottom: 3px;'>📌 {note}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 12px; padding: 3px 6px; background: rgba(255,255,255,0.06); border-radius: 4px; margin-bottom: 3px; color: #ececec;'>📌 {note}</div>", unsafe_allow_html=True)
                     with col_n2:
                         if st.button("✕", key=f"del_mem_p_{idx}", help="削除"):
                             remove_user_memory_item(cur_user, idx)
@@ -1661,6 +1618,20 @@ with st.sidebar:
                     use_container_width=True
                 )
             st.markdown("""
+            <div style="background-color: rgba(16,163,127,0.15); border: 1px solid rgba(16,163,127,0.3); border-radius: 6px; padding: 8px; font-size: 11px; color: #10a37f; margin-top: 8px;">
+                🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
+            </div>
+            """, unsafe_allow_html=True)
+            if "messages" in st.session_state and st.session_state.messages:
+                export_txt = export_session_to_text(st.session_state.messages)
+                st.download_button(
+                    label="📥 会話をテキスト保存",
+                    data=export_txt,
+                    file_name=f"弓道AIチャット_{time.strftime('%Y%m%d_%H%M')}.txt",
+                    mime="text/plain",
+                    use_container_width=True
+                )
+            st.markdown("""
             <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px; font-size: 11px; color: #166534; margin-top: 8px;">
                 🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
@@ -1687,15 +1658,15 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== ChatGPTモバイル公式UI（2024-10再現）単一統一トップバー ====================
+# ==================== ChatGPT Web公式 単一統一トップバー（ダークモード） ====================
 cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 short_char_name = cur_char_val.split("（")[0]
 
 st.markdown('<div class="chatgpt-top-header">', unsafe_allow_html=True)
-top_cols = st.columns([0.72, 0.28])
+top_cols = st.columns([0.65, 0.35])
 with top_cols[0]:
-    with st.popover(f"🏹 弓道AI  {short_char_name} ▾", use_container_width=False):
-        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #8e8ea0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em;'>指導キャラクターを選択</div>", unsafe_allow_html=True)
+    with st.popover(f"ChatGPT  {short_char_name} ▾", use_container_width=False):
+        st.markdown("<div style='font-size: 11px; font-weight: 700; color: #8e8ea0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em;'>指導陣（モデル）を選択</div>", unsafe_allow_html=True)
         for cname in CHARACTERS.keys():
             c_info_item = CHARACTERS[cname]
             is_active = (cname == cur_char_val)
@@ -1705,10 +1676,21 @@ with top_cols[0]:
                 st.rerun()
 
 with top_cols[1]:
-    if st.button("✏️ 新規", key="top_new_chat_btn", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.current_session_id = f"session_{int(time.time())}"
-        st.rerun()
+    top_r1, top_r2 = st.columns([0.55, 0.45])
+    with top_r1:
+        with st.popover("✦ アップグレード", use_container_width=True):
+            st.markdown("""
+            <div style="font-size: 14px; font-weight: 700; color: #ececec; margin-bottom: 4px;">ChatGPT Plus 弓道AI</div>
+            <div style="font-size: 12px; color: #8e8ea0; line-height: 1.5; margin-bottom: 10px;">
+                最上位の生体力学解析AI・無制限の3D動画解析が常時解放されています。
+            </div>
+            """, unsafe_allow_html=True)
+            st.button("現在のプラン: 有効", disabled=True, use_container_width=True)
+    with top_r2:
+        if st.button("✏️ 新規", key="top_new_chat_btn", use_container_width=True):
+            st.session_state.messages = []
+            st.session_state.current_session_id = f"session_{int(time.time())}"
+            st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
 
 selected_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
@@ -2196,43 +2178,50 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 quick_prompt = None
 
 if not st.session_state.messages:
-    # ===== ChatGPT公式サイト風ウェルカム画面 =====
-    cur_char_name_for_welcome = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
-    cur_char_for_welcome = CHARACTERS.get(cur_char_name_for_welcome, list(CHARACTERS.values())[0])
-    st.markdown(f"""
-    <div style="text-align: center; margin: 60px 0 40px 0; animation: fadeInUp 0.5s ease;">
-        <div style="
-            width: 56px; height: 56px;
-            background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%);
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
-            margin: 0 auto 20px auto;
-            box-shadow: 0 4px 16px rgba(16,163,127,0.25);
-        ">{cur_char_for_welcome['icon']}</div>
-        <div style="font-size: 28px; font-weight: 700; color: #0d0d0d; margin-bottom: 10px; letter-spacing: -0.03em; line-height: 1.2;">
-            何かお手伝いできることは<br>ありますか？
-        </div>
-        <div style="font-size: 14px; color: #8e8ea0; letter-spacing: -0.005em; font-weight: 400;">
-            {cur_char_name_for_welcome} が弓道の疑問・悩みを科学的根拠でお答えします
-        </div>
+    # ===== ChatGPT公式サイト（ダークモード）完全再現ウェルカム画面 =====
+    st.markdown("""
+    <div style="text-align: center; margin: 90px 0 36px 0; animation: fadeInUp 0.4s ease;">
+        <h1 style="font-size: 30px; font-weight: 600; color: #ececec; margin-bottom: 24px; letter-spacing: -0.025em;">
+            今日は何をしましょうか？
+        </h1>
     </div>
     """, unsafe_allow_html=True)
 
-    # プロンプトサジェストカード（2×2グリッド）
-    st.markdown('<div class="suggest-grid">', unsafe_allow_html=True)
-    s_col1, s_col2 = st.columns(2, gap="small")
-    with s_col1:
-        if st.button("🎯 早気の改善\n会で保てずすぐ離れてしまう", use_container_width=True):
-            quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("✋ 手の内・角見\n握り込まずに弓返りを高める", use_container_width=True):
-            quick_prompt = "手の内（角見）がうまく利かず、握り込んでしまいます。正しい手の内の整え方を教えてください。"
-    with s_col2:
-        if st.button("📜 射法八節チェック\n足踏みから残心までの要点", use_container_width=True):
-            quick_prompt = "射法八節それぞれのフェーズで、最も大切にすべき要点を教えてください。"
-        if st.button("🎬 射形動画の3D分析\n動画を添付して立体診断", use_container_width=True):
-            quick_prompt = "射形動画を分析してもらう際の撮影のコツ（アングルや秒数など）を教えてください。"
-    st.markdown('</div><div style="margin-bottom: 24px;"></div>', unsafe_allow_html=True)
+    # ChatGPT公式風クイックサジェストリスト（画像完全一致）
+    st.markdown("""
+    <style>
+        .chatgpt-quick-list button {
+            background: transparent !important;
+            border: none !important;
+            color: #b4b4b4 !important;
+            font-size: 14.5px !important;
+            font-weight: 400 !important;
+            text-align: left !important;
+            justify-content: flex-start !important;
+            padding: 10px 16px !important;
+            border-radius: 12px !important;
+            transition: all 0.15s ease !important;
+            margin-bottom: 4px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+        .chatgpt-quick-list button:hover {
+            background: #2f2f2f !important;
+            color: #ffffff !important;
+        }
+    </style>
+    <div class="chatgpt-quick-list">
+    """, unsafe_allow_html=True)
+
+    if st.button("🖼️　射形動画または写真を3D分析", key="quick_act_1", use_container_width=True):
+        quick_prompt = "射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。"
+    if st.button("✏️　射癖（早気・もたれ）の改善相談", key="quick_act_2", use_container_width=True):
+        quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
+    if st.button("🌐　射法八節・審査の要点を検索", key="quick_act_3", use_container_width=True):
+        quick_prompt = "射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。"
+
+    st.markdown('</div><div style="margin-bottom: 40px;"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
@@ -2351,9 +2340,9 @@ if "pending_regen" in st.session_state:
 
 
 
-# チャット入力欄（ChatGPTモバイル2024-10完全一致：プレースホルダー「メッセージ」）
+# チャット入力欄（ChatGPT Web公式完全一致：プレースホルダー「ChatGPT に聞く」）
 chat_submission = st.chat_input(
-    placeholder="メッセージ",
+    placeholder="ChatGPT に聞く",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
