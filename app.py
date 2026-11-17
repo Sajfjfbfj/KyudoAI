@@ -211,289 +211,576 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ==================== UNIQLOアプリを参考にしたクリーンUI ====================
+# ==================== Apple Design Award & iF Gold 受賞水準：世界最高峰UI ====================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --brand-red: #e60012;
-    --ink: #171717;
-    --muted: #707070;
-    --line: #e8e8e8;
-    --surface: #ffffff;
-    --canvas: #f7f7f5;
-    --soft: #f1f1ef;
+    --canvas: #f8fafc;
+    --canvas-subtle: #f1f5f9;
+    --surface-glass: rgba(255, 255, 255, 0.82);
+    --surface-solid: #ffffff;
+    --ink-primary: #0f172a;
+    --ink-secondary: #334155;
+    --ink-muted: #64748b;
+    --ink-faint: #94a3b8;
+    --border-glass: rgba(15, 23, 42, 0.07);
+    --border-strong: rgba(15, 23, 42, 0.12);
+    --brand-indigo: #2563eb;
+    --brand-dark: #0f172a;
+    --gold-accent: #b45309;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+    --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    --shadow-float: 0 20px 48px -8px rgba(15, 23, 42, 0.12), 0 6px 16px -4px rgba(15, 23, 42, 0.04);
+    --radius-full: 9999px;
+    --radius-2xl: 24px;
+    --radius-xl: 18px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Base Typography & Background */
 html, body, [class*="css"], .stApp {
-    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-    color: var(--ink) !important;
+    font-family: "Plus Jakarta Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: var(--ink-primary) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    background: var(--canvas) !important;
-    color: var(--ink) !important;
+    background: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--canvas) 60%, var(--canvas-subtle) 100%) !important;
+    color: var(--ink-primary) !important;
 }
+
+/* Header & Clean Slate */
 [data-testid="stHeader"] {
-    background: rgba(255,255,255,.96) !important;
-    border-bottom: 1px solid var(--line) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid var(--border-glass) !important;
 }
-[data-testid="stToolbar"], [data-testid="stDecoration"] { display:none !important; }
+[data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
+
+/* Main Container Centering & Rhythms */
 .main .block-container {
-    max-width: 1160px !important;
-    padding: 24px 34px 150px !important;
+    max-width: 980px !important;
+    padding: 28px 32px 160px !important;
     margin: 0 auto !important;
 }
+
+/* Typography Scale (Apple Human Interface Guidelines) */
 .stMarkdown, .stMarkdown p, .stMarkdown li,
 [data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
-    color: var(--ink) !important;
-    font-size: 15px !important;
-    line-height: 1.85 !important;
+    color: var(--ink-secondary) !important;
+    font-size: 15.5px !important;
+    line-height: 1.8 !important;
+    letter-spacing: -0.011em !important;
 }
-h1,h2,h3,h4,h5,h6 {
-    color: var(--ink) !important;
-    font-weight: 700 !important;
-    letter-spacing: -.035em !important;
-}
-h1 { font-size: clamp(27px, 3vw, 38px) !important; }
-h2 { font-size: 25px !important; }
-h3 { font-size: 20px !important; }
-a { color: var(--brand-red) !important; }
-hr, [data-testid="stDivider"] { border-color: var(--line) !important; }
 
-/* Sidebar: store-like category navigation */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--ink-primary) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+}
+
+h1 { font-size: clamp(26px, 3.2vw, 36px) !important; font-weight: 800 !important; }
+h2 { font-size: 22px !important; }
+h3 { font-size: 18px !important; }
+
+a {
+    color: var(--brand-indigo) !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    transition: color 0.15s ease !important;
+}
+a:hover {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+}
+
+hr, [data-testid="stDivider"] {
+    border-color: var(--border-glass) !important;
+    margin: 20px 0 !important;
+}
+
+/* ==================== macOS / iPadOS Style Translucent Sidebar ==================== */
 section[data-testid="stSidebar"] {
-    background: #fff !important;
-    border-right: 1px solid var(--line) !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border-right: 1px solid var(--border-glass) !important;
 }
 section[data-testid="stSidebar"] > div {
-    background: #fff !important;
+    background: transparent !important;
 }
 section[data-testid="stSidebar"] .stMarkdown,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] label {
-    color: var(--ink) !important;
+    color: var(--ink-primary) !important;
 }
+
 .sb-brand {
-    display:flex; align-items:center; gap:10px;
-    padding: 10px 8px 20px;
-    color:var(--ink) !important; font-size:19px; font-weight:800;
-    letter-spacing:-.04em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 10px 22px;
+    color: var(--ink-primary) !important;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 .sb-brand span:first-child {
-    display:inline-flex; align-items:center; justify-content:center;
-    width:34px; height:34px; border-radius:2px;
-    background:var(--brand-red); color:#fff; font-size:20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
+
 .sb-section-label {
-    color:#777 !important; font-size:11px !important; font-weight:700 !important;
-    letter-spacing:.08em !important; padding:20px 10px 7px !important;
+    color: var(--ink-muted) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 20px 10px 8px !important;
 }
+
 section[data-testid="stSidebar"] .stButton > button,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
-    background:#fff !important; color:#242424 !important;
-    border:0 !important; border-radius:3px !important;
-    box-shadow:none !important; min-height:42px !important;
-    padding:9px 12px !important; text-align:left !important;
-    justify-content:flex-start !important; font-size:13px !important;
-    font-weight:500 !important; transition:background .15s ease !important;
+    background: transparent !important;
+    color: var(--ink-secondary) !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: none !important;
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s var(--ease-spring) !important;
 }
 section[data-testid="stSidebar"] .stButton > button:hover,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button:hover {
-    background:#f1f1ef !important; color:var(--brand-red) !important;
+    background: rgba(15, 23, 42, 0.05) !important;
+    color: var(--ink-primary) !important;
+    transform: translateX(2px) !important;
 }
 section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
-    background:#f7eeee !important; color:var(--brand-red) !important;
-    font-weight:700 !important;
-}
-section[data-testid="stSidebar"] button p {
-    color:inherit !important; font-size:13px !important;
-}
-section[data-testid="stSidebar"] [data-testid="stPopoverBody"] {
-    background:#fff !important; border:1px solid var(--line) !important;
-    border-radius:4px !important; box-shadow:0 8px 28px rgba(0,0,0,.10) !important;
+    background: rgba(37, 99, 235, 0.08) !important;
+    color: var(--brand-indigo) !important;
+    border-color: rgba(37, 99, 235, 0.15) !important;
+    font-weight: 600 !important;
 }
 
-/* Top navigation */
+section[data-testid="stSidebar"] [data-testid="stPopoverBody"] {
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    padding: 14px !important;
+}
+
+/* ==================== Top Navigation Glass Bar ==================== */
 .st-key-topbar {
-    background:#fff !important; border-bottom:1px solid var(--line) !important;
-    padding:7px 12px !important; margin:-8px 0 24px !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-full) !important;
+    padding: 6px 14px !important;
+    margin: -8px 0 28px !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 .st-key-topbar [data-testid="stButton"] > button,
 .st-key-topbar [data-testid="stPopover"] > button {
-    background:transparent !important; border:0 !important; box-shadow:none !important;
-    color:var(--ink) !important; font-weight:700 !important; border-radius:3px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--ink-primary) !important;
+    font-weight: 600 !important;
+    border-radius: var(--radius-full) !important;
+    font-size: 13.5px !important;
+    padding: 6px 14px !important;
+    transition: background 0.15s ease !important;
 }
 .st-key-topbar [data-testid="stButton"] > button:hover,
 .st-key-topbar [data-testid="stPopover"] > button:hover {
-    background:var(--soft) !important;
+    background: rgba(15, 23, 42, 0.06) !important;
 }
 
-/* Main action buttons */
+/* ==================== Apple Design Award Standard Buttons ==================== */
 .stButton > button, .stDownloadButton > button, button[kind="secondary"] {
-    background:#fff !important; color:var(--ink) !important;
-    border:1px solid #d8d8d8 !important; border-radius:3px !important;
-    box-shadow:none !important; font-weight:600 !important;
-    min-height:42px !important; transition:all .15s ease !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    min-height: 42px !important;
+    padding: 8px 18px !important;
+    transition: all 0.2s var(--ease-spring) !important;
+    backdrop-filter: blur(12px) !important;
 }
 .stButton > button:hover, .stDownloadButton > button:hover {
-    border-color:var(--ink) !important; background:#f7f7f5 !important;
-    color:var(--ink) !important;
+    background: #ffffff !important;
+    border-color: rgba(15, 23, 42, 0.16) !important;
+    color: var(--ink-primary) !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: var(--shadow-md) !important;
 }
-button[kind="primary"], .stFormSubmitButton > button,
-[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
-    background:var(--brand-red) !important; color:#fff !important;
-    border:1px solid var(--brand-red) !important; border-radius:3px !important;
-    font-weight:700 !important; box-shadow:none !important;
-}
-button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
-    background:#c90010 !important; border-color:#c90010 !important; color:#fff !important;
+.stButton > button:active {
+    transform: scale(0.98) !important;
 }
 
-/* Inputs and selectors */
+button[kind="primary"], .stFormSubmitButton > button,
+[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: var(--radius-lg) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18) !important;
+    transition: all 0.2s var(--ease-spring) !important;
+}
+button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25) !important;
+}
+
+/* Inputs & Form Controls */
 div[data-baseweb="input"], div[data-baseweb="textarea"],
 div[data-baseweb="select"] > div {
-    background:#fff !important; border:1px solid #d7d7d7 !important;
-    border-radius:3px !important; color:var(--ink) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--ink-primary) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 div[data-baseweb="input"]:focus-within,
 div[data-baseweb="textarea"]:focus-within,
 div[data-baseweb="select"]:focus-within {
-    border-color:var(--ink) !important; box-shadow:0 0 0 1px var(--ink) !important;
+    border-color: var(--brand-indigo) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    background: #ffffff !important;
 }
-input, textarea, [data-baseweb="select"] * { color:var(--ink) !important; }
-input::placeholder, textarea::placeholder { color:#999 !important; }
-[data-testid="stTextInput"] label, [data-testid="stTextArea"] label,
-[data-testid="stSelectbox"] label, [data-testid="stRadio"] label {
-    color:#333 !important; font-weight:600 !important;
-}
+input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; }
+input::placeholder, textarea::placeholder { color: var(--ink-faint) !important; }
 
-/* Welcome / quick navigation tiles */
+/* ==================== Interactive Action Tiles (Craft & Flighty Style) ==================== */
 .st-key-quick_list {
-    display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:12px; margin:18px auto 0; max-width:1000px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 28px auto 0;
+    max-width: 920px;
 }
 .st-key-quick_list [data-testid="stButton"] > button {
-    min-height:116px !important; height:100% !important;
-    padding:20px 18px !important; text-align:left !important;
-    justify-content:flex-start !important; align-items:flex-start !important;
-    white-space:normal !important; line-height:1.6 !important;
-    background:#fff !important; border:1px solid var(--line) !important;
-    border-radius:3px !important; color:var(--ink) !important;
-    font-size:14px !important; font-weight:700 !important;
+    min-height: 120px !important;
+    height: 100% !important;
+    padding: 22px 20px !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    white-space: normal !important;
+    line-height: 1.55 !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-xl) !important;
+    color: var(--ink-primary) !important;
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: all 0.24s var(--ease-spring) !important;
 }
 .st-key-quick_list [data-testid="stButton"] > button:hover {
-    border-color:var(--brand-red) !important; color:var(--brand-red) !important;
-    background:#fff !important; transform:translateY(-2px);
+    border-color: rgba(37, 99, 235, 0.3) !important;
+    background: #ffffff !important;
+    transform: translateY(-4px) scale(1.008) !important;
+    box-shadow: var(--shadow-lg) !important;
+    color: var(--brand-indigo) !important;
 }
 .st-key-quick_list [data-testid="stButton"] button [data-testid="stMarkdownContainer"] {
-    text-align:left !important;
+    text-align: left !important;
 }
 
-/* Chat messages */
+/* ==================== World-Class Chat Timeline (Craft / Apple Messages) ==================== */
 div[data-testid="stChatMessage"] {
-    background:transparent !important; border:0 !important; box-shadow:none !important;
-    padding:12px 0 !important; margin:0 auto 8px !important;
-    max-width:900px !important; width:100% !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 8px 0 !important;
+    margin: 0 auto 16px !important;
+    max-width: 880px !important;
+    width: 100% !important;
 }
-div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] { display:none !important; }
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    max-width:78% !important; margin-left:auto !important; margin-right:0 !important;
-    background:#f0f0ee !important; border:1px solid #e7e7e5 !important;
-    border-radius:3px !important; padding:13px 18px !important;
-}
-div[data-testid="stChatMessage"] p {
-    color:var(--ink) !important; font-size:15px !important; line-height:1.9 !important;
-}
-.char-badge {
-    display:inline-flex; color:var(--brand-red) !important;
-    font-size:12px !important; font-weight:700 !important;
-    letter-spacing:.02em !important; margin:0 0 8px !important;
-    padding:0 !important; border:0 !important; background:transparent !important;
-}
-.memory-badge {
-    display:inline-flex; padding:4px 9px; margin:4px 0 8px;
-    background:#f7eeee !important; color:var(--brand-red) !important;
-    border:1px solid #f0d4d6 !important; border-radius:2px !important;
-    font-size:11px !important;
-}
-.file-attachment-card {
-    display:inline-flex; align-items:center; gap:10px;
-    background:#fff !important; border:1px solid var(--line) !important;
-    border-radius:3px !important; padding:12px 14px !important;
-}
-.file-attachment-name { color:var(--ink) !important; font-weight:700 !important; }
-.file-attachment-meta { color:#777 !important; }
+div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] { display: none !important; }
 
-/* Composer */
-div[data-testid="stBottom"] {
-    background:linear-gradient(180deg,rgba(247,247,245,0),#f7f7f5 24%) !important;
-    border-top:0 !important; padding:18px 0 calc(18px + env(safe-area-inset-bottom,0px)) !important;
+/* User Message: Elevated Obsidian Pill */
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    max-width: 76% !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 22px 22px 6px 22px !important;
+    padding: 16px 22px !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15), 0 2px 6px rgba(15, 23, 42, 0.08) !important;
+    color: #ffffff !important;
 }
-div[data-testid="stBottom"] > div { max-width:960px !important; padding:0 22px !important; margin:auto !important; }
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span,
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stMarkdownContainer"] * {
+    color: #f8fafc !important;
+}
+
+/* Assistant Message: Floating Frosted Canvas Card */
+div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) {
+    background: rgba(255, 255, 255, 0.84) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-2xl) !important;
+    padding: 24px 28px !important;
+    box-shadow: var(--shadow-md) !important;
+    transition: box-shadow 0.2s ease !important;
+}
+div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])):hover {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+div[data-testid="stChatMessage"] p {
+    font-size: 15.5px !important;
+    line-height: 1.85 !important;
+}
+
+/* Character Gradient Badges */
+.char-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px !important;
+    border-radius: var(--radius-full) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    margin: 0 0 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+.char-badge.char-master {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    color: #92400e !important;
+    border: 1px solid rgba(217, 119, 6, 0.25) !important;
+}
+.char-badge.char-senior {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+    color: #166534 !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}
+.char-badge.char-analyst {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+    color: #3730a3 !important;
+    border: 1px solid rgba(99, 102, 241, 0.25) !important;
+}
+
+.memory-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    margin: 4px 0 12px;
+    background: rgba(37, 99, 235, 0.06) !important;
+    color: var(--brand-indigo) !important;
+    border: 1px solid rgba(37, 99, 235, 0.15) !important;
+    border-radius: var(--radius-full) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+}
+
+.file-attachment-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 12px 16px !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+.file-attachment-name { color: var(--ink-primary) !important; font-weight: 700 !important; }
+.file-attachment-meta { color: var(--ink-muted) !important; }
+
+/* ==================== Floating Island Composer (Linear / Apple Intelligence) ==================== */
+div[data-testid="stBottom"] {
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.88) 32%, #f8fafc 100%) !important;
+    backdrop-filter: blur(12px) !important;
+    border-top: 0 !important;
+    padding: 24px 0 calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+}
+div[data-testid="stBottom"] > div {
+    max-width: 880px !important;
+    padding: 0 20px !important;
+    margin: auto !important;
+}
 div[data-testid="stChatInput"] {
-    background:#fff !important; border:1px solid #d8d8d8 !important;
-    border-radius:3px !important; box-shadow:0 2px 10px rgba(0,0,0,.04) !important;
-    padding:8px 12px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(32px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+    border: 1px solid rgba(15, 23, 42, 0.09) !important;
+    border-radius: 28px !important;
+    box-shadow: var(--shadow-float) !important;
+    padding: 10px 16px !important;
+    transition: all 0.25s var(--ease-spring) !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    border-color:#777 !important; box-shadow:0 0 0 1px #777 !important;
+    border-color: rgba(37, 99, 235, 0.35) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14), var(--shadow-float) !important;
+    background: #ffffff !important;
 }
 div[data-testid="stChatInput"] textarea {
-    color:var(--ink) !important; font-size:15px !important;
-    background:transparent !important; line-height:1.6 !important;
+    color: var(--ink-primary) !important;
+    font-size: 15.5px !important;
+    background: transparent !important;
+    line-height: 1.6 !important;
 }
-div[data-testid="stChatInput"] textarea::placeholder { color:#999 !important; }
+div[data-testid="stChatInput"] textarea::placeholder {
+    color: var(--ink-faint) !important;
+}
 div[data-testid="stChatInput"] button {
-    background:transparent !important; color:#555 !important;
-    border:0 !important; border-radius:3px !important;
+    background: transparent !important;
+    color: var(--ink-muted) !important;
+    border: 0 !important;
+    border-radius: var(--radius-full) !important;
+    transition: all 0.15s ease !important;
 }
 div[data-testid="stChatInput"] button:hover {
-    background:#f1f1ef !important; color:var(--ink) !important;
+    background: rgba(15, 23, 42, 0.06) !important;
+    color: var(--ink-primary) !important;
 }
 
-/* Tabs, expanders, popovers and charts */
-div[data-baseweb="tab-list"] { border-bottom:1px solid var(--line) !important; gap:14px !important; }
-button[data-baseweb="tab"] { color:#777 !important; font-weight:600 !important; }
+/* Tabs & Popovers */
+div[data-baseweb="tab-list"] {
+    border-bottom: 1px solid var(--border-glass) !important;
+    gap: 18px !important;
+}
+button[data-baseweb="tab"] {
+    color: var(--ink-muted) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 10px 4px !important;
+}
 button[data-baseweb="tab"][aria-selected="true"] {
-    color:var(--brand-red) !important; border-bottom:2px solid var(--brand-red) !important;
+    color: var(--brand-indigo) !important;
+    border-bottom: 2px solid var(--brand-indigo) !important;
 }
 div[data-testid="stExpander"], div[data-testid="stPopoverBody"] {
-    background:#fff !important; border:1px solid var(--line) !important;
-    border-radius:3px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
-div[data-testid="stAlert"] { border-radius:3px !important; }
+div[data-testid="stAlert"] {
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--border-glass) !important;
+}
 div[data-testid="stCode"], pre {
-    background:#f2f2f0 !important; border:1px solid var(--line) !important;
-    border-radius:3px !important;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
-code { color:#333 !important; }
-.stPlotlyChart { background:#fff !important; border:1px solid var(--line) !important; padding:8px; }
+.stPlotlyChart {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--border-glass) !important;
+    border-radius: var(--radius-xl) !important;
+    padding: 12px;
+    box-shadow: var(--shadow-sm) !important;
+}
 
-/* Login page */
-.login-wrap { max-width:480px; margin:46px auto 0; padding:0 16px; }
-.login-card-header { text-align:center; margin-bottom:26px; }
-.login-logo {
-    display:inline-flex; align-items:center; justify-content:center;
-    width:58px; height:58px; margin-bottom:16px;
-    background:var(--brand-red); color:#fff; font-size:30px;
+/* ==================== Login Screen (Apple Modal Style) ==================== */
+.login-wrap {
+    max-width: 440px;
+    margin: 50px auto 0;
+    padding: 0 16px;
 }
-.login-title { color:var(--ink) !important; font-size:26px; font-weight:800; }
-.login-subtitle { color:#777 !important; font-size:13px; line-height:1.7; }
+.login-card-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.login-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    font-size: 34px;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+}
+.login-title {
+    color: var(--ink-primary) !important;
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+.login-subtitle {
+    color: var(--ink-muted) !important;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 6px;
+}
+
+/* Keyframes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.hero-greeting {
+    animation: fadeInUp 0.45s var(--ease-spring);
+}
 
 /* Responsive */
 @media (max-width: 900px) {
-    .main .block-container { padding:18px 18px 130px !important; }
-    .st-key-quick_list { grid-template-columns:1fr !important; }
-    .st-key-quick_list [data-testid="stButton"] > button { min-height:72px !important; }
+    .main .block-container { padding: 20px 18px 140px !important; }
+    .st-key-quick_list { grid-template-columns: 1fr !important; }
+    .st-key-quick_list [data-testid="stButton"] > button { min-height: 76px !important; }
 }
 @media (max-width: 600px) {
-    .main .block-container { padding:12px 12px 120px !important; }
+    .main .block-container { padding: 14px 12px 130px !important; }
     div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-        max-width:92% !important; padding:10px 13px !important;
+        max-width: 90% !important;
+        padding: 12px 16px !important;
     }
-    div[data-testid="stBottom"] > div { padding:0 10px !important; }
-    h1 { font-size:26px !important; }
+    div[data-testid="stBottom"] > div { padding: 0 10px !important; }
+    h1 { font-size: 24px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -989,40 +1276,11 @@ LOCAL_RESPONSES = {
 # ==================== 世界最高峰UI：ログイン画面（スマホ・タブレット完全対応） ====================
 def render_login_screen():
     st.markdown("""
-    <style>
-        .login-wrap {
-            max-width: 440px;
-            margin: 40px auto 0 auto;
-            padding: 0 16px;
-        }
-        .login-card-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        .login-logo {
-            font-size: 44px;
-            line-height: 1;
-            margin-bottom: 12px;
-            display: inline-block;
-        }
-        .login-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0d0d0d;
-            margin-bottom: 6px;
-            letter-spacing: -0.01em;
-        }
-        .login-subtitle {
-            font-size: 14px;
-            color: #6e6e80;
-            line-height: 1.5;
-        }
-    </style>
     <div class="login-wrap">
         <div class="login-card-header">
             <div class="login-logo">🏹</div>
             <div class="login-title">弓道AI道場</div>
-            <div class="login-subtitle">アカウントにログインして射技稽古・動画分析を始めましょう</div>
+            <div class="login-subtitle">世界最高峰の対話美学で射技稽古・3D動作解析を体験しましょう</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1116,11 +1374,11 @@ with st.sidebar:
         st.rerun()
 
     with st.popover("画像・3D動画分析", icon=":material/image:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #ececec; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
         st.caption("画面下の入力欄の「＋」ボタンから動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
 
     with st.popover("スケジュール", icon=":material/schedule:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #ececec; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
         st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
         st.text_input("今日の稽古目標:", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
         if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
@@ -1128,8 +1386,8 @@ with st.sidebar:
 
     with st.popover("ライブラリ", icon=":material/menu_book:", use_container_width=True):
         st.markdown("""
-        <div style='font-size: 12px; font-weight: 700; color: #ececec; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
-        <div style='font-size: 12px; color: #c5c5d2; line-height: 1.6;'>
+        <div style='font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
+        <div style='font-size: 12px; color: #475569; line-height: 1.6;'>
         <b>1. 足踏み</b> : 両足を開く基本の土台<br>
         <b>2. 胴造り</b> : 丹田に息を沈め姿勢を正す<br>
         <b>3. 弓構え</b> : 取懸け・手の内・物見を整える<br>
@@ -1142,13 +1400,13 @@ with st.sidebar:
         """, unsafe_allow_html=True)
 
     with st.popover("プラグイン", icon=":material/extension:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 700; color: #ececec; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
         st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
 
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
     with st.popover("探索", icon=":material/more_horiz:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 500; color: #8e8ea0; margin-bottom: 8px;'>指導陣（AIモデル）を探す</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 8px;'>指導陣（AIモデル）を探す</div>", unsafe_allow_html=True)
         for cname in CHARACTERS.keys():
             c_info_item = CHARACTERS[cname]
             is_active = (cname == cur_c)
@@ -1238,13 +1496,13 @@ with st.sidebar:
 
     with st.popover(f"{disp_name}", icon=":material/account_circle:", use_container_width=True):
         st.markdown(f"""
-        <div style="border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.06);">
+        <div style="border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: rgba(15,23,42,0.04);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">弓道AI</span>
                 <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● 有効</span>
             </div>
-            <div style="font-size: 15px; font-weight: 600; color: #ececec; margin: 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: #8e8ea0; font-family: monospace;">プラン: 無料 / Pro機能解放中</div>
+            <div style="font-size: 15px; font-weight: 600; color: #0f172a; margin: 2px 0;">{disp_name}</div>
+            <div style="font-size: 11px; color: #64748b; font-family: monospace;">プラン: 無料 / Pro機能解放中</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1288,7 +1546,7 @@ with st.sidebar:
                 for idx, note in enumerate(user_notes):
                     col_n1, col_n2 = st.columns([0.80, 0.20])
                     with col_n1:
-                        st.markdown(f"<div style='font-size: 12px; padding: 3px 6px; background: rgba(255,255,255,0.06); border-radius: 4px; margin-bottom: 3px; color: #ececec;'>📌 {note}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 12px; padding: 3px 6px; background: rgba(15,23,42,0.04); border-radius: 4px; margin-bottom: 3px; color: #0f172a;'>📌 {note}</div>", unsafe_allow_html=True)
                     with col_n2:
                         if st.button("✕", key=f"del_mem_p_{idx}", help="削除"):
                             remove_user_memory_item(cur_user, idx)
@@ -1366,7 +1624,7 @@ with st.container(key="topbar"):
             st.rerun()
     with top_cols[1]:
         with st.popover(f"弓道AI　{short_char_name}", use_container_width=False):
-            st.markdown("<div style='font-size: 12px; font-weight: 500; color: #8e8ea0; margin-bottom: 8px;'>指導陣（モデル）を選択</div>", unsafe_allow_html=True)
+            st.markdown("<div style='font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 8px;'>指導陣（モデル）を選択</div>", unsafe_allow_html=True)
             for cname in CHARACTERS.keys():
                 c_info_item = CHARACTERS[cname]
                 is_active = (cname == cur_char_val)
@@ -1860,12 +2118,18 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバーのピン留め／プロジェクトからの質問
 
 if not st.session_state.messages:
-    # ===== ChatGPT公式サイト（ダークモード）完全再現ウェルカム画面 =====
+    # ===== 世界最高峰UI：ウェルカム画面 =====
     st.markdown("""
-    <div style="text-align: center; margin: 12vh 0 28px 0; animation: fadeInUp 0.4s ease;">
-        <h1 style="font-size: 30px; font-weight: 600; color: #ececec; margin-bottom: 24px; letter-spacing: -0.025em;">
+    <div class="hero-greeting" style="text-align: center; margin: 9vh 0 32px 0;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 9999px; background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.18); color: #2563eb; font-size: 13px; font-weight: 600; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(37,99,235,0.06);">
+            <span>🏹</span><span>Apple Design Award & iF Gold 水準の美学 × 弓道科学</span>
+        </div>
+        <h1 style="font-size: clamp(28px, 3.5vw, 38px); font-weight: 800; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.03em;">
             今日の稽古、何から始めますか？
         </h1>
+        <p style="font-size: 15px; color: #64748b; margin: 0 auto; max-width: 520px; line-height: 1.65;">
+            3D骨格分析・射癖相談から射法八節の極意まで、世界最高水準の対話体験でお応えします。
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2009,7 +2273,7 @@ chat_submission = st.chat_input(
 
 # 弓道AI道場 フッター注釈
 st.markdown("""
-<div style="text-align: center; font-size: 11.5px; color: #8e8ea0; margin-top: 8px; letter-spacing: 0.01em; font-family: 'Inter', sans-serif;">
+<div style="text-align: center; font-size: 11.5px; color: #64748b; margin-top: 8px; letter-spacing: 0.01em; font-family: 'Inter', sans-serif;">
     弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。
 </div>
 """, unsafe_allow_html=True)
