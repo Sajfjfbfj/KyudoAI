@@ -741,7 +741,96 @@ st.markdown(f"""
         color: #ffffff !important;
     }}
 
-    /* ===== 22. モバイル最適化 ===== */
+    /* ===== 22. ChatGPT公式サイドバー詳細スタイル ===== */
+
+    /* ナビゲーションメニュー項目 */
+    .sb-nav button {{
+        background: transparent !important;
+        border: none !important;
+        color: #c5c5d2 !important;
+        font-size: 13.5px !important;
+        font-weight: 400 !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        padding: 7px 10px !important;
+        border-radius: 8px !important;
+        margin-bottom: 2px !important;
+        transition: all 0.1s ease !important;
+        letter-spacing: -0.01em !important;
+    }}
+    .sb-nav button:hover {{
+        background: rgba(255,255,255,0.08) !important;
+        color: #ffffff !important;
+    }}
+    .sb-nav div[data-testid="stPopover"] > button {{
+        background: transparent !important;
+        border: none !important;
+        color: #c5c5d2 !important;
+        font-size: 13.5px !important;
+        font-weight: 400 !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        padding: 7px 10px !important;
+        border-radius: 8px !important;
+        margin-bottom: 2px !important;
+        transition: all 0.1s ease !important;
+        width: 100% !important;
+    }}
+    .sb-nav div[data-testid="stPopover"] > button:hover {{
+        background: rgba(255,255,255,0.08) !important;
+        color: #ffffff !important;
+    }}
+
+    /* セクション区切り線 */
+    .sb-divider {{
+        border: none !important;
+        border-top: 1px solid rgba(255,255,255,0.08) !important;
+        margin: 8px 0 !important;
+        height: 1px !important;
+        background: rgba(255,255,255,0.08) !important;
+    }}
+
+    /* セクションラベル */
+    .sb-section-label {{
+        font-size: 10.5px !important;
+        font-weight: 600 !important;
+        color: #8e8ea0 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.08em !important;
+        padding: 10px 10px 4px 10px !important;
+    }}
+
+    /* 履歴アイテム */
+    .sb-item button {{
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #c5c5d2 !important;
+        text-align: left !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        padding: 7px 10px !important;
+        transition: all 0.1s ease !important;
+        justify-content: flex-start !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        margin-bottom: 0px !important;
+    }}
+    .sb-item button:hover {{
+        background: rgba(255,255,255,0.08) !important;
+        color: #ececec !important;
+    }}
+    .sb-item-active button {{
+        background: rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+        font-weight: 500 !important;
+    }}
+    .sb-item-active button:hover {{
+        background: rgba(255,255,255,0.14) !important;
+    }}
+
+    /* ===== 23. モバイル最適化 ===== */
     @media (max-width: 768px) {{
         .main .block-container {{
             padding-left: 12px !important;
@@ -1364,49 +1453,87 @@ def switch_ai_character(new_char: str):
                 "content": CHARACTERS[new_char]["welcome"]
             }]
 
-# サイドバー構成（ChatGPTモバイル公式仕様・左ドロワー）
+# ==================== ChatGPT公式サイト完全再現サイドバー ====================
 with st.sidebar:
-    # 最上部に「+ 新しいチャット」ボタン（ChatGPTブラックピル）
-    st.markdown('<div class="sidebar-new-chat-btn">', unsafe_allow_html=True)
-    if st.button("＋ 新しいチャット", use_container_width=True, key="sidebar_new_chat_btn"):
+
+    # ── ヘッダー：「ChatGPT」ロゴ ──────────────────────────────
+    st.markdown("""
+    <div style="display: flex; align-items: center; justify-content: space-between;
+                padding: 6px 4px 14px 4px; margin-bottom: 2px;">
+        <div style="font-size: 16px; font-weight: 700; color: #ececec; letter-spacing: -0.02em;">
+            🏹 弓道AI
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── ナビゲーションメニュー（ChatGPT公式アイコン付き項目） ───────
+    st.markdown('<div class="sb-nav">', unsafe_allow_html=True)
+
+    # 新しいチャット
+    if st.button("✏️　新しいチャット", key="sidebar_new_chat_btn", use_container_width=True):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # 現在のAIモデル・指導陣バッジ表示（ダークサイドバー用）
+    # キャラクター選択（ChatGPTの「画像」「スケジュール」相当の位置）
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
-    st.markdown(f"""
-    <div style="background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px; margin: 10px 0 8px 0; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 10.5px; font-weight: 600; color: #8e8ea0; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em;">現在のモデル</div>
-        <div style="font-size: 13px; font-weight: 600; color: #ececec;">{c_info['icon']} {cur_c}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with st.popover(f"🎭　キャラクター選択", use_container_width=True):
+        st.markdown("<div style='font-size: 11px; font-weight: 700; color: #8e8ea0; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;'>指導キャラクターを選択</div>", unsafe_allow_html=True)
+        for cname in CHARACTERS.keys():
+            c_info_item = CHARACTERS[cname]
+            is_active = (cname == cur_c)
+            if st.button(
+                f"{'✓' if is_active else '　'} {c_info_item['icon']} {cname}",
+                key=f"sb_char_{cname}",
+                use_container_width=True,
+                help=c_info_item["desc"]
+            ):
+                switch_ai_character(cname)
+                st.rerun()
 
-    st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
+    # 射法八節（ChatGPTの「ライブラリ」相当）
+    with st.popover("📖　射法八節 早見表", use_container_width=True):
+        st.markdown("""
+        **射法八節** — 弓道の基本動作
+        1. **足踏み** : 両足を踏み開く土台
+        2. **胴造り** : 上体を安定させ丹田に力を込める
+        3. **弓構え** : 取懸け・手の内・物見を整える
+        4. **打起し** : 弓矢を静かに頭上へ持ち上げる
+        5. **引分け** : 左右均等に押し引きしながら引き開く
+        6. **会** : 狙いと伸び合いの極致
+        7. **離れ** : 伸び合いの極まりにより矢が放たれる
+        8. **残心** : 矢が放たれた後の姿勢と精神を保つ
+        """)
 
-    # ChatGPT風：過去のチャット履歴（日付別グループ分け縦並びリスト）
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── セパレーター ────────────────────────────────────────
+    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+
+    # ── 最近の項目（チャット履歴・日付グループ） ─────────────────
     all_sess = get_all_sessions()
     if all_sess:
         grouped_sess = group_sessions_by_date(all_sess)
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
-        
+
         for g_label, sess_list in grouped_sess.items():
-            st.markdown(f"<div style='margin: 10px 0 4px 0; font-size: 10px; font-weight: 600; color: #8e8ea0; text-transform: uppercase; letter-spacing: 0.08em; padding-left: 2px;'>{g_label}</div>", unsafe_allow_html=True)
-            for sess in sess_list[:10]:
+            st.markdown(
+                f"<div class='sb-section-label'>{g_label}</div>",
+                unsafe_allow_html=True
+            )
+            for sess in sess_list[:12]:
                 is_active = (sess["id"] == cur_id)
-                active_cls = "chat-history-active" if is_active else ""
-                st.markdown(f'<div class="chat-history-item {active_cls}">', unsafe_allow_html=True)
-                
-                # アクティブなセッションの場合、タイトルボタンと操作メニューを配置
+                active_cls = "sb-item-active" if is_active else ""
+                st.markdown(f'<div class="sb-item {active_cls}">', unsafe_allow_html=True)
+
                 if is_active:
-                    col_btn, col_opt = st.columns([0.80, 0.20])
+                    col_btn, col_opt = st.columns([0.82, 0.18])
                     with col_btn:
                         st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True)
                     with col_opt:
-                        with st.popover("•••", use_container_width=True):
+                        with st.popover("···", use_container_width=True):
                             st.caption("チャット設定")
                             rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
                             if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
@@ -1432,43 +1559,30 @@ with st.sidebar:
                         st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<div style='margin-top: 18px;'></div>", unsafe_allow_html=True)
+    # ── スペーサー（下部プロフィールを底に押し下げる） ───────────────
+    st.markdown('<div style="flex:1; min-height: 40px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
 
-    # 射法八節早見表
-    with st.expander("📖 射法八節 早見表"):
-        st.markdown("""
-        1. **足踏み** : 的に向かって両足を踏み開く基本の土台。
-        2. **胴造り** : 上体を安定させ、丹田に力を込める。
-        3. **弓構え** : 取懸け・手の内・物見を整える。
-        4. **打起し** : 弓矢を両腕で静かに頭上へ持ち上げる。
-        5. **引分け** : 左右均等に押し引きしながら弓を引き開く。
-        6. **会** : 狙いと伸び合いの極致。心技体が一体となる。
-        7. **離れ** : 伸び合いの極まりにより自然に矢が放たれる。
-        8. **残心** : 矢が放たれた後の姿勢と精神を保つ。
-        """)
-
-    st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
-
-    # ==================== 世界最高峰UI：ARCHER PASSPORT（デジタル会員証） ＆ 設定 ====================
+    # ── 下部：ユーザープロフィール（ChatGPT公式の「run_yoma / 無料 / アップグレード」） ─
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
     disp_name = cur_uinfo.get("display_name", st.session_state.get("logged_in_user", "射手"))
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"👤 {disp_name}", use_container_width=True):
+    with st.popover(f"👤  {disp_name}", use_container_width=True):
         st.markdown(f"""
-        <div style="border: 1px solid #e5e5e5; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: #f8f9fa;">
+        <div style="border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.06);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: #000000; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 12px;">弓道AI</span>
-                <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● 認証済</span>
+                <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">弓道AI</span>
+                <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● オンライン</span>
             </div>
-            <div style="font-size: 16px; font-weight: 600; color: #000000; margin: 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: #6b7280; font-family: monospace;">ID: KYD-8820-{user_id_num}</div>
+            <div style="font-size: 15px; font-weight: 600; color: #ececec; margin: 2px 0;">{disp_name}</div>
+            <div style="font-size: 11px; color: #8e8ea0; font-family: monospace;">ID: KYD-{user_id_num}</div>
         </div>
         """, unsafe_allow_html=True)
 
-        tab_profile, tab_memory, tab_inst, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ", "🎯 カスタム指示", "💾 会話"])
+        tab_profile, tab_memory, tab_inst, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ", "🎯 指示", "💾 会話"])
 
         with tab_profile:
             font_size_choice = st.radio(
