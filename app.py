@@ -38,7 +38,7 @@ def render_chatgpt_toolbar(text_content: str):
                 border: none;
                 border-radius: 8px;
                 background: transparent;
-                color: #b4b4b4;
+                color: #666666;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -46,8 +46,8 @@ def render_chatgpt_toolbar(text_content: str):
                 transition: background 0.15s ease, color 0.15s ease;
             }
             .btn:hover {
-                background: rgba(255, 255, 255, 0.15);
-                color: #ffffff;
+                background: rgba(0, 0, 0, 0.06);
+                color: #171717;
             }
             .btn:active {
                 transform: scale(0.94);
@@ -211,814 +211,290 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ==================== ChatGPT 公式サイト（chatgpt.com/ja-JP）完全ダークモード再現スタイル ====================
-st.markdown(f"""
+# ==================== UNIQLOアプリを参考にしたクリーンUI ====================
+st.markdown("""
 <style>
-    /* ===== Google Fonts: Inter ===== */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
 
-    /* ===== 1. ベース：ChatGPT公式 完全ダークモード #212121 + #171717 ===== */
-    .stApp {{
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-            "Hiragino Sans", "Noto Sans JP", sans-serif !important;
-        background-color: #212121 !important;
-        color: #ececec !important;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }}
+:root {
+    --brand-red: #e60012;
+    --ink: #171717;
+    --muted: #707070;
+    --line: #e8e8e8;
+    --surface: #ffffff;
+    --canvas: #f7f7f5;
+    --soft: #f1f1ef;
+}
+html, body, [class*="css"], .stApp {
+    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    color: var(--ink) !important;
+}
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    background: var(--canvas) !important;
+    color: var(--ink) !important;
+}
+[data-testid="stHeader"] {
+    background: rgba(255,255,255,.96) !important;
+    border-bottom: 1px solid var(--line) !important;
+}
+[data-testid="stToolbar"], [data-testid="stDecoration"] { display:none !important; }
+.main .block-container {
+    max-width: 1160px !important;
+    padding: 24px 34px 150px !important;
+    margin: 0 auto !important;
+}
+.stMarkdown, .stMarkdown p, .stMarkdown li,
+[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
+    color: var(--ink) !important;
+    font-size: 15px !important;
+    line-height: 1.85 !important;
+}
+h1,h2,h3,h4,h5,h6 {
+    color: var(--ink) !important;
+    font-weight: 700 !important;
+    letter-spacing: -.035em !important;
+}
+h1 { font-size: clamp(27px, 3vw, 38px) !important; }
+h2 { font-size: 25px !important; }
+h3 { font-size: 20px !important; }
+a { color: var(--brand-red) !important; }
+hr, [data-testid="stDivider"] { border-color: var(--line) !important; }
 
-    /* ===== スクロールバー（極細ダーク） ===== */
-    ::-webkit-scrollbar {{ width: 5px !important; height: 5px !important; }}
-    ::-webkit-scrollbar-track {{ background: transparent !important; }}
-    ::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.15) !important; border-radius: 9999px !important; }}
-    ::-webkit-scrollbar-thumb:hover {{ background: rgba(255,255,255,0.3) !important; }}
+/* Sidebar: store-like category navigation */
+section[data-testid="stSidebar"] {
+    background: #fff !important;
+    border-right: 1px solid var(--line) !important;
+}
+section[data-testid="stSidebar"] > div {
+    background: #fff !important;
+}
+section[data-testid="stSidebar"] .stMarkdown,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label {
+    color: var(--ink) !important;
+}
+.sb-brand {
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 8px 20px;
+    color:var(--ink) !important; font-size:19px; font-weight:800;
+    letter-spacing:-.04em;
+}
+.sb-brand span:first-child {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:2px;
+    background:var(--brand-red); color:#fff; font-size:20px;
+}
+.sb-section-label {
+    color:#777 !important; font-size:11px !important; font-weight:700 !important;
+    letter-spacing:.08em !important; padding:20px 10px 7px !important;
+}
+section[data-testid="stSidebar"] .stButton > button,
+section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
+    background:#fff !important; color:#242424 !important;
+    border:0 !important; border-radius:3px !important;
+    box-shadow:none !important; min-height:42px !important;
+    padding:9px 12px !important; text-align:left !important;
+    justify-content:flex-start !important; font-size:13px !important;
+    font-weight:500 !important; transition:background .15s ease !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover,
+section[data-testid="stSidebar"] [data-testid="stPopover"] > button:hover {
+    background:#f1f1ef !important; color:var(--brand-red) !important;
+}
+section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
+    background:#f7eeee !important; color:var(--brand-red) !important;
+    font-weight:700 !important;
+}
+section[data-testid="stSidebar"] button p {
+    color:inherit !important; font-size:13px !important;
+}
+section[data-testid="stSidebar"] [data-testid="stPopoverBody"] {
+    background:#fff !important; border:1px solid var(--line) !important;
+    border-radius:4px !important; box-shadow:0 8px 28px rgba(0,0,0,.10) !important;
+}
 
-    /* ===== Streamlit ヘッダー ===== */
-    header[data-testid="stHeader"] {{
-        background: rgba(33, 33, 33, 0.95) !important;
-        backdrop-filter: blur(10px) !important;
-        -webkit-backdrop-filter: blur(10px) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-        z-index: 999 !important;
-    }}
-    header[data-testid="stHeader"] div[data-testid="stToolbar"],
-    header[data-testid="stHeader"] [data-testid="stDecoration"] {{
-        display: none !important;
-    }}
-    div[data-testid="collapsedControl"] {{
-        top: 10px !important;
-        left: 12px !important;
-        z-index: 1001 !important;
-    }}
-    div[data-testid="collapsedControl"] button {{
-        background: transparent !important;
-        border: none !important;
-        color: #ececec !important;
-        font-size: 20px !important;
-    }}
+/* Top navigation */
+.st-key-topbar {
+    background:#fff !important; border-bottom:1px solid var(--line) !important;
+    padding:7px 12px !important; margin:-8px 0 24px !important;
+}
+.st-key-topbar [data-testid="stButton"] > button,
+.st-key-topbar [data-testid="stPopover"] > button {
+    background:transparent !important; border:0 !important; box-shadow:none !important;
+    color:var(--ink) !important; font-weight:700 !important; border-radius:3px !important;
+}
+.st-key-topbar [data-testid="stButton"] > button:hover,
+.st-key-topbar [data-testid="stPopover"] > button:hover {
+    background:var(--soft) !important;
+}
 
-    /* ===== 2. メインコンテナ（最大幅 768px 中央揃え） ===== */
-    .main .block-container {{
-        max-width: 768px !important;
-        padding-top: 8px !important;
-        padding-bottom: 156px !important;
-        padding-left: 20px !important;
-        padding-right: 20px !important;
-        margin: 0 auto !important;
-    }}
+/* Main action buttons */
+.stButton > button, .stDownloadButton > button, button[kind="secondary"] {
+    background:#fff !important; color:var(--ink) !important;
+    border:1px solid #d8d8d8 !important; border-radius:3px !important;
+    box-shadow:none !important; font-weight:600 !important;
+    min-height:42px !important; transition:all .15s ease !important;
+}
+.stButton > button:hover, .stDownloadButton > button:hover {
+    border-color:var(--ink) !important; background:#f7f7f5 !important;
+    color:var(--ink) !important;
+}
+button[kind="primary"], .stFormSubmitButton > button,
+[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
+    background:var(--brand-red) !important; color:#fff !important;
+    border:1px solid var(--brand-red) !important; border-radius:3px !important;
+    font-weight:700 !important; box-shadow:none !important;
+}
+button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
+    background:#c90010 !important; border-color:#c90010 !important; color:#fff !important;
+}
 
-    /* ===== 3. チャット入力エリア下部フェード（ダーク） ===== */
-    div[data-testid="stBottom"] {{
-        background: linear-gradient(180deg, rgba(33,33,33,0) 0%, rgba(33,33,33,0.92) 20%, #212121 100%) !important;
-        padding-top: 12px !important;
-        padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
-        border-top: none !important;
-        z-index: 9999 !important;
-    }}
-    div[data-testid="stBottom"] > div {{
-        max-width: 768px !important;
-        margin: 0 auto !important;
-        padding: 0 16px !important;
-    }}
+/* Inputs and selectors */
+div[data-baseweb="input"], div[data-baseweb="textarea"],
+div[data-baseweb="select"] > div {
+    background:#fff !important; border:1px solid #d7d7d7 !important;
+    border-radius:3px !important; color:var(--ink) !important;
+}
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="textarea"]:focus-within,
+div[data-baseweb="select"]:focus-within {
+    border-color:var(--ink) !important; box-shadow:0 0 0 1px var(--ink) !important;
+}
+input, textarea, [data-baseweb="select"] * { color:var(--ink) !important; }
+input::placeholder, textarea::placeholder { color:#999 !important; }
+[data-testid="stTextInput"] label, [data-testid="stTextArea"] label,
+[data-testid="stSelectbox"] label, [data-testid="stRadio"] label {
+    color:#333 !important; font-weight:600 !important;
+}
 
-    /* ===== 4. ChatGPT公式チャット入力ボックス（ダーク #2f2f2f） ===== */
-    div[data-testid="stChatInput"] {{
-        border: 1px solid #383838 !important;
-        border-radius: 24px !important;
-        background-color: #2f2f2f !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-        padding: 4px 14px !important;
-        transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
-    }}
-    div[data-testid="stChatInput"]:focus-within {{
-        border-color: #555555 !important;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
-    }}
-    div[data-testid="stChatInput"] textarea {{
-        font-size: 15px !important;
-        font-weight: 400 !important;
-        color: #ececec !important;
-        background-color: transparent !important;
-        line-height: 1.6 !important;
-        min-height: 44px !important;
-        font-family: "Inter", sans-serif !important;
-    }}
-    div[data-testid="stChatInput"] textarea::placeholder {{
-        color: #8e8ea0 !important;
-        font-size: 15px !important;
-    }}
-    div[data-testid="stChatInput"] button {{
-        color: #ffffff !important;
-        border-radius: 50% !important;
-        min-width: 32px !important;
-        min-height: 32px !important;
-        width: 32px !important;
-        height: 32px !important;
-        background: #676767 !important;
-        border: none !important;
-        transition: all 0.15s ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }}
-    div[data-testid="stChatInput"] button:hover {{
-        background: #ffffff !important;
-        color: #000000 !important;
-        transform: scale(1.05) !important;
-    }}
+/* Welcome / quick navigation tiles */
+.st-key-quick_list {
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px; margin:18px auto 0; max-width:1000px;
+}
+.st-key-quick_list [data-testid="stButton"] > button {
+    min-height:116px !important; height:100% !important;
+    padding:20px 18px !important; text-align:left !important;
+    justify-content:flex-start !important; align-items:flex-start !important;
+    white-space:normal !important; line-height:1.6 !important;
+    background:#fff !important; border:1px solid var(--line) !important;
+    border-radius:3px !important; color:var(--ink) !important;
+    font-size:14px !important; font-weight:700 !important;
+}
+.st-key-quick_list [data-testid="stButton"] > button:hover {
+    border-color:var(--brand-red) !important; color:var(--brand-red) !important;
+    background:#fff !important; transform:translateY(-2px);
+}
+.st-key-quick_list [data-testid="stButton"] button [data-testid="stMarkdownContainer"] {
+    text-align:left !important;
+}
 
-    /* ===== 5. チャットメッセージ共通 ===== */
-    div[data-testid="stChatMessage"] {{
-        display: flex !important;
-        flex-direction: row !important;
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 6px 0 !important;
-        margin-bottom: 6px !important;
-        width: 100% !important;
-        min-width: 0 !important;
-    }}
-    div[data-testid="stChatMessageContent"] {{
-        flex: 1 1 auto !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        overflow-wrap: break-word !important;
-        word-break: normal !important;
-        white-space: normal !important;
-    }}
-    div[data-testid="stChatMessageContent"] iframe {{
-        width: 100% !important;
-        max-width: 100% !important;
-        display: block !important;
-    }}
-    div[data-testid="stChatMessageContent"] > div {{
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-    }}
+/* Chat messages */
+div[data-testid="stChatMessage"] {
+    background:transparent !important; border:0 !important; box-shadow:none !important;
+    padding:12px 0 !important; margin:0 auto 8px !important;
+    max-width:900px !important; width:100% !important;
+}
+div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] { display:none !important; }
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    max-width:78% !important; margin-left:auto !important; margin-right:0 !important;
+    background:#f0f0ee !important; border:1px solid #e7e7e5 !important;
+    border-radius:3px !important; padding:13px 18px !important;
+}
+div[data-testid="stChatMessage"] p {
+    color:var(--ink) !important; font-size:15px !important; line-height:1.9 !important;
+}
+.char-badge {
+    display:inline-flex; color:var(--brand-red) !important;
+    font-size:12px !important; font-weight:700 !important;
+    letter-spacing:.02em !important; margin:0 0 8px !important;
+    padding:0 !important; border:0 !important; background:transparent !important;
+}
+.memory-badge {
+    display:inline-flex; padding:4px 9px; margin:4px 0 8px;
+    background:#f7eeee !important; color:var(--brand-red) !important;
+    border:1px solid #f0d4d6 !important; border-radius:2px !important;
+    font-size:11px !important;
+}
+.file-attachment-card {
+    display:inline-flex; align-items:center; gap:10px;
+    background:#fff !important; border:1px solid var(--line) !important;
+    border-radius:3px !important; padding:12px 14px !important;
+}
+.file-attachment-name { color:var(--ink) !important; font-weight:700 !important; }
+.file-attachment-meta { color:#777 !important; }
 
-    /* ===== 6. ユーザーバブル：ダーク #2f2f2f 右寄せ丸角 ===== */
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-        background-color: #2f2f2f !important;
-        border: none !important;
-        border-radius: 18px !important;
-        padding: 12px 18px !important;
-        max-width: 74% !important;
-        margin-left: auto !important;
-        margin-right: 0 !important;
-        box-shadow: none !important;
-    }}
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageAvatar"],
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) div[data-testid="chatAvatarIcon-user"] {{
-        display: none !important;
-    }}
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) p {{
-        color: #ececec !important;
-        font-size: 15px !important;
-        line-height: 1.65 !important;
-        margin: 0 !important;
-    }}
+/* Composer */
+div[data-testid="stBottom"] {
+    background:linear-gradient(180deg,rgba(247,247,245,0),#f7f7f5 24%) !important;
+    border-top:0 !important; padding:18px 0 calc(18px + env(safe-area-inset-bottom,0px)) !important;
+}
+div[data-testid="stBottom"] > div { max-width:960px !important; padding:0 22px !important; margin:auto !important; }
+div[data-testid="stChatInput"] {
+    background:#fff !important; border:1px solid #d8d8d8 !important;
+    border-radius:3px !important; box-shadow:0 2px 10px rgba(0,0,0,.04) !important;
+    padding:8px 12px !important;
+}
+div[data-testid="stChatInput"]:focus-within {
+    border-color:#777 !important; box-shadow:0 0 0 1px #777 !important;
+}
+div[data-testid="stChatInput"] textarea {
+    color:var(--ink) !important; font-size:15px !important;
+    background:transparent !important; line-height:1.6 !important;
+}
+div[data-testid="stChatInput"] textarea::placeholder { color:#999 !important; }
+div[data-testid="stChatInput"] button {
+    background:transparent !important; color:#555 !important;
+    border:0 !important; border-radius:3px !important;
+}
+div[data-testid="stChatInput"] button:hover {
+    background:#f1f1ef !important; color:var(--ink) !important;
+}
 
-    /* ===== 7. アシスタントメッセージ：左揃え・透明背景 ===== */
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
-        background-color: transparent !important;
-        border: none !important;
-        padding: 2px 0 !important;
-        width: 100% !important;
-    }}
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
-        border-radius: 50% !important;
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%) !important;
-        color: #ffffff !important;
-        border: none !important;
-        margin-right: 14px !important;
-        margin-top: 2px !important;
-        font-size: 15px !important;
-    }}
+/* Tabs, expanders, popovers and charts */
+div[data-baseweb="tab-list"] { border-bottom:1px solid var(--line) !important; gap:14px !important; }
+button[data-baseweb="tab"] { color:#777 !important; font-weight:600 !important; }
+button[data-baseweb="tab"][aria-selected="true"] {
+    color:var(--brand-red) !important; border-bottom:2px solid var(--brand-red) !important;
+}
+div[data-testid="stExpander"], div[data-testid="stPopoverBody"] {
+    background:#fff !important; border:1px solid var(--line) !important;
+    border-radius:3px !important;
+}
+div[data-testid="stAlert"] { border-radius:3px !important; }
+div[data-testid="stCode"], pre {
+    background:#f2f2f0 !important; border:1px solid var(--line) !important;
+    border-radius:3px !important;
+}
+code { color:#333 !important; }
+.stPlotlyChart { background:#fff !important; border:1px solid var(--line) !important; padding:8px; }
 
-    /* ===== 8. タイポグラフィ（ダークモード） ===== */
-    .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
-        color: #ececec !important;
-        font-size: 15px !important;
-        line-height: 1.72 !important;
-        letter-spacing: -0.003em;
-        font-family: "Inter", -apple-system, sans-serif !important;
-    }}
-    h1, h2, h3, h4, h5, h6 {{
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.025em;
-        font-family: "Inter", -apple-system, sans-serif !important;
-    }}
-    strong {{ color: #ffffff !important; font-weight: 600 !important; }}
-    div[data-testid="stMarkdownContainer"] code {{
-        background: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        color: #ececec !important;
-        border-radius: 6px !important;
-        padding: 2px 6px !important;
-        font-size: 13.5px !important;
-        font-family: "SF Mono", "Fira Code", "Fira Mono", monospace !important;
-    }}
-    div[data-testid="stMarkdownContainer"] pre {{
-        background: #171717 !important;
-        border: 1px solid #333333 !important;
-        border-radius: 10px !important;
-        padding: 14px 16px !important;
-    }}
-    div[data-testid="stMarkdownContainer"] blockquote {{
-        border-left: 3px solid #555555 !important;
-        background: #2a2a2a !important;
-        border-radius: 0 10px 10px 0 !important;
-        padding: 8px 16px !important;
-        color: #c5c5d2 !important;
-        margin: 8px 0 !important;
-    }}
-    div[data-testid="stMarkdownContainer"] {{
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        overflow-wrap: break-word !important;
-    }}
+/* Login page */
+.login-wrap { max-width:480px; margin:46px auto 0; padding:0 16px; }
+.login-card-header { text-align:center; margin-bottom:26px; }
+.login-logo {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:58px; height:58px; margin-bottom:16px;
+    background:var(--brand-red); color:#fff; font-size:30px;
+}
+.login-title { color:var(--ink) !important; font-size:26px; font-weight:800; }
+.login-subtitle { color:#777 !important; font-size:13px; line-height:1.7; }
 
-    /* ===== 9. キャラクターバッジ ===== */
-    .char-badge {{
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 2px 10px;
-        border-radius: 9999px !important;
-        font-size: 10.5px !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.04em;
-        margin-bottom: 8px;
-        background: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        color: #8e8ea0 !important;
-        text-transform: uppercase;
-    }}
-
-    /* ===== 10. プロンプトサジェストカード（ダークモード） ===== */
-    .suggest-grid button {{
-        background: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        border-radius: 14px !important;
-        padding: 14px 16px !important;
-        text-align: left !important;
-        color: #ececec !important;
-        font-size: 13.5px !important;
-        font-weight: 500 !important;
-        box-shadow: none !important;
-        transition: all 0.15s ease !important;
-        margin-bottom: 8px !important;
-        min-height: 64px !important;
-        line-height: 1.4 !important;
-        font-family: "Inter", sans-serif !important;
-    }}
-    .suggest-grid button:hover {{
-        background: #383838 !important;
-        border-color: #4a4a4a !important;
-        color: #ffffff !important;
-    }}
-
-    /* ===== 11. 添付ファイルカード ===== */
-    .file-attachment-card {{
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        border-radius: 12px !important;
-        padding: 10px 14px !important;
-        margin-bottom: 8px !important;
-        max-width: 100% !important;
-    }}
-    .file-attachment-icon {{ font-size: 20px !important; flex-shrink: 0; }}
-    .file-attachment-name {{ font-weight: 600 !important; font-size: 13.5px !important; color: #ececec !important; }}
-    .file-attachment-meta {{ font-size: 11px !important; color: #10a37f !important; font-weight: 500 !important; }}
-
-    /* ===== 12. メモリ更新バッジ ===== */
-    .memory-badge {{
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 3px 10px;
-        border-radius: 9999px !important;
-        font-size: 11px !important;
-        font-weight: 500;
-        background: rgba(16, 163, 127, 0.15) !important;
-        color: #10a37f !important;
-        border: 1px solid rgba(16, 163, 127, 0.3) !important;
-        margin-bottom: 8px;
-    }}
-
-    /* ===== 13. サイドバー：ChatGPT公式ダークサイドバー #171717 ===== */
-    section[data-testid="stSidebar"] {{
-        background-color: #171717 !important;
-        border-right: none !important;
-    }}
-    section[data-testid="stSidebar"] .stMarkdown p,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] label {{
-        color: #ececec !important;
-        font-size: 13px !important;
-        font-family: "Inter", sans-serif !important;
-    }}
-
-    /* ===== 14. アクションボタン（再生成など） ===== */
-    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
-        background: transparent !important;
-        border: 1px solid #383838 !important;
-        color: #8e8ea0 !important;
-        border-radius: 8px !important;
-        padding: 5px 12px !important;
-        font-size: 11.5px !important;
-        font-weight: 500 !important;
-        box-shadow: none !important;
-        transition: all 0.15s ease !important;
-    }}
-    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
-        background: #2f2f2f !important;
-        color: #ffffff !important;
-        border-color: #555555 !important;
-    }}
-
-    /* ===== 15. Streamlit 汎用 UI（ダークモード） ===== */
-    div[data-baseweb="tab-list"] {{
-        background-color: transparent !important;
-        border-bottom: 1px solid #383838 !important;
-    }}
-    button[data-baseweb="tab"] {{
-        color: #8e8ea0 !important;
-        font-weight: 500 !important;
-        font-size: 13.5px !important;
-        font-family: "Inter", sans-serif !important;
-    }}
-    button[data-baseweb="tab"][aria-selected="true"] {{
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        border-bottom-color: #ffffff !important;
-    }}
-    div[data-baseweb="tab-highlight"] {{ background-color: #ffffff !important; }}
-    div[data-testid="stExpander"] {{
-        background: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        border-radius: 12px !important;
-        box-shadow: none !important;
-    }}
-
-    /* ===== 16. ポップオーバー（ダークモード） ===== */
-    div[data-testid="stPopover"] > button {{
-        background: transparent !important;
-        border: none !important;
-        color: #ececec !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        border-radius: 10px !important;
-        box-shadow: none !important;
-        padding: 5px 10px !important;
-        letter-spacing: -0.015em !important;
-        font-family: "Inter", sans-serif !important;
-    }}
-    div[data-testid="stPopover"] > button:hover {{
-        background: rgba(255,255,255,0.08) !important;
-    }}
-    div[data-testid="stPopoverBody"] {{
-        background: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        border-radius: 14px !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
-        padding: 8px !important;
-    }}
-    div[data-testid="stPopoverBody"] button {{
-        border-radius: 8px !important;
-        font-size: 14px !important;
-        padding: 10px 14px !important;
-        color: #ececec !important;
-    }}
-
-    /* ===== 17. 統一トップバー（ダークモード） ===== */
-    .chatgpt-top-header {{
-        margin-bottom: 8px !important;
-        padding-bottom: 8px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-        display: flex;
-        align-items: center;
-    }}
-    .chatgpt-top-header div[data-testid="column"]:last-child button {{
-        background: transparent !important;
-        border: 1px solid #383838 !important;
-        border-radius: 10px !important;
-        color: #ececec !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        padding: 6px 14px !important;
-        box-shadow: none !important;
-    }}
-    .chatgpt-top-header div[data-testid="column"]:last-child button:hover {{
-        background: #2f2f2f !important;
-        color: #ffffff !important;
-    }}
-
-    /* ===== 18. フォーム要素 ===== */
-    div[data-baseweb="input"] {{
-        background-color: #2f2f2f !important;
-        border: 1px solid #383838 !important;
-        border-radius: 10px !important;
-        color: #ececec !important;
-    }}
-    div[data-baseweb="input"]:focus-within {{
-        border-color: #555555 !important;
-        box-shadow: 0 0 0 3px rgba(255,255,255,0.05) !important;
-    }}
-    div[data-baseweb="input"] input {{ color: #ececec !important; font-size: 15px !important; }}
-    button[kind="primary"] {{
-        background: #ffffff !important;
-        border: none !important;
-        border-radius: 10px !important;
-        color: #000000 !important;
-        font-weight: 600 !important;
-        font-size: 14px !important;
-        box-shadow: none !important;
-        letter-spacing: -0.01em !important;
-    }}
-    button[kind="primary"]:hover {{
-        background: #e0e0e0 !important;
-    }}
-
-    /* ===== 19. セレクトボックス ===== */
-    div[data-testid="stSelectbox"] [data-baseweb="select"] {{
-        border-radius: 10px !important;
-        border: 1px solid #383838 !important;
-        background: #2f2f2f !important;
-    }}
-    div[data-testid="stSelectbox"] [data-baseweb="select"]:focus-within {{
-        border-color: #555555 !important;
-    }}
-
-    /* ===== 20. アニメーション ===== */
-    @keyframes fadeInUp {{
-        from {{ opacity: 0; transform: translateY(12px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
-    }}
-
-    /* ===== 21. サイドバー popover ボタン（プロフィール） ===== */
-    section[data-testid="stSidebar"] div[data-testid="stPopover"] > button {{
-        color: #ececec !important;
-        background: rgba(255,255,255,0.06) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 10px !important;
-        font-size: 13px !important;
-        padding: 8px 12px !important;
-    }}
-    section[data-testid="stSidebar"] div[data-testid="stPopover"] > button:hover {{
-        background: rgba(255,255,255,0.12) !important;
-        color: #ffffff !important;
-    }}
-
-    /* ===== 22. ChatGPT公式サイドバー詳細スタイル ===== */
-
-    /* ナビゲーションメニュー項目 */
-    .sb-nav button {{
-        background: transparent !important;
-        border: none !important;
-        color: #c5c5d2 !important;
-        font-size: 13.5px !important;
-        font-weight: 400 !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
-        padding: 7px 10px !important;
-        border-radius: 8px !important;
-        margin-bottom: 2px !important;
-        transition: all 0.1s ease !important;
-        letter-spacing: -0.01em !important;
-    }}
-    .sb-nav button:hover {{
-        background: rgba(255,255,255,0.08) !important;
-        color: #ffffff !important;
-    }}
-    .sb-nav div[data-testid="stPopover"] > button {{
-        background: transparent !important;
-        border: none !important;
-        color: #c5c5d2 !important;
-        font-size: 13.5px !important;
-        font-weight: 400 !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
-        padding: 7px 10px !important;
-        border-radius: 8px !important;
-        margin-bottom: 2px !important;
-        transition: all 0.1s ease !important;
-        width: 100% !important;
-    }}
-    .sb-nav div[data-testid="stPopover"] > button:hover {{
-        background: rgba(255,255,255,0.08) !important;
-        color: #ffffff !important;
-    }}
-
-    /* セクション区切り線 */
-    .sb-divider {{
-        border: none !important;
-        border-top: 1px solid rgba(255,255,255,0.08) !important;
-        margin: 8px 0 !important;
-        height: 1px !important;
-        background: rgba(255,255,255,0.08) !important;
-    }}
-
-    /* セクションラベル */
-    .sb-section-label {{
-        font-size: 10.5px !important;
-        font-weight: 600 !important;
-        color: #8e8ea0 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        padding: 10px 10px 4px 10px !important;
-    }}
-
-    /* 履歴アイテム */
-    .sb-item button {{
-        background: transparent !important;
-        border: none !important;
-        border-radius: 8px !important;
-        color: #c5c5d2 !important;
-        text-align: left !important;
-        font-size: 13px !important;
-        font-weight: 400 !important;
-        padding: 7px 10px !important;
-        transition: all 0.1s ease !important;
-        justify-content: flex-start !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        margin-bottom: 0px !important;
-    }}
-    .sb-item button:hover {{
-        background: rgba(255,255,255,0.08) !important;
-        color: #ececec !important;
-    }}
-    .sb-item-active button {{
-        background: rgba(255,255,255,0.12) !important;
-        color: #ffffff !important;
-        font-weight: 500 !important;
-    }}
-    .sb-item-active button:hover {{
-        background: rgba(255,255,255,0.16) !important;
-    }}
-
-    /* ===== 23. モバイル最適化 ===== */
-    @media (max-width: 768px) {{
-        .main .block-container {{
-            padding-left: 12px !important;
-            padding-right: 12px !important;
-            padding-top: 6px !important;
-            padding-bottom: 130px !important;
-        }}
-        div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-            max-width: 88% !important;
-            padding: 10px 14px !important;
-        }}
-        div[data-testid="stChatInput"] {{
-            border-radius: 20px !important;
-        }}
-        .file-attachment-card {{ padding: 8px 12px !important; }}
-        .file-attachment-name {{ font-size: 13px !important; }}
-    }}
-
-    /* =====================================================================
-       24. ChatGPT（2026年版）リファイン：後勝ちで上書き
-       ===================================================================== */
-
-    /* Streamlitヘッダーを透明化（罫線なし） */
-    header[data-testid="stHeader"] {{
-        background: transparent !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        border-bottom: none !important;
-    }}
-
-    header[data-testid="stHeader"] button {{
-        color: #ececec !important;
-    }}
-
-    /* アシスタント／ユーザーのアバターを非表示（ChatGPTはアバターなし） */
-    div[data-testid="stChatMessageAvatarAssistant"],
-    div[data-testid="stChatMessageAvatarUser"],
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
-        display: none !important;
-    }}
-
-    /* ユーザーバブル：右寄せ・大きめ角丸 */
-    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]),
-    div[data-testid="stChatMessage"]:has(div[data-testid="stChatMessageAvatarUser"]) {{
-        border-radius: 22px !important;
-        max-width: 70% !important;
-        padding: 10px 18px !important;
-        margin-left: auto !important;
-    }}
-
-    /* キャラバッジ：ピルをやめて控えめなラベルに */
-    .char-badge {{
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-        color: #8e8ea0 !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        letter-spacing: 0 !important;
-        text-transform: none !important;
-        margin-bottom: 4px !important;
-    }}
-
-    /* コードブロック */
-    div[data-testid="stCode"], div[data-testid="stMarkdownContainer"] pre {{
-        background: #0d0d0d !important;
-        border: none !important;
-        border-radius: 12px !important;
-    }}
-
-    /* ---------- 入力欄（コンポーザー）：28px角丸・枠なし ---------- */
-    div[data-testid="stChatInput"] {{
-        border-radius: 28px !important;
-        background-color: #2f2f2f !important;
-        border: 1px solid transparent !important;
-        box-shadow: none !important;
-        padding: 6px 10px 6px 16px !important;
-    }}
-    div[data-testid="stChatInput"]:focus-within {{
-        border-color: rgba(255,255,255,0.12) !important;
-        box-shadow: none !important;
-    }}
-    div[data-testid="stChatInput"] div[data-baseweb] {{
-        background: transparent !important;
-        border: none !important;
-    }}
-    /* 添付（＋）など：背景なしの丸ボタン */
-    div[data-testid="stChatInput"] button {{
-        background: transparent !important;
-        color: #b4b4b4 !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        border-radius: 50% !important;
-        transform: none !important;
-    }}
-    div[data-testid="stChatInput"] button:hover {{
-        background: rgba(255,255,255,0.12) !important;
-        color: #ffffff !important;
-        transform: none !important;
-    }}
-    /* 送信ボタン：入力あり=白丸＋黒矢印／空=グレー */
-    div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {{
-        background: #ffffff !important;
-        color: #000000 !important;
-    }}
-    div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {{
-        background: #e5e5e5 !important;
-        color: #000000 !important;
-    }}
-    div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:disabled {{
-        background: #4a4a4a !important;
-        color: #8e8ea0 !important;
-        opacity: 0.6 !important;
-    }}
-
-    /* ---------- サイドバー：フラットなナビ ---------- */
-    .sb-brand {{
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 10px 12px 10px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #ececec;
-        letter-spacing: -0.01em;
-    }}
-    section[data-testid="stSidebar"] div[data-testid="stButton"] > button,
-    section[data-testid="stSidebar"] .stButton > button,
-    section[data-testid="stSidebar"] div[data-testid="stPopover"] > button {{
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #ececec !important;
-        min-height: 38px !important;
-        padding: 6px 10px !important;
-        border-radius: 10px !important;
-        justify-content: flex-start !important;
-        text-align: left !important;
-        width: 100% !important;
-        transition: background 0.12s ease !important;
-    }}
-    section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover,
-    section[data-testid="stSidebar"] .stButton > button:hover,
-    section[data-testid="stSidebar"] div[data-testid="stPopover"] > button:hover {{
-        background: #212121 !important;
-        color: #ffffff !important;
-    }}
-    section[data-testid="stSidebar"] button > div {{
-        justify-content: flex-start !important;
-        gap: 10px !important;
-        width: 100% !important;
-    }}
-    section[data-testid="stSidebar"] button p {{
-        font-size: 14px !important;
-        line-height: 1.4 !important;
-        margin: 0 !important;
-        color: inherit !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }}
-    section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {{
-        background: #2f2f2f !important;
-        color: #ffffff !important;
-    }}
-    .sb-section-label {{
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        color: #8e8ea0 !important;
-        text-transform: none !important;
-        letter-spacing: 0 !important;
-        padding: 16px 10px 4px 10px !important;
-    }}
-
-    /* ---------- トップバー ---------- */
-    .st-key-topbar {{
-        margin-bottom: 4px;
-    }}
-    .st-key-topbar div[data-testid="stButton"] > button {{
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #ececec !important;
-        width: 40px !important;
-        min-width: 40px !important;
-        height: 40px !important;
-        min-height: 40px !important;
-        padding: 0 !important;
-        border-radius: 10px !important;
-    }}
-    .st-key-topbar div[data-testid="stPopover"] > button {{
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #ececec !important;
-        font-size: 18px !important;
-        font-weight: 600 !important;
-        padding: 6px 12px !important;
-        border-radius: 10px !important;
-    }}
-    .st-key-topbar div[data-testid="stButton"] > button:hover,
-    .st-key-topbar div[data-testid="stPopover"] > button:hover {{
-        background: #2f2f2f !important;
-    }}
-
-    /* ---------- ウェルカム画面のクイックリスト ---------- */
-    .st-key-quick_list button {{
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #b4b4b4 !important;
-        justify-content: flex-start !important;
-        text-align: left !important;
-        padding: 10px 16px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-    }}
-    .st-key-quick_list button > div {{
-        justify-content: flex-start !important;
-        gap: 12px !important;
-    }}
-    .st-key-quick_list button:hover {{
-        background: #2f2f2f !important;
-        color: #ffffff !important;
-    }}
-
-    /* ---------- メッセージ下の再生成ボタン：ゴースト ---------- */
-    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button,
-    div[data-testid="stChatMessage"] div[data-testid="stPopover"] > button {{
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: #b4b4b4 !important;
-        border-radius: 8px !important;
-        min-height: 32px !important;
-        padding: 4px 10px !important;
-        font-size: 13px !important;
-        justify-content: flex-start !important;
-    }}
-    div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover,
-    div[data-testid="stChatMessage"] div[data-testid="stPopover"] > button:hover {{
-        background: rgba(255,255,255,0.12) !important;
-        color: #ffffff !important;
-    }}
-
+/* Responsive */
+@media (max-width: 900px) {
+    .main .block-container { padding:18px 18px 130px !important; }
+    .st-key-quick_list { grid-template-columns:1fr !important; }
+    .st-key-quick_list [data-testid="stButton"] > button { min-height:72px !important; }
+}
+@media (max-width: 600px) {
+    .main .block-container { padding:12px 12px 120px !important; }
+    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+        max-width:92% !important; padding:10px 13px !important;
+    }
+    div[data-testid="stBottom"] > div { padding:0 10px !important; }
+    h1 { font-size:26px !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -1545,7 +1021,7 @@ def render_login_screen():
     <div class="login-wrap">
         <div class="login-card-header">
             <div class="login-logo">🏹</div>
-            <div class="login-title">ChatGPT // 弓道AI道場</div>
+            <div class="login-title">弓道AI道場</div>
             <div class="login-subtitle">アカウントにログインして射技稽古・動画分析を始めましょう</div>
         </div>
     </div>
@@ -1624,7 +1100,7 @@ def switch_ai_character(new_char: str):
                 "content": CHARACTERS[new_char]["welcome"]
             }]
 
-# ==================== ChatGPT風サイドバー（フラットなナビ ＋ 日付グループ履歴） ====================
+# ==================== 弓道AI道場 ナビゲーション ====================
 with st.sidebar:
 
     # ── ブランド ──────────────────────────────────────────────
@@ -1877,7 +1353,7 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== ChatGPT風トップバー（新規チャット ＋ モデルピッカー） ====================
+# ==================== 弓道AI道場 トップナビゲーション ====================
 cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 short_char_name = cur_char_val.split("（")[0]
 
@@ -2388,7 +1864,7 @@ if not st.session_state.messages:
     st.markdown("""
     <div style="text-align: center; margin: 12vh 0 28px 0; animation: fadeInUp 0.4s ease;">
         <h1 style="font-size: 30px; font-weight: 600; color: #ececec; margin-bottom: 24px; letter-spacing: -0.025em;">
-            今日は何をしましょうか？
+            今日の稽古、何から始めますか？
         </h1>
     </div>
     """, unsafe_allow_html=True)
@@ -2531,7 +2007,7 @@ chat_submission = st.chat_input(
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
 
-# ChatGPT公式フッター注釈テキスト
+# 弓道AI道場 フッター注釈
 st.markdown("""
 <div style="text-align: center; font-size: 11.5px; color: #8e8ea0; margin-top: 8px; letter-spacing: 0.01em; font-family: 'Inter', sans-serif;">
     弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。
