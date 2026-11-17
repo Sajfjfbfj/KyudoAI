@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 
 def render_chatgpt_toolbar(text_content: str):
-    """ChatGPT風アクションツールバー（ミニマル・アイコンバー：コピー＆ブラウザ音声読み上げ）"""
+    """Raycast / Linear風 世界一美しいフローティング・グラス・アクションバー"""
     safe_text_json = json.dumps(text_content)
     toolbar_html = f"""
     <!DOCTYPE html>
@@ -24,32 +24,36 @@ def render_chatgpt_toolbar(text_content: str):
                 margin: 0;
                 padding: 0;
                 background: transparent;
-                font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Hiragino Sans", "Noto Sans JP", sans-serif;
             }}
             .bar {{
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                padding-top: 2px;
+                padding-top: 3px;
             }}
             .btn {{
-                background: #ffffff;
-                border: 1px solid #d1d5db;
-                color: #111111;
-                border-radius: 0px;
-                padding: 3px 8px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                color: #94a3b8;
+                border-radius: 9999px;
+                padding: 3px 10px;
                 font-size: 11px;
-                font-weight: 700;
+                font-weight: 500;
                 cursor: pointer;
                 display: inline-flex;
                 align-items: center;
                 gap: 4px;
-                transition: all 0.12s ease;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             }}
             .btn:hover {{
-                background: #e60012;
-                color: #ffffff;
-                border-color: #e60012;
+                background: rgba(99, 102, 241, 0.22);
+                color: #f8fafc;
+                border-color: rgba(99, 102, 241, 0.45);
+                box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+                transform: translateY(-1px);
             }}
             .btn:active {{
                 transform: scale(0.96);
@@ -185,74 +189,99 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ChatGPT風モダンUIカスタムCSS（スマホ・タブレット・PC完全レスポンシブ対応）
+# ==================== 世界最高峰UI（Linear / Apple / Raycast / Godly Dark Modernism）カスタムCSS ====================
 st.markdown(f"""
 <style>
-    /* ==================== UNIQLO（ユニクロ）アプリ公式UI完全再現スタイル ==================== */
-    
-    /* 1. 全体フォント・背景（徹底した白・黒・UNIQLOレッドの機能美ミニマリズム） */
+    /* 1. 全体フォント・背景（深遠なオブシディアン・ブラック & アンビエント・ラジアルグロー） */
     .stApp {{
-        font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif !important;
-        background-color: #ffffff !important;
-        color: #000000 !important;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter Variable", "Inter", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif !important;
+        background-color: #08090d !important;
+        background-image: radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.05) 45%, rgba(8, 9, 13, 0) 75%) !important;
+        background-attachment: fixed !important;
+        color: #f8fafc !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        letter-spacing: -0.015em;
     }}
     
-    /* 2. メインコンテナ（整然としたモジュラーグリッド幅） */
+    /* スムース・スクロールバー */
+    ::-webkit-scrollbar {{
+        width: 6px !important;
+        height: 6px !important;
+    }}
+    ::-webkit-scrollbar-track {{
+        background: transparent !important;
+    }}
+    ::-webkit-scrollbar-thumb {{
+        background: rgba(255, 255, 255, 0.14) !important;
+        border-radius: 9999px !important;
+    }}
+    ::-webkit-scrollbar-thumb:hover {{
+        background: rgba(255, 255, 255, 0.28) !important;
+    }}
+
+    /* 2. メインコンテナ（洗練されたセンタリングとスペーシング） */
     .main .block-container {{
         max-width: 820px !important;
-        padding-top: 10px !important;
+        padding-top: 16px !important;
         padding-bottom: 140px !important;
         margin: 0 auto !important;
     }}
     
-    /* 3. 下部固定入力バーエリア（白背景・シャープな上部境界線） */
+    /* 3. 下部固定入力バーエリア（ハイブラー・フロストグラス） */
     div[data-testid="stBottom"] {{
-        background: #ffffff !important;
-        border-top: 1px solid #e5e5e5 !important;
-        padding-top: 8px !important;
-        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+        background: rgba(8, 9, 13, 0.78) !important;
+        backdrop-filter: blur(28px) !important;
+        -webkit-backdrop-filter: blur(28px) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding-top: 10px !important;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
         z-index: 9999 !important;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.03) !important;
+        box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.45) !important;
     }}
     div[data-testid="stBottom"] > div {{
         max-width: 820px !important;
         margin: 0 auto !important;
-        padding: 0 10px !important;
+        padding: 0 12px !important;
     }}
 
-    /* 4. 【UNIQLO検索バー風】シャープな入力ボックス */
+    /* 4. 【Raycast / Spotlight風】フローティング・コマンドバー */
     div[data-testid="stChatInput"] {{
-        border: 1px solid #cccccc !important;
-        border-radius: 2px !important;
-        background-color: #f7f7f7 !important;
-        box-shadow: none !important;
-        padding: 4px 12px !important;
-        transition: all 0.15s ease !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 20px !important;
+        background-color: rgba(18, 22, 34, 0.8) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        padding: 5px 14px !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     div[data-testid="stChatInput"]:focus-within {{
-        border-color: #e60012 !important;
-        background-color: #ffffff !important;
-        box-shadow: 0 0 0 1px #e60012 !important;
+        border-color: #6366f1 !important;
+        background-color: rgba(24, 28, 44, 0.95) !important;
+        box-shadow: 0 0 0 1px #6366f1, 0 10px 36px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
     }}
     div[data-testid="stChatInput"] textarea {{
         font-size: 15px !important;
-        font-weight: 500 !important;
-        color: #000000 !important;
+        font-weight: 400 !important;
+        color: #f8fafc !important;
         background-color: transparent !important;
-        line-height: 1.5 !important;
+        line-height: 1.55 !important;
         min-height: 38px !important;
     }}
-    /* 入力欄の添付プラスボタン */
+    div[data-testid="stChatInput"] textarea::placeholder {{
+        color: #64748b !important;
+    }}
+    /* 入力欄の添付プラスボタン & 送信ボタン */
     div[data-testid="stChatInput"] button {{
-        color: #111111 !important;
-        border-radius: 2px !important;
-        transition: all 0.15s ease !important;
+        color: #94a3b8 !important;
+        border-radius: 9999px !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
     div[data-testid="stChatInput"] button:hover {{
-        background-color: #e60012 !important;
+        background-color: rgba(99, 102, 241, 0.35) !important;
         color: #ffffff !important;
+        box-shadow: 0 0 14px rgba(99, 102, 241, 0.4) !important;
     }}
 
     /* 5. チャットメッセージコンテナ */
@@ -287,22 +316,24 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* 6. 【UNIQLO仕様】ユーザーメッセージ：シャープな枠線・黒文字・右寄せ */
+    /* 6. 【Linear / Apple風】ユーザーメッセージ：エレガントなバイオレット・グラスバブル */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-        background-color: #f4f4f4 !important;
-        border: 1px solid #e0e0e0 !important;
-        border-radius: 2px !important;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(139, 92, 246, 0.14)) !important;
+        border: 1px solid rgba(139, 92, 246, 0.32) !important;
+        border-radius: 18px 18px 4px 18px !important;
         padding: 12px 18px !important;
-        max-width: 78% !important;
+        max-width: 80% !important;
         margin-left: auto !important;
-        box-shadow: none !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 4px 20px rgba(99, 102, 241, 0.15) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
     }}
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageAvatar"],
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) div[data-testid="chatAvatarIcon-user"] {{
         display: none !important;
     }}
 
-    /* 7. 【UNIQLO仕様】アシスタントメッセージ：白背景・シャープな四角アバター */
+    /* 7. 【Raycast風】アシスタントメッセージ：クリーンな透明背景・グローアバター */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
         background-color: transparent !important;
         border: none !important;
@@ -310,21 +341,41 @@ st.markdown(f"""
         width: 100% !important;
     }}
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
-        border-radius: 2px !important;
-        width: 34px !important;
-        height: 34px !important;
-        background-color: #e60012 !important;
-        color: #ffffff !important;
+        border-radius: 12px !important;
+        width: 36px !important;
+        height: 36px !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 16px rgba(99, 102, 241, 0.25) !important;
         margin-right: 14px !important;
-        border: 1px solid #e60012 !important;
     }}
 
-    /* 8. テキストタイポグラフィ（UNIQLOの明瞭・高コントラスト） */
+    /* 8. テキストタイポグラフィ（高精細・モダン・高可読性） */
     .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
-        color: #111111 !important;
+        color: #e2e8f0 !important;
         font-size: 15.5px !important;
         line-height: 1.85 !important;
-        letter-spacing: 0.02em;
+        letter-spacing: -0.01em;
+    }}
+    h1, h2, h3, h4, h5, h6, strong {{
+        color: #f8fafc !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em;
+    }}
+    div[data-testid="stMarkdownContainer"] code {{
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: #a5b4fc !important;
+        border-radius: 6px !important;
+        padding: 2px 6px !important;
+        font-size: 13.5px !important;
+    }}
+    div[data-testid="stMarkdownContainer"] blockquote {{
+        border-left: 3px solid #6366f1 !important;
+        background: rgba(99, 102, 241, 0.08) !important;
+        border-radius: 0 10px 10px 0 !important;
+        padding: 10px 16px !important;
+        color: #cbd5e1 !important;
     }}
     div[data-testid="stMarkdownContainer"] {{
         width: 100% !important;
@@ -333,158 +384,171 @@ st.markdown(f"""
         overflow-wrap: break-word !important;
     }}
 
-    /* 9. 【UNIQLOレッドタグ】キャラクター＆カテゴリーバッジ */
+    /* 9. 【Linear風オーラタグ】キャラクター＆カテゴリーバッジ */
     .char-badge {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 2px 8px;
-        border-radius: 0px !important;
+        padding: 3px 10px;
+        border-radius: 9999px !important;
         font-size: 11px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.04em;
+        font-weight: 600 !important;
+        letter-spacing: 0.05em;
         margin-bottom: 8px;
-        background-color: #e60012 !important;
-        color: #ffffff !important;
-        text-transform: uppercase;
+        background: rgba(99, 102, 241, 0.18) !important;
+        border: 1px solid rgba(99, 102, 241, 0.35) !important;
+        color: #a5b4fc !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.2) !important;
     }}
 
-    /* 10. 【UNIQLOコレクションカード風】初期提案カード */
+    /* 10. 【Godly / Linear Bento Grid】初期提案カード */
     .uniqlo-collection-grid button {{
-        background-color: #ffffff !important;
-        border: 1px solid #e5e5e5 !important;
-        border-radius: 0px !important;
-        padding: 16px 18px !important;
+        background: linear-gradient(135deg, rgba(20, 24, 38, 0.75), rgba(15, 18, 28, 0.9)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        border-radius: 16px !important;
+        padding: 18px 20px !important;
         text-align: left !important;
-        color: #000000 !important;
+        color: #f1f5f9 !important;
         font-size: 14px !important;
-        font-weight: 600 !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
-        transition: all 0.15s ease !important;
-        margin-bottom: 8px !important;
-        min-height: 80px !important;
-        border-left: 3px solid #111111 !important;
+        font-weight: 500 !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 26px rgba(0, 0, 0, 0.35) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        margin-bottom: 10px !important;
+        min-height: 82px !important;
     }}
     .uniqlo-collection-grid button:hover {{
-        border-color: #e60012 !important;
-        border-left: 3px solid #e60012 !important;
-        background-color: #fafafa !important;
-        transform: translateY(-2px) !important;
+        border-color: rgba(99, 102, 241, 0.45) !important;
+        background: linear-gradient(135deg, rgba(30, 36, 56, 0.85), rgba(20, 24, 40, 0.95)) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(99, 102, 241, 0.3) !important;
+        color: #ffffff !important;
     }}
 
-    /* 11. UNIQLO風 添付ファイルカード */
+    /* 11. フローティング添付ファイルカード */
     .file-attachment-card {{
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        background-color: #ffffff !important;
-        border: 1px solid #000000 !important;
-        border-radius: 0px !important;
-        padding: 8px 14px !important;
+        gap: 12px;
+        background: rgba(18, 22, 34, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 14px !important;
+        padding: 10px 16px !important;
         margin-bottom: 8px !important;
         max-width: 100% !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(16px) !important;
     }}
     .file-attachment-icon {{
-        font-size: 20px !important;
+        font-size: 22px !important;
         flex-shrink: 0;
     }}
     .file-attachment-name {{
-        font-weight: 700 !important;
-        font-size: 13px !important;
-        color: #000000 !important;
+        font-weight: 600 !important;
+        font-size: 13.5px !important;
+        color: #f8fafc !important;
     }}
     .file-attachment-meta {{
         font-size: 11px !important;
-        color: #e60012 !important;
-        font-weight: 600 !important;
+        color: #10b981 !important;
+        font-weight: 500 !important;
     }}
 
-    /* 12. メモリ更新バッジ（赤黒タグ） */
+    /* 12. メモリ更新バッジ（ルミナス・バイオレット） */
     .memory-badge {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 2px 8px;
-        border-radius: 0px !important;
+        padding: 3px 10px;
+        border-radius: 9999px !important;
         font-size: 11px !important;
-        font-weight: 600;
-        background-color: #f4f4f4 !important;
-        color: #111111 !important;
-        border-left: 3px solid #e60012 !important;
+        font-weight: 500;
+        background: rgba(99, 102, 241, 0.12) !important;
+        color: #a5b4fc !important;
+        border: 1px solid rgba(99, 102, 241, 0.28) !important;
+        box-shadow: 0 0 10px rgba(99, 102, 241, 0.15) !important;
         margin-bottom: 8px;
     }}
 
-    /* 13. 【UNIQLOサイドバー】クリーンホワイト & シャープリスト */
+    /* 13. 【SaaS Dark Glass】サイドバー */
     section[data-testid="stSidebar"] {{
-        background-color: #ffffff !important;
-        border-right: 1px solid #e5e5e5 !important;
+        background-color: #0b0c13 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
     }}
     section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] label {{
-        color: #111111 !important;
+        color: #94a3b8 !important;
         font-size: 13px !important;
     }}
 
-    /* サイドバーの「新規チャット」ボタン（UNIQLOプライマリ赤ボタン） */
+    /* サイドバーの「新規チャット」ボタン（Linearグラデーション） */
     .sidebar-new-chat-btn button {{
-        background-color: #e60012 !important;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 0px !important;
-        font-weight: 700 !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
         font-size: 13.5px !important;
-        letter-spacing: 0.05em !important;
+        letter-spacing: 0.02em !important;
         padding: 10px 16px !important;
-        transition: all 0.15s ease !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }}
     .sidebar-new-chat-btn button:hover {{
-        background-color: #cc0010 !important;
+        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6) !important;
+        transform: translateY(-1px) !important;
         color: #ffffff !important;
     }}
 
-    /* チャット履歴リスト（UNIQLO風のシャープなアイテムリスト） */
+    /* チャット履歴リスト（SaaSクリーン・ホバー） */
     .chat-history-item button {{
-        background: transparent !important;
-        border: none !important;
-        border-radius: 0px !important;
-        border-bottom: 1px solid #f0f0f0 !important;
-        color: #111111 !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid transparent !important;
+        border-radius: 10px !important;
+        color: #94a3b8 !important;
         text-align: left !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        padding: 8px 10px !important;
-        transition: all 0.12s ease !important;
+        padding: 8px 12px !important;
+        transition: all 0.15s ease !important;
         justify-content: flex-start !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
+        margin-bottom: 2px !important;
     }}
     .chat-history-item button:hover {{
-        background-color: #f7f7f7 !important;
-        color: #e60012 !important;
+        background: rgba(99, 102, 241, 0.15) !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+        color: #f8fafc !important;
         padding-left: 14px !important;
     }}
     .chat-history-active button {{
-        background-color: #f4f4f4 !important;
-        color: #e60012 !important;
-        font-weight: 700 !important;
-        border-left: 3px solid #e60012 !important;
+        background: rgba(99, 102, 241, 0.22) !important;
+        border-color: rgba(99, 102, 241, 0.45) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.2) !important;
     }}
 
-    /* 【UNIQLO公式アプリ風】カテゴリーナビゲーションタブ（WOMEN/MEN/KIDS風） */
+    /* 【Apple / Raycast風】フローティング・セグメンテッド・ピル・コントロール */
     div[data-testid="stRadio"] {{
-        background: #ffffff !important;
-        border-bottom: 2px solid #e5e5e5 !important;
-        margin-bottom: 16px !important;
-        padding-bottom: 0px !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 9999px !important;
+        margin-bottom: 20px !important;
+        padding: 4px !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
     }}
     div[data-testid="stRadio"] > div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        justify-content: flex-start !important;
-        gap: 6px !important;
+        justify-content: center !important;
+        gap: 4px !important;
         overflow-x: auto !important;
         scrollbar-width: none !important;
     }}
@@ -493,15 +557,13 @@ st.markdown(f"""
     }}
     div[data-testid="stRadio"] label {{
         background: transparent !important;
-        border: none !important;
-        border-radius: 0px !important;
-        padding: 8px 16px !important;
+        border: 1px solid transparent !important;
+        border-radius: 9999px !important;
+        padding: 7px 18px !important;
         margin: 0 !important;
         cursor: pointer !important;
-        transition: all 0.15s ease !important;
-        border-bottom: 3px solid transparent !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }}
-    /* 丸いラジオボタンのポッチを非表示化してフラットタブに */
     div[data-testid="stRadio"] label > div:first-child:not(:has([data-testid="stMarkdownContainer"])) {{
         display: none !important;
     }}
@@ -511,62 +573,157 @@ st.markdown(f"""
     div[data-testid="stRadio"] label p,
     div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {{
         font-size: 13.5px !important;
-        font-weight: 700 !important;
-        color: #737373 !important;
-        letter-spacing: 0.05em !important;
+        font-weight: 500 !important;
+        color: #94a3b8 !important;
+        letter-spacing: 0.02em !important;
         margin: 0 !important;
         transition: color 0.15s ease !important;
     }}
     div[data-testid="stRadio"] label:hover p,
     div[data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {{
-        color: #000000 !important;
+        color: #ffffff !important;
     }}
-    /* 選択中タブ：太字ブラック & UNIQLOレッドのアンダーライン */
+    /* 選択中タブ：フロストグラスピル＆アンビエントネオングロー */
     div[data-testid="stRadio"] label[aria-checked="true"],
     div[data-testid="stRadio"] label:has(input:checked) {{
-        border-bottom: 3px solid #e60012 !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 16px rgba(99, 102, 241, 0.3) !important;
     }}
     div[data-testid="stRadio"] label[aria-checked="true"] p,
     div[data-testid="stRadio"] label:has(input:checked) p,
     div[data-testid="stRadio"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {{
-        color: #000000 !important;
-        font-weight: 900 !important;
-    }}
-
-    /* 【UNIQLO会員証風】ARCHER MEMBERSHIP CARD */
-    .uniqlo-membership-card {{
-        background: #ffffff;
-        border: 1px solid #000000;
-        padding: 12px;
-        margin-top: 14px;
-        border-radius: 0px;
-    }}
-    .uniqlo-logo-sq {{
-        background: #e60012;
-        color: #ffffff;
-        font-weight: 900;
-        font-size: 13px;
-        padding: 4px 6px;
-        display: inline-block;
-        letter-spacing: -0.05em;
-        line-height: 1;
+        color: #ffffff !important;
+        font-weight: 700 !important;
     }}
 
     /* アクションボタングループ（再生成・キャラ変更） */
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
-        background: #ffffff !important;
-        border: 1px solid #000000 !important;
-        color: #000000 !important;
-        border-radius: 0px !important;
-        padding: 3px 8px !important;
-        font-size: 11px !important;
-        font-weight: 700 !important;
-        transition: all 0.12s ease !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: #cbd5e1 !important;
+        border-radius: 9999px !important;
+        padding: 4px 12px !important;
+        font-size: 11.5px !important;
+        font-weight: 500 !important;
+        backdrop-filter: blur(12px) !important;
+        transition: all 0.18s ease !important;
     }}
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
-        background: #e60012 !important;
+        background: rgba(99, 102, 241, 0.25) !important;
         color: #ffffff !important;
-        border-color: #e60012 !important;
+        border-color: rgba(99, 102, 241, 0.5) !important;
+        box-shadow: 0 0 14px rgba(99, 102, 241, 0.3) !important;
+    }}
+
+    /* 14. 【Streamlit UI全般】世界最高峰ダーク・グラスモーフィズム共通スタイル */
+    /* タブ（st.tabs） */
+    div[data-baseweb="tab-list"] {{
+        background-color: transparent !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        gap: 8px !important;
+    }}
+    button[data-baseweb="tab"] {{
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+        font-size: 13.5px !important;
+        background: transparent !important;
+        border-radius: 8px 8px 0 0 !important;
+        padding: 8px 14px !important;
+        transition: all 0.15s ease !important;
+    }}
+    button[data-baseweb="tab"]:hover {{
+        color: #f8fafc !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+    }}
+    button[data-baseweb="tab"][aria-selected="true"] {{
+        color: #a5b4fc !important;
+        font-weight: 700 !important;
+        border-bottom-color: #6366f1 !important;
+    }}
+    div[data-baseweb="tab-highlight"] {{
+        background-color: #6366f1 !important;
+        height: 2px !important;
+        box-shadow: 0 0 10px #6366f1 !important;
+    }}
+
+    /* エクスパンダー（st.expander） */
+    div[data-testid="stExpander"] {{
+        background: rgba(18, 22, 34, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+        backdrop-filter: blur(16px) !important;
+        margin-bottom: 12px !important;
+        overflow: hidden !important;
+    }}
+    div[data-testid="stExpander"] summary {{
+        color: #cbd5e1 !important;
+        font-weight: 600 !important;
+        font-size: 13.5px !important;
+        padding: 10px 14px !important;
+        transition: background 0.15s ease !important;
+    }}
+    div[data-testid="stExpander"] summary:hover {{
+        background: rgba(255, 255, 255, 0.04) !important;
+        color: #ffffff !important;
+    }}
+
+    /* ポップオーバー（st.popover）ボタン & ドロップダウン */
+    div[data-testid="stPopover"] > button {{
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #cbd5e1 !important;
+        border-radius: 10px !important;
+        padding: 8px 14px !important;
+        font-weight: 500 !important;
+        transition: all 0.18s ease !important;
+    }}
+    div[data-testid="stPopover"] > button:hover {{
+        background: rgba(99, 102, 241, 0.18) !important;
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.2) !important;
+    }}
+    div[data-testid="stPopoverBody"] {{
+        background: #0f121d !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+        padding: 14px !important;
+    }}
+
+    /* フォーム入力欄（st.text_input, st.text_area） */
+    div[data-baseweb="input"] {{
+        background-color: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        color: #f8fafc !important;
+        transition: all 0.15s ease !important;
+    }}
+    div[data-baseweb="input"]:focus-within {{
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 1px #6366f1, 0 0 16px rgba(99, 102, 241, 0.25) !important;
+        background-color: rgba(255, 255, 255, 0.07) !important;
+    }}
+    div[data-baseweb="input"] input {{
+        color: #f8fafc !important;
+    }}
+
+    /* プライマリボタン（st.button type="primary"） */
+    button[kind="primary"] {{
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }}
+    button[kind="primary"]:hover {{
+        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6) !important;
+        transform: translateY(-1px) !important;
+        color: #ffffff !important;
     }}
 
     /* スマートフォン・タブレット最適化（レスポンシブデザイン） */
@@ -583,8 +740,8 @@ st.markdown(f"""
             font-size: 15px !important;
         }}
         div[data-testid="stChatInput"] {{
-            border-radius: 2px !important;
-            padding: 4px 8px !important;
+            border-radius: 20px !important;
+            padding: 4px 10px !important;
         }}
         .file-attachment-card {{
             padding: 8px 12px !important;
@@ -1084,13 +1241,13 @@ LOCAL_RESPONSES = {
     }
 }
 
-# ==================== ChatGPT風完全ログイン画面（スマホ・タブレット完全対応） ====================
+# ==================== 世界最高峰UI：ログイン画面（スマホ・タブレット完全対応） ====================
 def render_login_screen():
     st.markdown("""
     <style>
         .login-wrap {
             max-width: 440px;
-            margin: 30px auto 0 auto;
+            margin: 40px auto 0 auto;
             padding: 0 16px;
         }
         .login-card-header {
@@ -1098,28 +1255,30 @@ def render_login_screen():
             margin-bottom: 24px;
         }
         .login-logo {
-            font-size: 52px;
+            font-size: 48px;
             line-height: 1;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
+            display: inline-block;
+            filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.4));
         }
         .login-title {
             font-size: 24px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 6px;
-            letter-spacing: -0.01em;
+            font-weight: 800;
+            color: #f8fafc;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
         .login-subtitle {
-            font-size: 14px;
-            color: #6b7280;
-            line-height: 1.5;
+            font-size: 13.5px;
+            color: #94a3b8;
+            line-height: 1.6;
         }
     </style>
     <div class="login-wrap">
         <div class="login-card-header">
             <div class="login-logo">🏹</div>
-            <div class="login-title">弓道AI道場へようこそ</div>
-            <div class="login-subtitle">アカウントにログインして射技稽古・動画分析を始めましょう</div>
+            <div class="login-title">KYUDO AI LAB</div>
+            <div class="login-subtitle">生体力学と伝統を極める弓道AI道場へようこそ</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1265,24 +1424,28 @@ with st.sidebar:
 
     st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 
-    # ==================== UNIQLO風最下部：ARCHER MEMBERSHIP CARD（会員証） ＆ 設定 ====================
+    # ==================== 世界最高峰UI：ARCHER PASSPORT（デジタル会員証） ＆ 設定 ====================
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
     disp_name = cur_uinfo.get("display_name", st.session_state.get("logged_in_user", "射手"))
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"🪪 MEMBERSHIP | {disp_name}", use_container_width=True):
+    with st.popover(f"🪪 PASSPORT | {disp_name}", use_container_width=True):
         st.markdown(f"""
-        <div style="border: 2px solid #000000; padding: 14px; margin-bottom: 14px; background: #ffffff; text-align: center;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: #e60012; color: #ffffff; font-weight: 900; font-size: 12px; padding: 2px 6px; letter-spacing: -0.05em;">弓道</span>
-                <span style="font-size: 10px; font-weight: 700; color: #111111; letter-spacing: 0.1em;">ARCHER ID CARD</span>
+        <div style="border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 18px; margin-bottom: 14px; background: linear-gradient(135deg, rgba(26, 31, 48, 0.9) 0%, rgba(15, 18, 28, 0.95) 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 10px 30px rgba(0, 0, 0, 0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #ffffff; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 9999px; letter-spacing: 0.05em;">ARCHER PASSPORT</span>
+                <span style="font-size: 10px; font-weight: 600; color: #10b981; letter-spacing: 0.08em; display: flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #10b981;"></span> VERIFIED
+                </span>
             </div>
-            <div style="font-size: 18px; font-weight: 900; color: #000000; letter-spacing: 0.05em; margin: 4px 0 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: #737373; font-family: monospace; letter-spacing: 0.15em; margin-bottom: 10px;">ID: KYD-8820-{user_id_num}</div>
-            <div style="background: repeating-linear-gradient(90deg, #000 0px, #000 2px, #fff 2px, #fff 4px, #000 4px, #000 7px, #fff 7px, #fff 9px); height: 32px; width: 90%; margin: 0 auto 8px auto;"></div>
-            <div style="font-size: 9px; font-weight: 700; color: #555555; letter-spacing: 0.15em;">• 道場認証済・稽古カルテ連動 •</div>
+            <div style="font-size: 19px; font-weight: 700; color: #f8fafc; letter-spacing: -0.01em; margin: 4px 0 2px 0;">{disp_name}</div>
+            <div style="font-size: 11px; color: #818cf8; font-family: monospace; letter-spacing: 0.15em; margin-bottom: 12px;">ID: KYD-8820-{user_id_num}</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 10px; color: #64748b;">
+                <span>BIOMECHANICAL LAB</span>
+                <span>AUTHENTICATED</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1391,26 +1554,30 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== UNIQLO公式アプリ風トップバー（ヘッダー・ブランドロゴ＆カテゴリータブ） ====================
+# ==================== 世界最高峰UI（Linear / Raycast風）ヘッダー ＆ セグメンテッド・コントロール ====================
 st.markdown("""
-<div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid #111111;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <div style="background-color: #e60012; color: #ffffff; font-weight: 900; font-size: 14px; padding: 4px 7px; letter-spacing: -0.05em; line-height: 1; border-radius: 0px;">弓道</div>
+<div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2)); border: 1px solid rgba(139, 92, 246, 0.4); color: #ffffff; font-size: 18px; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);">🏹</div>
         <div>
-            <div style="font-size: 16px; font-weight: 900; color: #000000; letter-spacing: 0.05em; line-height: 1.1;">KYUDO AI DOJO</div>
-            <div style="font-size: 10px; font-weight: 700; color: #737373; letter-spacing: 0.08em;">LifeWear for Archers | 弓道AI道場</div>
+            <div style="font-size: 17px; font-weight: 700; color: #f8fafc; letter-spacing: -0.02em; line-height: 1.1; display: flex; align-items: center; gap: 6px;">
+                KYUDO AI <span style="font-size: 11px; font-weight: 500; color: #818cf8; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 6px; border-radius: 9999px;">BIO-LAB</span>
+            </div>
+            <div style="font-size: 11px; font-weight: 500; color: #64748b; letter-spacing: 0.04em;">PRECISION BIOMECHANICS & COACHING</div>
         </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 10px; font-weight: 700; background: #e60012; color: #ffffff; padding: 3px 6px; letter-spacing: 0.06em;">BIOMECHANICS</span>
-        <span style="font-size: 10px; font-weight: 700; background: #000000; color: #ffffff; padding: 3px 6px; letter-spacing: 0.06em;">EVIDENCE</span>
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 9999px; padding: 4px 10px; backdrop-filter: blur(12px);">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+            <span style="font-size: 10px; font-weight: 600; color: #cbd5e1; letter-spacing: 0.06em;">AI ONLINE</span>
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# UNIQLO風 カテゴリータブ（WOMEN / MEN / KIDS 風の切り替え）
+# Apple / Raycast風 フローティング・セグメンテッド・ピル・コントロール
 selected_char = st.radio(
-    "指導陣（カテゴリー）を選択",
+    "指導陣（AIペルソナ）を選択",
     options=list(CHARACTERS.keys()),
     index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
     horizontal=True,
@@ -1419,7 +1586,7 @@ selected_char = st.radio(
 )
 st.session_state.current_selected_char = selected_char
 char_info = CHARACTERS[selected_char]
-st.markdown("<div style='margin-bottom: 14px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
 # 応答生成関数（テキスト用）
 def generate_response(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False) -> str:
@@ -1583,7 +1750,7 @@ def get_local_response(user_input: str, char_name: str) -> str:
     else:
         return f"入力パラメータ『{user_input}』を受領。解析の結果、運動連鎖における体幹の安定性および肩甲胸郭関節（肩甲骨まわり）の可動域が当該事象に寄与している可能性が高いと推定されます。矢束（引き尺の長さ）の均等性と左右の筋出力バランスを再確認することを推奨します。"
 
-# ==================== 3D立体骨格＆筋肉活動可視化関数 ====================
+# ==================== 3D立体骨格＆筋肉活動可視化関数（Cyber Holographic Biomechanics） ====================
 def create_muscle_radar_chart(muscle_scores: dict):
     categories = list(muscle_scores.keys())
     values = list(muscle_scores.values())
@@ -1597,9 +1764,9 @@ def create_muscle_radar_chart(muscle_scores: dict):
         r=values_closed,
         theta=categories_closed,
         fill='toself',
-        fillcolor='rgba(27, 67, 50, 0.25)',
-        line=dict(color='#1b4332', width=3),
-        marker=dict(size=7, color='#d4af37'),
+        fillcolor='rgba(99, 102, 241, 0.22)',
+        line=dict(color='#818cf8', width=2.5),
+        marker=dict(size=6, color='#a5b4fc'),
         name='筋活動バランス'
     ))
     
@@ -1608,16 +1775,17 @@ def create_muscle_radar_chart(muscle_scores: dict):
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
-                tickfont=dict(size=11, color='#4b5563'),
-                gridcolor='#e5e7eb'
+                tickfont=dict(size=10, color='#64748b'),
+                gridcolor='rgba(255, 255, 255, 0.08)'
             ),
             angularaxis=dict(
-                tickfont=dict(size=12, color='#111827'),
-                gridcolor='#e5e7eb'
+                tickfont=dict(size=11, color='#cbd5e1'),
+                gridcolor='rgba(255, 255, 255, 0.08)'
             ),
-            bgcolor='#ffffff'
+            bgcolor='rgba(15, 18, 28, 0.65)'
         ),
-        paper_bgcolor='#ffffff',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=35, r=35, t=25, b=25),
         height=340,
         showlegend=False
@@ -1655,32 +1823,32 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         "Bow_Bottom": [0.95, 0.0, 0.15]
     }
     
-    # 骨格リンク定義
+    # 骨格リンク定義（サイバー・ホログラフィック・カラー）
     bones = [
-        ("Head", "Neck", "#8b0000", 6),
-        ("Neck", "Chest", "#1b4332", 7),
-        ("Chest", "Pelvis", "#1b4332", 8),
+        ("Head", "Neck", "#f43f5e", 6),
+        ("Neck", "Chest", "#10b981", 7),
+        ("Chest", "Pelvis", "#10b981", 8),
         # 押手リンク
-        ("Chest", "L_Shoulder", "#1b4332", 6),
-        ("L_Shoulder", "L_Elbow", "#2e7d32", 6),
-        ("L_Elbow", "L_Wrist", "#2e7d32", 6),
+        ("Chest", "L_Shoulder", "#10b981", 6),
+        ("L_Shoulder", "L_Elbow", "#06b6d4", 6),
+        ("L_Elbow", "L_Wrist", "#06b6d4", 6),
         # 妻手リンク
-        ("Chest", "R_Shoulder", "#1b4332", 6),
-        ("R_Shoulder", "R_Elbow", "#d35400", 6),
-        ("R_Elbow", "R_Wrist", "#d35400", 6),
+        ("Chest", "R_Shoulder", "#10b981", 6),
+        ("R_Shoulder", "R_Elbow", "#f59e0b", 6),
+        ("R_Elbow", "R_Wrist", "#f59e0b", 6),
         # 下半身リンク
-        ("Pelvis", "L_Hip", "#1b4332", 6),
-        ("L_Hip", "L_Foot", "#1b4332", 6),
-        ("Pelvis", "R_Hip", "#1b4332", 6),
-        ("R_Hip", "R_Foot", "#1b4332", 6),
+        ("Pelvis", "L_Hip", "#10b981", 6),
+        ("L_Hip", "L_Foot", "#10b981", 6),
+        ("Pelvis", "R_Hip", "#10b981", 6),
+        ("R_Hip", "R_Foot", "#10b981", 6),
         # 弓幹
-        ("Bow_Bottom", "L_Wrist", "#5c4033", 4),
-        ("L_Wrist", "Bow_Top", "#5c4033", 4),
+        ("Bow_Bottom", "L_Wrist", "#8b5cf6", 4),
+        ("L_Wrist", "Bow_Top", "#8b5cf6", 4),
         # 矢（L_Wrist から R_Wrist への水平ベクトル）
-        ("L_Wrist", "R_Wrist", "#d4af37", 4),
+        ("L_Wrist", "R_Wrist", "#fbbf24", 5),
         # 弦（Bow_Top -> R_Wrist -> Bow_Bottom）
-        ("Bow_Top", "R_Wrist", "#c0c0c0", 2),
-        ("R_Wrist", "Bow_Bottom", "#c0c0c0", 2)
+        ("Bow_Top", "R_Wrist", "#94a3b8", 2),
+        ("R_Wrist", "Bow_Bottom", "#94a3b8", 2)
     ]
     
     fig = go.Figure()
@@ -1708,25 +1876,25 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     fig.add_trace(go.Scatter3d(
         x=jx, y=jy, z=jz,
         mode='markers+text',
-        marker=dict(size=6, color='#111111'),
+        marker=dict(size=6, color='#38bdf8'),
         text=["頭", "頸", "胸", "丹田", "押手肩", "押手肘", "角見(押手)", "妻手肩", "妻手肘", "取懸け", "左腰", "左足", "右腰", "右足", "弓(本)", "弓(末)"],
         textposition="top center",
-        textfont=dict(size=10, color='#222222'),
+        textfont=dict(size=10, color='#e2e8f0'),
         hoverinfo='text',
         showlegend=False
     ))
     
     fig.update_layout(
         scene=dict(
-            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='#ffffff', gridcolor='#f3f4f6'),
-            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='#ffffff', gridcolor='#f3f4f6'),
-            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='#ffffff', gridcolor='#f3f4f6'),
+            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='rgba(15, 18, 28, 0.6)', gridcolor='rgba(255, 255, 255, 0.08)'),
+            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='rgba(15, 18, 28, 0.6)', gridcolor='rgba(255, 255, 255, 0.08)'),
+            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='rgba(15, 18, 28, 0.6)', gridcolor='rgba(255, 255, 255, 0.08)'),
             camera=dict(
                 eye=dict(x=1.3, y=-1.5, z=0.8) # 斜め前からの自然な視点
             ),
             aspectratio=dict(x=1.4, y=0.8, z=1.5)
         ),
-        paper_bgcolor='#ffffff',
+        paper_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=5, r=5, t=5, b=5),
         height=360
     )
@@ -1897,44 +2065,45 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 # ==================== チャット統合型メイン画面 ====================
 
-# ユーザーメッセージがまだない場合はUNIQLO公式アプリ風の特集バナー＆コレクションを表示
+# ユーザーメッセージがまだない場合は世界最高峰（Godly / Linear風）Bento Heroを表示
 quick_prompt = None
 
 if not st.session_state.messages:
     st.markdown(f"""
-    <div style="margin: 30px 0 24px 0; border: 1px solid #000000; padding: 24px 22px; background: #ffffff;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="background: #e60012; color: #ffffff; font-weight: 900; font-size: 11px; padding: 3px 6px; letter-spacing: 0.05em;">SPECIAL FEATURE</span>
-                <span style="font-size: 11px; font-weight: 700; color: #111111; letter-spacing: 0.08em;">KYUDO LifeWear | 射技特集</span>
+    <div style="margin: 24px 0 24px 0; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 20px; padding: 30px 28px; background: linear-gradient(135deg, rgba(20, 24, 38, 0.75) 0%, rgba(13, 16, 26, 0.9) 100%); backdrop-filter: blur(24px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 16px 40px rgba(0, 0, 0, 0.4);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 9999px; padding: 4px 10px;">
+                <span style="color: #a5b4fc; font-size: 11px;">✦</span>
+                <span style="font-size: 11px; font-weight: 600; color: #c7d2fe; letter-spacing: 0.05em;">NEXT-GEN KYUDO INTELLIGENCE</span>
             </div>
-            <span style="font-size: 10px; font-weight: 700; color: #e60012; border: 1px solid #e60012; padding: 2px 6px;">2026 COLLECTION</span>
+            <span style="font-size: 11px; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.28); padding: 3px 8px; border-radius: 9999px;">2026 EDITION</span>
         </div>
-        <div style="font-size: 26px; font-weight: 900; color: #000000; letter-spacing: -0.01em; line-height: 1.25; margin-bottom: 8px;">
-            機能美と科学で、射技を究める。
+        <div style="font-size: 28px; font-weight: 800; color: #f8fafc; letter-spacing: -0.025em; line-height: 1.25; margin-bottom: 10px;">
+            心・技・体の理を、<br><span style="background: linear-gradient(90deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">極上の美と科学で。</span>
         </div>
-        <div style="font-size: 13px; color: #555555; line-height: 1.6;">
-            筑波大・鹿屋体育大等の筋電図（EMG）・重心力学研究知見に基づき、八節の連動と射癖を論理的に解説・コーチングします。
+        <div style="font-size: 13.5px; color: #94a3b8; line-height: 1.65; max-width: 640px;">
+            筑波大・鹿屋体育大等の筋電図（EMG）・床反力生体力学知見と最先端AIが、八節の連動から射癖の克服まで論理的かつ直感的にコーチングします。
         </div>
     </div>
 
-    <div style="font-size: 12px; font-weight: 900; color: #000000; letter-spacing: 0.1em; margin-bottom: 10px; border-left: 3px solid #e60012; padding-left: 8px;">
-        RECOMMENDED TOPICS | おすすめの稽古メニュー
+    <div style="font-size: 11.5px; font-weight: 600; color: #94a3b8; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 8px #6366f1;"></span>
+        RECOMMENDED TOPICS // おすすめの稽古メニュー
     </div>
     """, unsafe_allow_html=True)
     
-    # 【UNIQLOコレクションカード風グリッド】
+    # 【Linear / Bento Gridカード風グリッド】
     st.markdown('<div class="uniqlo-collection-grid">', unsafe_allow_html=True)
     s_col1, s_col2 = st.columns(2)
     with s_col1:
-        if st.button("🎯 早気の改善ワーク\n会で保てずにすぐ離れてしまう神経反射の克服", use_container_width=True):
+        if st.button("🎯 早気の根本克服ワーク\n会で保てずにすぐ離れてしまう神経抑制と伸び合いのリセット", use_container_width=True):
             quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("✋ 手の内・角見マスター\n握り込まずに弓返りと矢飛びを向上させる整え方", use_container_width=True):
+        if st.button("✋ 手の内・角見の極意\n前腕屈筋を脱力し、不随意の鋭い離れと弓返りを生む手の内", use_container_width=True):
             quick_prompt = "手の内（角見）がうまく利かず、握り込んでしまいます。正しい手の内の整え方と利かせ方を教えてください。"
     with s_col2:
-        if st.button("📜 射法八節の連動チェック\n足踏みから残心までの身体アライメントと呼吸", use_container_width=True):
+        if st.button("📜 射法八節の連動チェック\n三重十文字と重心アライメントの力学的チェック", use_container_width=True):
             quick_prompt = "射法八節それぞれのフェーズで、最も大切にすべき要点を教えてください。"
-        if st.button("🎬 射形動画の3D骨格分析\n下部の「＋」から動画を送信して立体診断", use_container_width=True):
+        if st.button("🎬 3D立体骨格＆動画診断\n下部の「＋」から動画を送信して生体力学立体解析", use_container_width=True):
             quick_prompt = "射形動画を分析してもらう際の撮影のコツ（アングルや秒数など）を教えてください。"
     st.markdown('</div><div style="margin-bottom: 25px;"></div>', unsafe_allow_html=True)
 
@@ -2055,17 +2224,17 @@ if "pending_regen" in st.session_state:
 
 
 
-# チャット入力欄（UNIQLO風 検索＆相談バー）
+# チャット入力欄（Raycast / Spotlight風 フローティング・コマンドバー）
 chat_submission = st.chat_input(
-    placeholder="質問や知りたい技・課題を入力（例: 早気、手の内、動画分析）...",
+    placeholder="弓道の悩みや射技の疑問、動画分析について尋ねる（例: 早気、手の内、動画を送信）...",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
 
-# UNIQLO公式アプリ風 ブランドフッター注釈テキスト
+# Raycast / Linear風 ブランドフッター注釈テキスト
 st.markdown("""
-<div style="text-align: center; font-size: 11px; color: #737373; margin-top: 6px; letter-spacing: 0.04em;">
-    KYUDO LifeWear | 科学と伝統で導く弓道AI道場（AIの回答は参考情報としてご活用ください）
+<div style="text-align: center; font-size: 11px; color: #64748b; margin-top: 6px; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; gap: 6px;">
+    <span>✦</span> <span>KYUDO AI // BIO-MECHANICAL INTELLIGENCE LAB</span> <span>✦</span>
 </div>
 """, unsafe_allow_html=True)
 
