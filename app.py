@@ -12,7 +12,7 @@ from google import genai
 from google.genai import types
 
 def render_chatgpt_toolbar(text_content: str):
-    """Raycast / Linear風 世界一美しいフローティング・グラス・アクションバー"""
+    """ChatGPTモバイル（2024-10仕様）ミニマル・アクションツールバー"""
     safe_text_json = json.dumps(text_content)
     toolbar_html = f"""
     <!DOCTYPE html>
@@ -24,36 +24,31 @@ def render_chatgpt_toolbar(text_content: str):
                 margin: 0;
                 padding: 0;
                 background: transparent;
-                font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Hiragino Sans", "Noto Sans JP", sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }}
             .bar {{
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                padding-top: 3px;
+                padding-top: 4px;
             }}
             .btn {{
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.12);
-                color: #94a3b8;
-                border-radius: 9999px;
-                padding: 3px 10px;
-                font-size: 11px;
+                background: transparent;
+                border: none;
+                color: #71717a;
+                border-radius: 6px;
+                padding: 4px 8px;
+                font-size: 12px;
                 font-weight: 500;
                 cursor: pointer;
                 display: inline-flex;
                 align-items: center;
                 gap: 4px;
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                transition: all 0.15s ease;
             }}
             .btn:hover {{
-                background: rgba(99, 102, 241, 0.22);
-                color: #f8fafc;
-                border-color: rgba(99, 102, 241, 0.45);
-                box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
-                transform: translateY(-1px);
+                background: #f4f4f5;
+                color: #0d0d0d;
             }}
             .btn:active {{
                 transform: scale(0.96);
@@ -189,99 +184,92 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ==================== 世界最高峰UI（Linear / Apple / Raycast / Godly Dark Modernism）カスタムCSS ====================
+# ==================== ChatGPT モバイルアプリ公式UI（2024-10再現スタイル） ====================
 st.markdown(f"""
 <style>
-    /* 1. 全体フォント・背景（深遠なオブシディアン・ブラック & アンビエント・ラジアルグロー） */
+    /* 1. 全体フォント・背景（クリーンホワイト #FFFFFF & チャコール #0D0D0D） */
     .stApp {{
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter Variable", "Inter", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif !important;
-        background-color: #08090d !important;
-        background-image: radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.05) 45%, rgba(8, 9, 13, 0) 75%) !important;
-        background-attachment: fixed !important;
-        color: #f8fafc !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif !important;
+        background-color: #ffffff !important;
+        color: #0d0d0d !important;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        letter-spacing: -0.015em;
     }}
     
-    /* スムース・スクロールバー */
+    /* スクロールバー（iOS風控えめスクロールバー） */
     ::-webkit-scrollbar {{
-        width: 6px !important;
-        height: 6px !important;
+        width: 5px !important;
+        height: 5px !important;
     }}
     ::-webkit-scrollbar-track {{
         background: transparent !important;
     }}
     ::-webkit-scrollbar-thumb {{
-        background: rgba(255, 255, 255, 0.14) !important;
+        background: rgba(0, 0, 0, 0.15) !important;
         border-radius: 9999px !important;
     }}
     ::-webkit-scrollbar-thumb:hover {{
-        background: rgba(255, 255, 255, 0.28) !important;
+        background: rgba(0, 0, 0, 0.3) !important;
     }}
 
-    /* 2. メインコンテナ（洗練されたセンタリングとスペーシング） */
+    /* 2. メインコンテナ（ChatGPTモバイル標準 768px） */
     .main .block-container {{
-        max-width: 820px !important;
-        padding-top: 16px !important;
-        padding-bottom: 140px !important;
+        max-width: 768px !important;
+        padding-top: 10px !important;
+        padding-bottom: 130px !important;
         margin: 0 auto !important;
     }}
     
-    /* 3. 下部固定入力バーエリア（ハイブラー・フロストグラス） */
+    /* 3. 下部固定入力バーエリア（白グラデーションフェード & セーフエリア） */
     div[data-testid="stBottom"] {{
-        background: rgba(8, 9, 13, 0.78) !important;
-        backdrop-filter: blur(28px) !important;
-        -webkit-backdrop-filter: blur(28px) !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding-top: 10px !important;
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.96) 24%, #ffffff 100%) !important;
+        padding-top: 8px !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+        border-top: none !important;
         z-index: 9999 !important;
-        box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.45) !important;
     }}
     div[data-testid="stBottom"] > div {{
-        max-width: 820px !important;
+        max-width: 768px !important;
         margin: 0 auto !important;
-        padding: 0 12px !important;
+        padding: 0 16px !important;
     }}
 
-    /* 4. 【Raycast / Spotlight風】フローティング・コマンドバー */
+    /* 4. 【ChatGPTモバイル2024-10完全一致】ソフトグレー・ピル型入力ボックス */
     div[data-testid="stChatInput"] {{
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 20px !important;
-        background-color: rgba(18, 22, 34, 0.8) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-        padding: 5px 14px !important;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        border: none !important;
+        border-radius: 26px !important;
+        background-color: #f4f4f4 !important;
+        box-shadow: none !important;
+        padding: 4px 14px !important;
+        transition: background-color 0.15s ease !important;
     }}
     div[data-testid="stChatInput"]:focus-within {{
-        border-color: #6366f1 !important;
-        background-color: rgba(24, 28, 44, 0.95) !important;
-        box-shadow: 0 0 0 1px #6366f1, 0 10px 36px rgba(99, 102, 241, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+        border: none !important;
+        background-color: #f0f0f0 !important;
+        box-shadow: none !important;
     }}
     div[data-testid="stChatInput"] textarea {{
         font-size: 15px !important;
         font-weight: 400 !important;
-        color: #f8fafc !important;
+        color: #0d0d0d !important;
         background-color: transparent !important;
-        line-height: 1.55 !important;
+        line-height: 1.5 !important;
         min-height: 38px !important;
     }}
     div[data-testid="stChatInput"] textarea::placeholder {{
-        color: #64748b !important;
+        color: #8e8ea0 !important;
     }}
-    /* 入力欄の添付プラスボタン & 送信ボタン */
+    /* 入力欄の添付プラスボタン */
     div[data-testid="stChatInput"] button {{
-        color: #94a3b8 !important;
-        border-radius: 9999px !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        color: #5d5d5d !important;
+        border-radius: 50% !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        transition: all 0.15s ease !important;
     }}
     div[data-testid="stChatInput"] button:hover {{
-        background-color: rgba(99, 102, 241, 0.35) !important;
-        color: #ffffff !important;
-        box-shadow: 0 0 14px rgba(99, 102, 241, 0.4) !important;
+        background-color: #e5e5e5 !important;
+        color: #0d0d0d !important;
     }}
 
     /* 5. チャットメッセージコンテナ */
@@ -291,8 +279,8 @@ st.markdown(f"""
         background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        padding: 12px 0 !important;
-        margin-bottom: 14px !important;
+        padding: 10px 0 !important;
+        margin-bottom: 12px !important;
         width: 100% !important;
         min-width: 0 !important;
     }}
@@ -316,66 +304,65 @@ st.markdown(f"""
         max-width: 100% !important;
     }}
 
-    /* 6. 【Linear / Apple風】ユーザーメッセージ：エレガントなバイオレット・グラスバブル */
+    /* 6. 【ChatGPTモバイル仕様】ユーザーメッセージ：右寄せ・ソフトグレー #ECECF1 丸角バブル（アバター非表示） */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.22), rgba(139, 92, 246, 0.14)) !important;
-        border: 1px solid rgba(139, 92, 246, 0.32) !important;
-        border-radius: 18px 18px 4px 18px !important;
-        padding: 12px 18px !important;
-        max-width: 80% !important;
+        background-color: #ececf1 !important;
+        border: none !important;
+        border-radius: 20px !important;
+        padding: 10px 16px !important;
+        max-width: 78% !important;
         margin-left: auto !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 4px 20px rgba(99, 102, 241, 0.15) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
+        box-shadow: none !important;
+        color: #0d0d0d !important;
     }}
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) [data-testid="stChatMessageAvatar"],
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) div[data-testid="chatAvatarIcon-user"] {{
         display: none !important;
     }}
 
-    /* 7. 【Raycast風】アシスタントメッセージ：クリーンな透明背景・グローアバター */
+    /* 7. 【ChatGPTモバイル仕様】アシスタントメッセージ：透明背景・白キャンバス上に直接描画 */
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {{
         background-color: transparent !important;
         border: none !important;
-        padding: 4px 0 !important;
+        padding: 2px 0 !important;
         width: 100% !important;
     }}
     div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) [data-testid="stChatMessageAvatar"] {{
-        border-radius: 12px !important;
-        width: 36px !important;
-        height: 36px !important;
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 0 16px rgba(99, 102, 241, 0.25) !important;
-        margin-right: 14px !important;
+        border-radius: 50% !important;
+        width: 28px !important;
+        height: 28px !important;
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border: none !important;
+        margin-right: 12px !important;
     }}
 
-    /* 8. テキストタイポグラフィ（高精細・モダン・高可読性） */
+    /* 8. テキストタイポグラフィ（高可読性・クリーンサンセリフ） */
     .stMarkdown, .stMarkdown p, .stMarkdown li, div[data-testid="stMarkdownContainer"] p {{
-        color: #e2e8f0 !important;
+        color: #0d0d0d !important;
         font-size: 15.5px !important;
-        line-height: 1.85 !important;
+        line-height: 1.65 !important;
         letter-spacing: -0.01em;
     }}
     h1, h2, h3, h4, h5, h6, strong {{
-        color: #f8fafc !important;
+        color: #000000 !important;
         font-weight: 700 !important;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.015em;
     }}
     div[data-testid="stMarkdownContainer"] code {{
-        background: rgba(255, 255, 255, 0.08) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        color: #a5b4fc !important;
+        background: #f4f4f4 !important;
+        border: 1px solid #e5e5e5 !important;
+        color: #111827 !important;
         border-radius: 6px !important;
         padding: 2px 6px !important;
         font-size: 13.5px !important;
     }}
     div[data-testid="stMarkdownContainer"] blockquote {{
-        border-left: 3px solid #6366f1 !important;
-        background: rgba(99, 102, 241, 0.08) !important;
-        border-radius: 0 10px 10px 0 !important;
-        padding: 10px 16px !important;
-        color: #cbd5e1 !important;
+        border-left: 3px solid #000000 !important;
+        background: #f9f9f9 !important;
+        border-radius: 0 8px 8px 0 !important;
+        padding: 8px 14px !important;
+        color: #374151 !important;
     }}
     div[data-testid="stMarkdownContainer"] {{
         width: 100% !important;
@@ -384,78 +371,71 @@ st.markdown(f"""
         overflow-wrap: break-word !important;
     }}
 
-    /* 9. 【Linear風オーラタグ】キャラクター＆カテゴリーバッジ */
+    /* 9. キャラクター＆カテゴリーバッジ（控えめなモノトーン・ピル） */
     .char-badge {{
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 3px 10px;
+        padding: 2px 9px;
         border-radius: 9999px !important;
         font-size: 11px !important;
         font-weight: 600 !important;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.02em;
         margin-bottom: 8px;
-        background: rgba(99, 102, 241, 0.18) !important;
-        border: 1px solid rgba(99, 102, 241, 0.35) !important;
-        color: #a5b4fc !important;
-        box-shadow: 0 0 12px rgba(99, 102, 241, 0.2) !important;
+        background: #f4f4f4 !important;
+        border: 1px solid #e5e5e5 !important;
+        color: #111827 !important;
     }}
 
-    /* 10. 【Godly / Linear Bento Grid】初期提案カード */
+    /* 10. 【ChatGPTモバイル風プロンプトサジェストカード】初期提案カード */
     .uniqlo-collection-grid button {{
-        background: linear-gradient(135deg, rgba(20, 24, 38, 0.75), rgba(15, 18, 28, 0.9)) !important;
-        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        background: #f4f4f4 !important;
+        border: none !important;
         border-radius: 16px !important;
-        padding: 18px 20px !important;
+        padding: 14px 16px !important;
         text-align: left !important;
-        color: #f1f5f9 !important;
+        color: #111827 !important;
         font-size: 14px !important;
         font-weight: 500 !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 26px rgba(0, 0, 0, 0.35) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        margin-bottom: 10px !important;
-        min-height: 82px !important;
+        box-shadow: none !important;
+        transition: all 0.15s ease !important;
+        margin-bottom: 8px !important;
+        min-height: 72px !important;
     }}
     .uniqlo-collection-grid button:hover {{
-        border-color: rgba(99, 102, 241, 0.45) !important;
-        background: linear-gradient(135deg, rgba(30, 36, 56, 0.85), rgba(20, 24, 40, 0.95)) !important;
-        transform: translateY(-3px) !important;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(99, 102, 241, 0.3) !important;
-        color: #ffffff !important;
+        background: #eaeaea !important;
+        color: #000000 !important;
+        transform: translateY(-1px) !important;
     }}
 
-    /* 11. フローティング添付ファイルカード */
+    /* 11. 添付ファイルカード */
     .file-attachment-card {{
         display: inline-flex;
         align-items: center;
-        gap: 12px;
-        background: rgba(18, 22, 34, 0.75) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        gap: 10px;
+        background: #f4f4f4 !important;
+        border: 1px solid #e5e5e5 !important;
         border-radius: 14px !important;
-        padding: 10px 16px !important;
+        padding: 10px 14px !important;
         margin-bottom: 8px !important;
         max-width: 100% !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(16px) !important;
     }}
     .file-attachment-icon {{
-        font-size: 22px !important;
+        font-size: 20px !important;
         flex-shrink: 0;
     }}
     .file-attachment-name {{
         font-weight: 600 !important;
         font-size: 13.5px !important;
-        color: #f8fafc !important;
+        color: #0d0d0d !important;
     }}
     .file-attachment-meta {{
         font-size: 11px !important;
-        color: #10b981 !important;
+        color: #166534 !important;
         font-weight: 500 !important;
     }}
 
-    /* 12. メモリ更新バッジ（ルミナス・バイオレット） */
+    /* 12. メモリ更新バッジ（クリーン通知） */
     .memory-badge {{
         display: inline-flex;
         align-items: center;
@@ -464,56 +444,52 @@ st.markdown(f"""
         border-radius: 9999px !important;
         font-size: 11px !important;
         font-weight: 500;
-        background: rgba(99, 102, 241, 0.12) !important;
-        color: #a5b4fc !important;
-        border: 1px solid rgba(99, 102, 241, 0.28) !important;
-        box-shadow: 0 0 10px rgba(99, 102, 241, 0.15) !important;
+        background: #f4f4f4 !important;
+        color: #4b5563 !important;
+        border: 1px solid #e5e5e5 !important;
         margin-bottom: 8px;
     }}
 
-    /* 13. 【SaaS Dark Glass】サイドバー */
+    /* 13. 【ChatGPTモバイル風サイドバー】クリーンホワイト */
     section[data-testid="stSidebar"] {{
-        background-color: #0b0c13 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background-color: #ffffff !important;
+        border-right: 1px solid #e5e5e5 !important;
     }}
     section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] label {{
-        color: #94a3b8 !important;
+        color: #374151 !important;
         font-size: 13px !important;
     }}
 
-    /* サイドバーの「新規チャット」ボタン（Linearグラデーション） */
+    /* サイドバーの「新規チャット」ボタン（ChatGPTモバイル黒ピルボタン） */
     .sidebar-new-chat-btn button {{
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        background: #000000 !important;
         color: #ffffff !important;
         border: none !important;
-        border-radius: 12px !important;
+        border-radius: 20px !important;
         font-weight: 600 !important;
         font-size: 13.5px !important;
-        letter-spacing: 0.02em !important;
-        padding: 10px 16px !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
+        padding: 9px 16px !important;
+        transition: all 0.15s ease !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
     }}
     .sidebar-new-chat-btn button:hover {{
-        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6) !important;
-        transform: translateY(-1px) !important;
+        background: #262626 !important;
         color: #ffffff !important;
     }}
 
-    /* チャット履歴リスト（SaaSクリーン・ホバー） */
+    /* チャット履歴リスト */
     .chat-history-item button {{
-        background: rgba(255, 255, 255, 0.02) !important;
-        border: 1px solid transparent !important;
-        border-radius: 10px !important;
-        color: #94a3b8 !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: #4b5563 !important;
         text-align: left !important;
         font-size: 13px !important;
         font-weight: 500 !important;
-        padding: 8px 12px !important;
-        transition: all 0.15s ease !important;
+        padding: 8px 10px !important;
+        transition: all 0.12s ease !important;
         justify-content: flex-start !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -521,34 +497,29 @@ st.markdown(f"""
         margin-bottom: 2px !important;
     }}
     .chat-history-item button:hover {{
-        background: rgba(99, 102, 241, 0.15) !important;
-        border-color: rgba(99, 102, 241, 0.3) !important;
-        color: #f8fafc !important;
-        padding-left: 14px !important;
+        background: #f4f4f4 !important;
+        color: #0d0d0d !important;
+        padding-left: 12px !important;
     }}
     .chat-history-active button {{
-        background: rgba(99, 102, 241, 0.22) !important;
-        border-color: rgba(99, 102, 241, 0.45) !important;
-        color: #ffffff !important;
+        background: #ececf1 !important;
+        color: #000000 !important;
         font-weight: 600 !important;
-        box-shadow: 0 0 12px rgba(99, 102, 241, 0.2) !important;
     }}
 
-    /* 【Apple / Raycast風】フローティング・セグメンテッド・ピル・コントロール */
+    /* 【ChatGPTモバイル風】モデル・キャラクター切り替えピル */
     div[data-testid="stRadio"] {{
-        background: rgba(255, 255, 255, 0.04) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 9999px !important;
-        margin-bottom: 20px !important;
-        padding: 4px !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
+        background: #f4f4f4 !important;
+        border: none !important;
+        border-radius: 22px !important;
+        margin-bottom: 16px !important;
+        padding: 3px !important;
     }}
     div[data-testid="stRadio"] > div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
         justify-content: center !important;
-        gap: 4px !important;
+        gap: 3px !important;
         overflow-x: auto !important;
         scrollbar-width: none !important;
     }}
@@ -557,12 +528,12 @@ st.markdown(f"""
     }}
     div[data-testid="stRadio"] label {{
         background: transparent !important;
-        border: 1px solid transparent !important;
-        border-radius: 9999px !important;
-        padding: 7px 18px !important;
+        border: none !important;
+        border-radius: 18px !important;
+        padding: 6px 16px !important;
         margin: 0 !important;
         cursor: pointer !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition: all 0.15s ease !important;
     }}
     div[data-testid="stRadio"] label > div:first-child:not(:has([data-testid="stMarkdownContainer"])) {{
         display: none !important;
@@ -574,155 +545,102 @@ st.markdown(f"""
     div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {{
         font-size: 13.5px !important;
         font-weight: 500 !important;
-        color: #94a3b8 !important;
-        letter-spacing: 0.02em !important;
+        color: #71717a !important;
+        letter-spacing: 0.01em !important;
         margin: 0 !important;
         transition: color 0.15s ease !important;
     }}
     div[data-testid="stRadio"] label:hover p,
     div[data-testid="stRadio"] label:hover div[data-testid="stMarkdownContainer"] p {{
-        color: #ffffff !important;
+        color: #0d0d0d !important;
     }}
-    /* 選択中タブ：フロストグラスピル＆アンビエントネオングロー */
+    /* 選択中タブ：白背景・微細シャドウ・黒文字 */
     div[data-testid="stRadio"] label[aria-checked="true"],
     div[data-testid="stRadio"] label:has(input:checked) {{
-        background: rgba(255, 255, 255, 0.12) !important;
-        border-color: rgba(255, 255, 255, 0.18) !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 16px rgba(99, 102, 241, 0.3) !important;
+        background: #ffffff !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
     }}
     div[data-testid="stRadio"] label[aria-checked="true"] p,
     div[data-testid="stRadio"] label:has(input:checked) p,
     div[data-testid="stRadio"] label:has(input:checked) div[data-testid="stMarkdownContainer"] p {{
-        color: #ffffff !important;
-        font-weight: 700 !important;
+        color: #000000 !important;
+        font-weight: 600 !important;
     }}
 
-    /* アクションボタングループ（再生成・キャラ変更） */
+    /* 14. アクションボタングループ（再生成・キャラ変更） */
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button {{
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        color: #cbd5e1 !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e5e5 !important;
+        color: #374151 !important;
         border-radius: 9999px !important;
         padding: 4px 12px !important;
         font-size: 11.5px !important;
         font-weight: 500 !important;
-        backdrop-filter: blur(12px) !important;
-        transition: all 0.18s ease !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+        transition: all 0.15s ease !important;
     }}
     div[data-testid="stChatMessage"] div[data-testid="stHorizontalBlock"] button:hover {{
-        background: rgba(99, 102, 241, 0.25) !important;
-        color: #ffffff !important;
-        border-color: rgba(99, 102, 241, 0.5) !important;
-        box-shadow: 0 0 14px rgba(99, 102, 241, 0.3) !important;
+        background: #f4f4f4 !important;
+        color: #000000 !important;
+        border-color: #d1d5db !important;
     }}
 
-    /* 14. 【Streamlit UI全般】世界最高峰ダーク・グラスモーフィズム共通スタイル */
-    /* タブ（st.tabs） */
+    /* 15. Streamlit UI全般（タブ・エクスパンダー・ポップオーバー） */
     div[data-baseweb="tab-list"] {{
         background-color: transparent !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-        gap: 8px !important;
+        border-bottom: 1px solid #e5e5e5 !important;
     }}
     button[data-baseweb="tab"] {{
-        color: #94a3b8 !important;
+        color: #6b7280 !important;
         font-weight: 500 !important;
         font-size: 13.5px !important;
-        background: transparent !important;
-        border-radius: 8px 8px 0 0 !important;
-        padding: 8px 14px !important;
-        transition: all 0.15s ease !important;
-    }}
-    button[data-baseweb="tab"]:hover {{
-        color: #f8fafc !important;
-        background: rgba(255, 255, 255, 0.04) !important;
     }}
     button[data-baseweb="tab"][aria-selected="true"] {{
-        color: #a5b4fc !important;
-        font-weight: 700 !important;
-        border-bottom-color: #6366f1 !important;
+        color: #000000 !important;
+        font-weight: 600 !important;
+        border-bottom-color: #000000 !important;
     }}
     div[data-baseweb="tab-highlight"] {{
-        background-color: #6366f1 !important;
-        height: 2px !important;
-        box-shadow: 0 0 10px #6366f1 !important;
+        background-color: #000000 !important;
     }}
-
-    /* エクスパンダー（st.expander） */
     div[data-testid="stExpander"] {{
-        background: rgba(18, 22, 34, 0.6) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e5e5 !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
-        backdrop-filter: blur(16px) !important;
-        margin-bottom: 12px !important;
-        overflow: hidden !important;
+        box-shadow: none !important;
     }}
-    div[data-testid="stExpander"] summary {{
-        color: #cbd5e1 !important;
-        font-weight: 600 !important;
-        font-size: 13.5px !important;
-        padding: 10px 14px !important;
-        transition: background 0.15s ease !important;
-    }}
-    div[data-testid="stExpander"] summary:hover {{
-        background: rgba(255, 255, 255, 0.04) !important;
-        color: #ffffff !important;
-    }}
-
-    /* ポップオーバー（st.popover）ボタン & ドロップダウン */
     div[data-testid="stPopover"] > button {{
-        background: rgba(255, 255, 255, 0.04) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        color: #cbd5e1 !important;
-        border-radius: 10px !important;
-        padding: 8px 14px !important;
+        background: #f4f4f4 !important;
+        border: 1px solid #e5e5e5 !important;
+        color: #111827 !important;
+        border-radius: 20px !important;
         font-weight: 500 !important;
-        transition: all 0.18s ease !important;
-    }}
-    div[data-testid="stPopover"] > button:hover {{
-        background: rgba(99, 102, 241, 0.18) !important;
-        border-color: rgba(99, 102, 241, 0.4) !important;
-        color: #ffffff !important;
-        box-shadow: 0 0 12px rgba(99, 102, 241, 0.2) !important;
     }}
     div[data-testid="stPopoverBody"] {{
-        background: #0f121d !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: 14px !important;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
-        padding: 14px !important;
+        background: #ffffff !important;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
     }}
-
-    /* フォーム入力欄（st.text_input, st.text_area） */
     div[data-baseweb="input"] {{
-        background-color: rgba(255, 255, 255, 0.04) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        background-color: #ffffff !important;
+        border: 1px solid #d1d5db !important;
         border-radius: 10px !important;
-        color: #f8fafc !important;
-        transition: all 0.15s ease !important;
-    }}
-    div[data-baseweb="input"]:focus-within {{
-        border-color: #6366f1 !important;
-        box-shadow: 0 0 0 1px #6366f1, 0 0 16px rgba(99, 102, 241, 0.25) !important;
-        background-color: rgba(255, 255, 255, 0.07) !important;
+        color: #0d0d0d !important;
     }}
     div[data-baseweb="input"] input {{
-        color: #f8fafc !important;
+        color: #0d0d0d !important;
     }}
-
-    /* プライマリボタン（st.button type="primary"） */
     button[kind="primary"] {{
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        background: #000000 !important;
         border: none !important;
-        border-radius: 10px !important;
+        border-radius: 20px !important;
         color: #ffffff !important;
         font-weight: 600 !important;
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4) !important;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        box-shadow: none !important;
     }}
     button[kind="primary"]:hover {{
-        box-shadow: 0 6px 24px rgba(99, 102, 241, 0.6) !important;
-        transform: translateY(-1px) !important;
+        background: #262626 !important;
         color: #ffffff !important;
     }}
 
@@ -731,16 +649,16 @@ st.markdown(f"""
         .main .block-container {{
             padding-left: 14px !important;
             padding-right: 14px !important;
-            padding-top: 12px !important;
+            padding-top: 10px !important;
             padding-bottom: 120px !important;
         }}
         div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {{
-            max-width: 90% !important;
-            padding: 10px 16px !important;
+            max-width: 85% !important;
+            padding: 10px 14px !important;
             font-size: 15px !important;
         }}
         div[data-testid="stChatInput"] {{
-            border-radius: 20px !important;
+            border-radius: 24px !important;
             padding: 4px 10px !important;
         }}
         .file-attachment-card {{
@@ -1255,30 +1173,29 @@ def render_login_screen():
             margin-bottom: 24px;
         }
         .login-logo {
-            font-size: 48px;
+            font-size: 44px;
             line-height: 1;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             display: inline-block;
-            filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.4));
         }
         .login-title {
             font-size: 24px;
-            font-weight: 800;
-            color: #f8fafc;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
+            font-weight: 700;
+            color: #0d0d0d;
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
         }
         .login-subtitle {
-            font-size: 13.5px;
-            color: #94a3b8;
-            line-height: 1.6;
+            font-size: 14px;
+            color: #6e6e80;
+            line-height: 1.5;
         }
     </style>
     <div class="login-wrap">
         <div class="login-card-header">
             <div class="login-logo">🏹</div>
-            <div class="login-title">KYUDO AI LAB</div>
-            <div class="login-subtitle">生体力学と伝統を極める弓道AI道場へようこそ</div>
+            <div class="login-title">ChatGPT // 弓道AI道場</div>
+            <div class="login-subtitle">アカウントにログインして射技稽古・動画分析を始めましょう</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1431,21 +1348,15 @@ with st.sidebar:
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"🪪 PASSPORT | {disp_name}", use_container_width=True):
+    with st.popover(f"👤 {disp_name}", use_container_width=True):
         st.markdown(f"""
-        <div style="border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; padding: 18px; margin-bottom: 14px; background: linear-gradient(135deg, rgba(26, 31, 48, 0.9) 0%, rgba(15, 18, 28, 0.95) 100%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 10px 30px rgba(0, 0, 0, 0.5);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #ffffff; font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: 9999px; letter-spacing: 0.05em;">ARCHER PASSPORT</span>
-                <span style="font-size: 10px; font-weight: 600; color: #10b981; letter-spacing: 0.08em; display: flex; align-items: center; gap: 4px;">
-                    <span style="display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #10b981;"></span> VERIFIED
-                </span>
+        <div style="border: 1px solid #e5e5e5; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: #f8f9fa;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="background: #000000; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 12px;">弓道AI</span>
+                <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● 認証済</span>
             </div>
-            <div style="font-size: 19px; font-weight: 700; color: #f8fafc; letter-spacing: -0.01em; margin: 4px 0 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: #818cf8; font-family: monospace; letter-spacing: 0.15em; margin-bottom: 12px;">ID: KYD-8820-{user_id_num}</div>
-            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 10px; color: #64748b;">
-                <span>BIOMECHANICAL LAB</span>
-                <span>AUTHENTICATED</span>
-            </div>
+            <div style="font-size: 16px; font-weight: 600; color: #000000; margin: 2px 0;">{disp_name}</div>
+            <div style="font-size: 11px; color: #6b7280; font-family: monospace;">ID: KYD-8820-{user_id_num}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1554,30 +1465,27 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== 世界最高峰UI（Linear / Raycast風）ヘッダー ＆ セグメンテッド・コントロール ====================
+# ==================== ChatGPTモバイル公式UI（2024-10再現）トップバー＆モデルピル ====================
 st.markdown("""
-<div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0 12px 0; margin-bottom: 6px;">
     <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2)); border: 1px solid rgba(139, 92, 246, 0.4); color: #ffffff; font-size: 18px; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);">🏹</div>
-        <div>
-            <div style="font-size: 17px; font-weight: 700; color: #f8fafc; letter-spacing: -0.02em; line-height: 1.1; display: flex; align-items: center; gap: 6px;">
-                KYUDO AI <span style="font-size: 11px; font-weight: 500; color: #818cf8; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 6px; border-radius: 9999px;">BIO-LAB</span>
-            </div>
-            <div style="font-size: 11px; font-weight: 500; color: #64748b; letter-spacing: 0.04em;">PRECISION BIOMECHANICS & COACHING</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; justify-content: center; width: 22px; height: 22px; cursor: pointer;">
+            <span style="display: block; width: 18px; height: 2px; background: #0d0d0d; border-radius: 1px;"></span>
+            <span style="display: block; width: 18px; height: 2px; background: #0d0d0d; border-radius: 1px;"></span>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; color: #000000; letter-spacing: -0.02em;">
+            ChatGPT
         </div>
     </div>
     <div style="display: flex; align-items: center; gap: 8px;">
-        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 9999px; padding: 4px 10px; backdrop-filter: blur(12px);">
-            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
-            <span style="font-size: 10px; font-weight: 600; color: #cbd5e1; letter-spacing: 0.06em;">AI ONLINE</span>
-        </div>
+        <span style="font-size: 12px; font-weight: 600; color: #ffffff; background: #000000; padding: 5px 14px; border-radius: 16px;">サインアップ</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Apple / Raycast風 フローティング・セグメンテッド・ピル・コントロール
+# ChatGPT風 モデル・指導陣セレクター（クリーン・ピル）
 selected_char = st.radio(
-    "指導陣（AIペルソナ）を選択",
+    "指導陣（AIキャラクター）を選択",
     options=list(CHARACTERS.keys()),
     index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
     horizontal=True,
@@ -1750,7 +1658,7 @@ def get_local_response(user_input: str, char_name: str) -> str:
     else:
         return f"入力パラメータ『{user_input}』を受領。解析の結果、運動連鎖における体幹の安定性および肩甲胸郭関節（肩甲骨まわり）の可動域が当該事象に寄与している可能性が高いと推定されます。矢束（引き尺の長さ）の均等性と左右の筋出力バランスを再確認することを推奨します。"
 
-# ==================== 3D立体骨格＆筋肉活動可視化関数（Cyber Holographic Biomechanics） ====================
+# ==================== 3D立体骨格＆筋肉活動可視化関数（ChatGPTクリーン・ライトスタイル） ====================
 def create_muscle_radar_chart(muscle_scores: dict):
     categories = list(muscle_scores.keys())
     values = list(muscle_scores.values())
@@ -1764,9 +1672,9 @@ def create_muscle_radar_chart(muscle_scores: dict):
         r=values_closed,
         theta=categories_closed,
         fill='toself',
-        fillcolor='rgba(99, 102, 241, 0.22)',
-        line=dict(color='#818cf8', width=2.5),
-        marker=dict(size=6, color='#a5b4fc'),
+        fillcolor='rgba(16, 163, 127, 0.2)',
+        line=dict(color='#10a37f', width=2.5),
+        marker=dict(size=6, color='#10a37f'),
         name='筋活動バランス'
     ))
     
@@ -1775,17 +1683,17 @@ def create_muscle_radar_chart(muscle_scores: dict):
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
-                tickfont=dict(size=10, color='#64748b'),
-                gridcolor='rgba(255, 255, 255, 0.08)'
+                tickfont=dict(size=10, color='#6b7280'),
+                gridcolor='#e5e7eb'
             ),
             angularaxis=dict(
-                tickfont=dict(size=11, color='#cbd5e1'),
-                gridcolor='rgba(255, 255, 255, 0.08)'
+                tickfont=dict(size=11, color='#111827', weight=600),
+                gridcolor='#e5e7eb'
             ),
-            bgcolor='rgba(15, 18, 28, 0.65)'
+            bgcolor='#f8f9fa'
         ),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='#ffffff',
+        plot_bgcolor='#ffffff',
         margin=dict(l=35, r=35, t=25, b=25),
         height=340,
         showlegend=False
@@ -1823,32 +1731,32 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         "Bow_Bottom": [0.95, 0.0, 0.15]
     }
     
-    # 骨格リンク定義（サイバー・ホログラフィック・カラー）
+    # 骨格リンク定義
     bones = [
-        ("Head", "Neck", "#f43f5e", 6),
-        ("Neck", "Chest", "#10b981", 7),
-        ("Chest", "Pelvis", "#10b981", 8),
+        ("Head", "Neck", "#ef4444", 6),
+        ("Neck", "Chest", "#10a37f", 7),
+        ("Chest", "Pelvis", "#10a37f", 8),
         # 押手リンク
-        ("Chest", "L_Shoulder", "#10b981", 6),
-        ("L_Shoulder", "L_Elbow", "#06b6d4", 6),
-        ("L_Elbow", "L_Wrist", "#06b6d4", 6),
+        ("Chest", "L_Shoulder", "#10a37f", 6),
+        ("L_Shoulder", "L_Elbow", "#0284c7", 6),
+        ("L_Elbow", "L_Wrist", "#0284c7", 6),
         # 妻手リンク
-        ("Chest", "R_Shoulder", "#10b981", 6),
-        ("R_Shoulder", "R_Elbow", "#f59e0b", 6),
-        ("R_Elbow", "R_Wrist", "#f59e0b", 6),
+        ("Chest", "R_Shoulder", "#10a37f", 6),
+        ("R_Shoulder", "R_Elbow", "#d97706", 6),
+        ("R_Elbow", "R_Wrist", "#d97706", 6),
         # 下半身リンク
-        ("Pelvis", "L_Hip", "#10b981", 6),
-        ("L_Hip", "L_Foot", "#10b981", 6),
-        ("Pelvis", "R_Hip", "#10b981", 6),
-        ("R_Hip", "R_Foot", "#10b981", 6),
+        ("Pelvis", "L_Hip", "#10a37f", 6),
+        ("L_Hip", "L_Foot", "#10a37f", 6),
+        ("Pelvis", "R_Hip", "#10a37f", 6),
+        ("R_Hip", "R_Foot", "#10a37f", 6),
         # 弓幹
-        ("Bow_Bottom", "L_Wrist", "#8b5cf6", 4),
-        ("L_Wrist", "Bow_Top", "#8b5cf6", 4),
+        ("Bow_Bottom", "L_Wrist", "#7c3aed", 4),
+        ("L_Wrist", "Bow_Top", "#7c3aed", 4),
         # 矢（L_Wrist から R_Wrist への水平ベクトル）
-        ("L_Wrist", "R_Wrist", "#fbbf24", 5),
+        ("L_Wrist", "R_Wrist", "#eab308", 5),
         # 弦（Bow_Top -> R_Wrist -> Bow_Bottom）
-        ("Bow_Top", "R_Wrist", "#94a3b8", 2),
-        ("R_Wrist", "Bow_Bottom", "#94a3b8", 2)
+        ("Bow_Top", "R_Wrist", "#6b7280", 2),
+        ("R_Wrist", "Bow_Bottom", "#6b7280", 2)
     ]
     
     fig = go.Figure()
@@ -1876,25 +1784,25 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     fig.add_trace(go.Scatter3d(
         x=jx, y=jy, z=jz,
         mode='markers+text',
-        marker=dict(size=6, color='#38bdf8'),
+        marker=dict(size=6, color='#10a37f'),
         text=["頭", "頸", "胸", "丹田", "押手肩", "押手肘", "角見(押手)", "妻手肩", "妻手肘", "取懸け", "左腰", "左足", "右腰", "右足", "弓(本)", "弓(末)"],
         textposition="top center",
-        textfont=dict(size=10, color='#e2e8f0'),
+        textfont=dict(size=10, color='#111827'),
         hoverinfo='text',
         showlegend=False
     ))
     
     fig.update_layout(
         scene=dict(
-            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='rgba(15, 18, 28, 0.6)', gridcolor='rgba(255, 255, 255, 0.08)'),
-            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='rgba(15, 18, 28, 0.6)', gridcolor='rgba(255, 255, 255, 0.08)'),
-            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='rgba(15, 18, 28, 0.6)', gridcolor='rgba(255, 255, 255, 0.08)'),
+            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='#f8f9fa', gridcolor='#e5e7eb'),
+            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='#f8f9fa', gridcolor='#e5e7eb'),
+            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='#f8f9fa', gridcolor='#e5e7eb'),
             camera=dict(
                 eye=dict(x=1.3, y=-1.5, z=0.8) # 斜め前からの自然な視点
             ),
             aspectratio=dict(x=1.4, y=0.8, z=1.5)
         ),
-        paper_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='#ffffff',
         margin=dict(l=5, r=5, t=5, b=5),
         height=360
     )
@@ -2065,45 +1973,43 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 # ==================== チャット統合型メイン画面 ====================
 
-# ユーザーメッセージがまだない場合は世界最高峰（Godly / Linear風）Bento Heroを表示
+# ユーザーメッセージがまだない場合はChatGPTモバイル（2024-10）風のウェルカム画面を表示
 quick_prompt = None
 
 if not st.session_state.messages:
-    st.markdown(f"""
-    <div style="margin: 24px 0 24px 0; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 20px; padding: 30px 28px; background: linear-gradient(135deg, rgba(20, 24, 38, 0.75) 0%, rgba(13, 16, 26, 0.9) 100%); backdrop-filter: blur(24px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 16px 40px rgba(0, 0, 0, 0.4);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 9999px; padding: 4px 10px;">
-                <span style="color: #a5b4fc; font-size: 11px;">✦</span>
-                <span style="font-size: 11px; font-weight: 600; color: #c7d2fe; letter-spacing: 0.05em;">NEXT-GEN KYUDO INTELLIGENCE</span>
-            </div>
-            <span style="font-size: 11px; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.28); padding: 3px 8px; border-radius: 9999px;">2026 EDITION</span>
+    # ChatGPTモバイル公式風：中央の控えめな渦巻きアウトラインロゴ
+    st.markdown("""
+    <div style="text-align: center; margin: 50px 0 30px 0;">
+        <div style="width: 48px; height: 48px; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; color: #b4b4b4;">
+            <svg width="44" height="44" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                <path d="M12 3a9 9 0 0 1 9 9" />
+                <path d="M12 12a4.5 4.5 0 0 1 4.5 4.5" />
+                <path d="M12 12a4.5 4.5 0 0 1 -4.5 -4.5" />
+            </svg>
         </div>
-        <div style="font-size: 28px; font-weight: 800; color: #f8fafc; letter-spacing: -0.025em; line-height: 1.25; margin-bottom: 10px;">
-            心・技・体の理を、<br><span style="background: linear-gradient(90deg, #818cf8 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">極上の美と科学で。</span>
+        <div style="font-size: 24px; font-weight: 700; color: #000000; margin-bottom: 6px; letter-spacing: -0.02em;">
+            今日はどうされましたか？
         </div>
-        <div style="font-size: 13.5px; color: #94a3b8; line-height: 1.65; max-width: 640px;">
-            筑波大・鹿屋体育大等の筋電図（EMG）・床反力生体力学知見と最先端AIが、八節の連動から射癖の克服まで論理的かつ直感的にコーチングします。
+        <div style="font-size: 13.5px; color: #71717a;">
+            弓道AI道場 // 筑波大・鹿屋体育大等の筋電図・重心力学研究知見に基づくコーチング
         </div>
-    </div>
-
-    <div style="font-size: 11.5px; font-weight: 600; color: #94a3b8; letter-spacing: 0.08em; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #6366f1; box-shadow: 0 0 8px #6366f1;"></span>
-        RECOMMENDED TOPICS // おすすめの稽古メニュー
     </div>
     """, unsafe_allow_html=True)
     
-    # 【Linear / Bento Gridカード風グリッド】
+    # 【ChatGPTモバイル2024-10仕様】プロンプトサジェストカード
     st.markdown('<div class="uniqlo-collection-grid">', unsafe_allow_html=True)
     s_col1, s_col2 = st.columns(2)
     with s_col1:
-        if st.button("🎯 早気の根本克服ワーク\n会で保てずにすぐ離れてしまう神経抑制と伸び合いのリセット", use_container_width=True):
+        if st.button("🎯 早気の改善アドバイス\n会で保てずにすぐ離れてしまう神経反射の克服", use_container_width=True):
             quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("✋ 手の内・角見の極意\n前腕屈筋を脱力し、不随意の鋭い離れと弓返りを生む手の内", use_container_width=True):
+        if st.button("✋ 手の内・角見の整え方\n握り込まずに弓返りと矢飛びを向上させる整え方", use_container_width=True):
             quick_prompt = "手の内（角見）がうまく利かず、握り込んでしまいます。正しい手の内の整え方と利かせ方を教えてください。"
     with s_col2:
-        if st.button("📜 射法八節の連動チェック\n三重十文字と重心アライメントの力学的チェック", use_container_width=True):
+        if st.button("📜 射法八節の連動チェック\n足踏みから残心までの身体アライメントと呼吸", use_container_width=True):
             quick_prompt = "射法八節それぞれのフェーズで、最も大切にすべき要点を教えてください。"
-        if st.button("🎬 3D立体骨格＆動画診断\n下部の「＋」から動画を送信して生体力学立体解析", use_container_width=True):
+        if st.button("🎬 射形動画の3D骨格分析\n下部の「＋」から動画を送信して立体診断", use_container_width=True):
             quick_prompt = "射形動画を分析してもらう際の撮影のコツ（アングルや秒数など）を教えてください。"
     st.markdown('</div><div style="margin-bottom: 25px;"></div>', unsafe_allow_html=True)
 
@@ -2224,17 +2130,17 @@ if "pending_regen" in st.session_state:
 
 
 
-# チャット入力欄（Raycast / Spotlight風 フローティング・コマンドバー）
+# チャット入力欄（ChatGPTモバイル2024-10完全一致：プレースホルダー「メッセージ」）
 chat_submission = st.chat_input(
-    placeholder="弓道の悩みや射技の疑問、動画分析について尋ねる（例: 早気、手の内、動画を送信）...",
+    placeholder="メッセージ",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
 
-# Raycast / Linear風 ブランドフッター注釈テキスト
+# ChatGPT公式フッター注釈テキスト
 st.markdown("""
-<div style="text-align: center; font-size: 11px; color: #64748b; margin-top: 6px; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; gap: 6px;">
-    <span>✦</span> <span>KYUDO AI // BIO-MECHANICAL INTELLIGENCE LAB</span> <span>✦</span>
+<div style="text-align: center; font-size: 11px; color: #8e8ea0; margin-top: 6px; letter-spacing: 0.01em;">
+    ChatGPT は間違いを犯すことがあります。重要な情報は確認してください。
 </div>
 """, unsafe_allow_html=True)
 
