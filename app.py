@@ -212,6 +212,28 @@ st.markdown(f"""
         background: rgba(0, 0, 0, 0.3) !important;
     }}
 
+    /* Streamlit上部ヘッダー透明化 & デフォルトツールバー非表示 */
+    header[data-testid="stHeader"] {{
+        background: transparent !important;
+        height: 3rem !important;
+        z-index: 100 !important;
+    }}
+    header[data-testid="stHeader"] div[data-testid="stToolbar"] {{
+        display: none !important;
+    }}
+    /* 左上サイドバー展開ボタンのChatGPT風スタイリング */
+    div[data-testid="collapsedControl"] {{
+        top: 10px !important;
+        left: 12px !important;
+        color: #0d0d0d !important;
+        z-index: 1000 !important;
+    }}
+    div[data-testid="collapsedControl"] button {{
+        background: transparent !important;
+        border: none !important;
+        color: #0d0d0d !important;
+    }}
+
     /* 2. メインコンテナ（ChatGPTモバイル標準 768px） */
     .main .block-container {{
         max-width: 768px !important;
@@ -610,17 +632,45 @@ st.markdown(f"""
         box-shadow: none !important;
     }}
     div[data-testid="stPopover"] > button {{
+        background: transparent !important;
+        border: none !important;
+        color: #0d0d0d !important;
+        font-size: 17px !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+        box-shadow: none !important;
+        padding: 4px 10px !important;
+    }}
+    div[data-testid="stPopover"] > button:hover {{
         background: #f4f4f4 !important;
-        border: 1px solid #e5e5e5 !important;
-        color: #111827 !important;
-        border-radius: 20px !important;
-        font-weight: 500 !important;
+        color: #000000 !important;
     }}
     div[data-testid="stPopoverBody"] {{
         background: #ffffff !important;
         border: 1px solid #e5e5e5 !important;
         border-radius: 16px !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+        padding: 12px !important;
+    }}
+
+    /* 統一トップバー */
+    .chatgpt-top-header {{
+        margin-bottom: 6px !important;
+        padding-bottom: 6px !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    }}
+    .chatgpt-top-header div[data-testid="column"]:last-child button {{
+        background: #f4f4f4 !important;
+        border: 1px solid #e5e5e5 !important;
+        border-radius: 20px !important;
+        color: #0d0d0d !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 4px 12px !important;
+        box-shadow: none !important;
+    }}
+    .chatgpt-top-header div[data-testid="column"]:last-child button:hover {{
+        background: #ececf1 !important;
     }}
     div[data-baseweb="input"] {{
         background-color: #ffffff !important;
@@ -1277,6 +1327,21 @@ with st.sidebar:
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # サイドバー内モデル・キャラクター切り替え
+    st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='font-size: 11px; font-weight: 600; color: #8e8e8e; margin: 4px 0 6px 4px; letter-spacing: 0.05em;'>AI指導陣（モデル）</div>", unsafe_allow_html=True)
+    cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+    sb_char = st.selectbox(
+        "指導陣を選択",
+        options=list(CHARACTERS.keys()),
+        index=list(CHARACTERS.keys()).index(cur_c) if cur_c in CHARACTERS else 0,
+        label_visibility="collapsed",
+        key="sb_char_picker"
+    )
+    if sb_char != cur_c:
+        st.session_state.current_selected_char = sb_char
+        st.rerun()
+
     st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
 
     # ChatGPT風：過去のチャット履歴（日付別グループ分け縦並びリスト）
@@ -1465,34 +1530,35 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== ChatGPTモバイル公式UI（2024-10再現）トップバー＆モデルピル ====================
-st.markdown("""
-<div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 0 12px 0; margin-bottom: 6px;">
-    <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="display: flex; flex-direction: column; gap: 4px; justify-content: center; width: 22px; height: 22px; cursor: pointer;">
-            <span style="display: block; width: 18px; height: 2px; background: #0d0d0d; border-radius: 1px;"></span>
-            <span style="display: block; width: 18px; height: 2px; background: #0d0d0d; border-radius: 1px;"></span>
-        </div>
-        <div style="font-size: 18px; font-weight: 700; color: #000000; letter-spacing: -0.02em;">
-            ChatGPT
-        </div>
-    </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 12px; font-weight: 600; color: #ffffff; background: #000000; padding: 5px 14px; border-radius: 16px;">サインアップ</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# ==================== ChatGPTモバイル公式UI（2024-10再現）単一統一トップバー ====================
+cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+short_char_name = cur_char_val.split("（")[0]
 
-# ChatGPT風 モデル・指導陣セレクター（クリーン・ピル）
-selected_char = st.radio(
-    "指導陣（AIキャラクター）を選択",
-    options=list(CHARACTERS.keys()),
-    index=list(CHARACTERS.keys()).index(st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])),
-    horizontal=True,
-    label_visibility="collapsed",
-    key="uniqlo_character_picker"
-)
-st.session_state.current_selected_char = selected_char
+st.markdown('<div class="chatgpt-top-header">', unsafe_allow_html=True)
+top_cols = st.columns([0.72, 0.28])
+with top_cols[0]:
+    with st.popover(f"ChatGPT ({short_char_name}) ▾", use_container_width=False):
+        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #71717a; margin-bottom: 8px;'>モデル・指導陣の選択</div>", unsafe_allow_html=True)
+        for cname in CHARACTERS.keys():
+            c_info_item = CHARACTERS[cname]
+            is_active = (cname == cur_char_val)
+            btn_prefix = "✓ " if is_active else "　 "
+            if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
+                st.session_state.current_selected_char = cname
+                st.rerun()
+
+with top_cols[1]:
+    if st.button("＋ 新規", key="top_new_chat_btn", use_container_width=True):
+        st.session_state.messages = [{
+            "role": "assistant",
+            "char": cur_char_val,
+            "content": CHARACTERS[cur_char_val]["welcome"]
+        }]
+        st.session_state.current_session_id = f"session_{int(time.time())}"
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
+
+selected_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 char_info = CHARACTERS[selected_char]
 st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
