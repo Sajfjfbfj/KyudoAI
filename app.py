@@ -806,7 +806,20 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
 }
 
 /* ---------- ログイン ---------- */
-.login-wrap { max-width: 520px; margin: 9vh auto 18px; text-align: left; }
+.st-key-login_card {
+    background: var(--surface-2); border: 1px solid var(--border-hairline);
+    border-radius: 20px; padding: 22px 24px 8px; box-shadow: var(--shadow-md);
+    margin-bottom: 14px;
+}
+.st-key-goto_register button, .st-key-goto_login button, .st-key-guest_login button {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    color: var(--ink-muted) !important; font-size: 13px !important; min-height: 32px !important;
+}
+.st-key-goto_register button:hover, .st-key-goto_login button:hover, .st-key-guest_login button:hover {
+    background: transparent !important; color: var(--shu) !important;
+}
+.login-wrap { margin: 7vh auto 22px; text-align: center; }
+.login-logo { margin-left: auto; margin-right: auto; }
 .login-logo {
     width: 48px; height: 48px; border-radius: 14px; background: var(--shu); color: var(--on-accent);
     display: flex; align-items: center; justify-content: center;
@@ -1330,63 +1343,78 @@ LOCAL_RESPONSES = {
     }
 }
 
-# ==================== 世界最高峰UI：ログイン画面（スマホ・タブレット完全対応） ====================
+# ==================== ログイン画面・新規登録画面 ====================
+def _complete_login(username: str):
+    """ログイン成功時の共通処理。ユーザー専用の履歴・テーマ設定を読み直す。"""
+    st.session_state.authenticated = True
+    st.session_state.logged_in_user = username.strip().lower()
+    st.session_state.ui_theme = load_ui_theme()
+    for k in ("current_session_id", "messages", "auth_mode"):
+        st.session_state.pop(k, None)
+    st.rerun()
+
 def render_login_screen():
-    st.markdown("""
-    <div class="login-wrap">
-        <div class="login-card-header">
+    mode = st.session_state.get("auth_mode", "login")
+    is_login = (mode == "login")
+
+    _, col_center, _ = st.columns([1, 1.5, 1])
+    with col_center:
+        st.markdown(f"""
+        <div class="login-wrap">
             <div class="login-logo">🏹</div>
             <div class="login-title">弓道AI道場</div>
-            <div class="login-subtitle">世界最高峰の対話美学で射技稽古・3D動作解析を体験しましょう</div>
+            <div class="login-subtitle">{"アカウントにログインして、稽古を続けましょう。" if is_login else "アカウントを作成して、稽古の記録を残しましょう。"}</div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # スマホ・タブレット・PC全対応の中央カードレイアウト
-    _, col_center, _ = st.columns([0.05, 0.9, 0.05]) if st.session_state.get("_is_mobile", False) else st.columns([1, 1.8, 1])
-    with col_center:
-        tab_login, tab_register = st.tabs(["🔑 ログイン", "✨ 新規アカウント登録"])
-        
-        with tab_login:
-            with st.form("login_form", clear_on_submit=False):
-                uname = st.text_input("ユーザー名", placeholder="ユーザー名を入力")
-                upass = st.text_input("パスワード", type="password", placeholder="パスワードを入力")
-                btn_login = st.form_submit_button("ログインして道場に入る", use_container_width=True, type="primary")
-                
-                if btn_login:
+        """, unsafe_allow_html=True)
+
+        with st.container(key="login_card"):
+            if is_login:
+                with st.form("login_form", clear_on_submit=False, border=False):
+                    uname = st.text_input("ユーザー名", placeholder="ユーザー名")
+                    upass = st.text_input("パスワード", type="password", placeholder="パスワード")
+                    submitted = st.form_submit_button("ログイン", use_container_width=True, type="primary")
+                if submitted:
                     if uname and upass and authenticate_user(uname, upass):
-                        st.session_state.authenticated = True
-                        st.session_state.logged_in_user = uname.strip().lower()
-                        st.success("✅ 認証成功！道場へ移動します...")
-                        time.sleep(0.4)
-                        st.rerun()
+                        _complete_login(uname)
                     else:
                         st.error("ユーザー名またはパスワードが正しくありません。")
-
-            
-        with tab_register:
-            with st.form("reg_form", clear_on_submit=False):
-                reg_name = st.text_input("希望のユーザー名 (英数字3文字以上)", placeholder="例: yamada")
-                reg_disp = st.text_input("お名前・道場での呼び名 (任意)", placeholder="例: 山田")
-                reg_pass1 = st.text_input("パスワード (6文字以上)", type="password", placeholder="パスワード")
-                reg_pass2 = st.text_input("パスワードの確認", type="password", placeholder="もう一度入力")
-                btn_reg = st.form_submit_button("アカウントを作成する", use_container_width=True, type="primary")
-                
-                if btn_reg:
+            else:
+                with st.form("reg_form", clear_on_submit=False, border=False):
+                    reg_name = st.text_input("ユーザー名（英数字3文字以上）", placeholder="例: yamada")
+                    reg_disp = st.text_input("表示名（任意）", placeholder="例: 山田")
+                    reg_pass1 = st.text_input("パスワード（6文字以上）", type="password", placeholder="パスワード")
+                    reg_pass2 = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
+                    submitted = st.form_submit_button("アカウントを作成", use_container_width=True, type="primary")
+                if submitted:
                     if not reg_name or not reg_pass1:
-                        st.error("すべての必須項目を入力してください。")
+                        st.error("ユーザー名とパスワードを入力してください。")
                     elif reg_pass1 != reg_pass2:
                         st.error("パスワードが一致しません。")
                     else:
                         ok, msg = register_user(reg_name, reg_pass1, reg_disp)
                         if ok:
-                            st.success(f"🎉 {msg} 「ログイン」タブからログインしてください。")
+                            _complete_login(reg_name)
                         else:
                             st.error(msg)
 
-# ==================== 認証状態チェック（即座に稽古開始可能な安心設計） ====================
+        # 画面の切り替え（ログイン ⇄ 新規登録）
+        if is_login:
+            if st.button("アカウントをお持ちでない方は 新規登録", key="goto_register", use_container_width=True):
+                st.session_state.auth_mode = "register"
+                st.rerun()
+        else:
+            if st.button("すでにアカウントをお持ちの方は ログイン", key="goto_login", use_container_width=True):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+        if st.button("ログインせずに使う", key="guest_login", use_container_width=True):
+            _complete_login("archer")
+
+# ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
-    st.session_state.authenticated = True
+    st.session_state.authenticated = False
+if not st.session_state.authenticated:
+    render_login_screen()
+    st.stop()
 if "logged_in_user" not in st.session_state or not st.session_state.logged_in_user:
     st.session_state.logged_in_user = "archer"
 
