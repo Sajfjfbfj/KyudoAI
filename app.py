@@ -33,46 +33,26 @@ def render_chatgpt_toolbar(text_content: str):
     <head>
         <meta charset="utf-8">
         <style>
+            :root { color-scheme: light dark; }
             body {
                 margin: 0;
                 padding: 0;
                 background: transparent;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
-            .bar {
-                display: flex;
-                align-items: center;
-                gap: 0;
-                padding-top: 4px;
-            }
+            .bar { display: flex; align-items: center; gap: 2px; padding-top: 4px; }
             .btn {
-                width: 32px;
-                height: 32px;
-                border: none;
-                border-radius: 8px;
-                background: transparent;
-                color: #666666;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: background 0.15s ease, color 0.15s ease;
+                width: 32px; height: 32px; border: none; border-radius: 8px;
+                background: transparent; color: #78716c;
+                display: inline-flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
             }
-            .btn:hover {
-                background: rgba(0, 0, 0, 0.06);
-                color: #171717;
-            }
-            .btn:active {
-                transform: scale(0.94);
-            }
-            .btn svg {
-                width: 18px;
-                height: 18px;
-                fill: none;
-                stroke: currentColor;
-                stroke-width: 1.8;
-                stroke-linecap: round;
-                stroke-linejoin: round;
+            .btn:hover { background: rgba(28, 25, 23, 0.06); color: #1c1917; }
+            .btn:active { transform: scale(0.94); }
+            .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+            @media (prefers-color-scheme: dark) {
+                .btn { color: #9a948a; }
+                .btn:hover { background: rgba(244, 240, 233, 0.09); color: #f3f0ea; }
             }
         </style>
     </head>
@@ -224,831 +204,592 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ==================== Linear Dark Canvas × Apple HIG：世界最高峰UIデザインシステム ====================
+# ==================== UI Renewal 2026-11-18：藍（AI）— 余白・淡い面・1色のアクセント ====================
+# 方針：装飾を減らし、タイポグラフィと余白で洗練を出す。ライト／ダークは OS 設定に自動追従。
+# 機能ロジックには一切触れず、表示層（CSS と静的HTML）のみを差し替える。
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+/* =====================================================================
+   弓道AI道場 — 藍（AI）デザイン
+   方針：余白・淡い面・1色の藍だけで構成する。装飾（円相・点描・印・縦書き）は使わない。
+   ライト／ダークは OS 設定に自動追従（prefers-color-scheme）。
+   ===================================================================== */
 :root {
-    --canvas: #000000;
-    --canvas-subtle: #0d0d0d;
-    --surface-1: #171717;
-    --surface-2: #212121;
-    --surface-3: #2f2f2f;
-    --surface-glass: rgba(19, 22, 27, 0.88);
-    
-    --border-hairline: rgba(255, 255, 255, 0.06);
-    --border-subtle: rgba(255, 255, 255, 0.10);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    
-    --accent-emerald: #10b981;
-    --accent-emerald-light: #34d399;
-    --accent-emerald-glow: 0 0 24px rgba(16, 185, 129, 0.28);
-    --accent-emerald-soft: rgba(16, 185, 129, 0.12);
-    
-    --accent-blue: #5e6ad2;
-    --accent-blue-soft: rgba(94, 106, 210, 0.14);
-    
-    --ink-primary: #f8fafc;
-    --ink-secondary: #cbd5e1;
-    --ink-muted: #94a3b8;
-    --ink-dim: #64748b;
-    
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 6px 20px -2px rgba(0, 0, 0, 0.6), 0 2px 6px -1px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 16px 40px -4px rgba(0, 0, 0, 0.7), 0 4px 14px -2px rgba(0, 0, 0, 0.4);
-    --shadow-float: 0 24px 64px -8px rgba(0, 0, 0, 0.8), 0 8px 24px -4px rgba(0, 0, 0, 0.5);
-    
+    color-scheme: light dark;
+
+    /* 地と面（ライト：生成りの紙） */
+    --canvas: #faf9f7;
+    --canvas-subtle: #f5f3ef;
+    --surface-1: #f4f2ee;
+    --surface-2: var(--ink-primary);
+    --surface-3: #eeebe5;
+    --surface-glass: rgba(250, 249, 247, 0.82);
+
+    /* 罫線 */
+    --border-hairline: rgba(28, 25, 23, 0.07);
+    --border-subtle: rgba(28, 25, 23, 0.12);
+    --border-strong: rgba(28, 25, 23, 0.22);
+
+    /* アクセント：藍（唯一の色）。旧変数名も互換のため同じ値に割り当て */
+    --shu: #2b4c7e;
+    --shu-light: #2b4c7e;
+    --shu-soft: rgba(43, 76, 126, 0.08);
+    --on-accent: var(--ink-primary);
+    --accent-emerald: var(--shu);
+    --accent-emerald-light: var(--shu-light);
+    --accent-emerald-soft: var(--shu-soft);
+    --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0);
+    --accent-blue: var(--shu);
+    --accent-blue-soft: var(--shu-soft);
+
+    /* 文字 */
+    --ink-primary: #1c1917;
+    --ink-secondary: #44403c;
+    --ink-muted: #78716c;
+    --ink-dim: #a8a29e;
+
+    --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
+    --shadow-md: 0 8px 24px -10px rgba(28, 25, 23, 0.16);
+    --shadow-lg: 0 18px 48px -14px rgba(28, 25, 23, 0.22);
+    --shadow-float: 0 10px 34px -14px rgba(28, 25, 23, 0.22), 0 1px 2px rgba(28, 25, 23, 0.05);
+
     --radius-full: 9999px;
-    --radius-2xl: 22px;
     --radius-xl: 16px;
     --radius-lg: 12px;
-    --radius-md: 9px;
+    --radius-md: 10px;
     --radius-sm: 6px;
-    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --font-serif: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    --font-sans: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --canvas: #141312;
+        --canvas-subtle: #181716;
+        --surface-1: #1a1918;
+        --surface-2: #211f1e;
+        --surface-3: #2a2826;
+        --surface-glass: rgba(20, 19, 18, 0.82);
+
+        --border-hairline: rgba(244, 240, 233, 0.07);
+        --border-subtle: rgba(244, 240, 233, 0.13);
+        --border-strong: rgba(244, 240, 233, 0.24);
+
+        --shu: #9dbbea;
+        --shu-light: #b6cdf1;
+        --shu-soft: rgba(157, 187, 234, 0.12);
+        --on-accent: #0e1a2b;
+
+        --ink-primary: #f3f0ea;
+        --ink-secondary: #cfc9bf;
+        --ink-muted: #9a948a;
+        --ink-dim: #6f6a62;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+        --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7);
+        --shadow-float: 0 10px 34px -14px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
 }
 
-/* Base Canvas & Typography */
+/* ---------- 地 ---------- */
 html, body, [class*="css"], .stApp {
-    font-family: "Plus Jakarta Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    background-color: var(--canvas) !important;
+    font-family: var(--font-sans) !important;
+    background: var(--canvas) !important;
     color: var(--ink-primary) !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    background: radial-gradient(circle at 50% 0%, #11141a 0%, var(--canvas) 70%) !important;
     color: var(--ink-primary) !important;
+    background-color: var(--canvas) !important;
+    /* 上部にごく淡い藍のにじみだけ。操作を邪魔しない */
+    background-image: radial-gradient(900px 420px at 50% -8%, var(--shu-soft), transparent 70%) !important;
+    background-attachment: fixed !important;
 }
+::selection { background: var(--shu-soft); color: var(--ink-primary); }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px !important; height: 5px !important; }
+::-webkit-scrollbar { width: 6px !important; height: 6px !important; }
 ::-webkit-scrollbar-track { background: transparent !important; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12) !important; border-radius: 9999px !important; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25) !important; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle) !important; border-radius: 9999px !important; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong) !important; }
 
-/* Streamlit Header Minimalized */
 [data-testid="stHeader"] {
-    background: rgba(8, 9, 10, 0.85) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid var(--border-hairline) !important;
-}
-[data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
-
-/* Collapsed Sidebar Icon */
-div[data-testid="collapsedControl"] {
-    top: 12px !important;
-    left: 14px !important;
-    z-index: 1001 !important;
-}
-div[data-testid="collapsedControl"] button {
     background: transparent !important;
-    border: none !important;
-    color: var(--ink-secondary) !important;
-    font-size: 20px !important;
+    border-bottom: 0 !important;
+    height: 0 !important; min-height: 0 !important;
+    pointer-events: none !important;
 }
+[data-testid="stHeader"] button, [data-testid="stHeader"] a { pointer-events: auto !important; }
+[data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stToolbarActions"],
+[data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
+[data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] button {
+    position: relative; z-index: 1002;
+    color: var(--ink-secondary) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 999px !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+[data-testid="stExpandSidebarButton"] { position: fixed !important; top: 12px !important; left: 12px !important; width: 36px; height: 36px; }
+[data-testid="stExpandSidebarButton"]:hover, [data-testid="stSidebarCollapseButton"] button:hover {
+    border-color: var(--shu) !important; color: var(--shu) !important;
+}
+[data-testid="stExpandSidebarButton"] *, [data-testid="stSidebarCollapseButton"] button * { color: inherit !important; }
 
-/* Main Container Centering & Rhythms */
-.main .block-container {
-    max-width: 900px !important;
-    padding: 24px 28px 160px !important;
+[data-testid="stMainBlockContainer"] {
+    max-width: 760px !important;
+    padding: 10px 24px 150px !important;
     margin: 0 auto !important;
 }
 
-/* Typography Hierarchy */
+/* ---------- タイポグラフィ ---------- */
 .stMarkdown, .stMarkdown p, .stMarkdown li,
 [data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
     color: var(--ink-secondary) !important;
     font-size: 15.5px !important;
-    line-height: 1.82 !important;
-    letter-spacing: -0.008em !important;
+    line-height: 1.85 !important;
+    letter-spacing: 0.01em !important;
 }
-
 h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans) !important;
     color: var(--ink-primary) !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.03em !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
 }
-h1 { font-size: clamp(28px, 3.4vw, 38px) !important; font-weight: 800 !important; }
-h2 { font-size: 22px !important; }
-h3 { font-size: 18px !important; }
-strong { color: #ffffff !important; font-weight: 600 !important; }
+h1 { font-size: clamp(26px, 3.4vw, 34px) !important; line-height: 1.4 !important; }
+h2 { font-size: 21px !important; }
+h3 { font-size: 17.5px !important; }
+h4 { font-size: 15.5px !important; }
+strong { color: var(--ink-primary) !important; font-weight: 600 !important; }
+hr, [data-testid="stDivider"] hr { border-color: var(--border-hairline) !important; }
+a { color: var(--shu) !important; text-underline-offset: 3px; }
 
 div[data-testid="stMarkdownContainer"] code {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid var(--border-hairline) !important;
-    color: var(--accent-emerald-light) !important;
-    border-radius: 5px !important;
-    padding: 2px 7px !important;
+    background: var(--surface-3) !important;
+    border: 0 !important;
+    color: var(--ink-primary) !important;
+    border-radius: 6px !important;
+    padding: 2px 6px !important;
     font-size: 13.5px !important;
-    font-family: "JetBrains Mono", monospace !important;
+    font-family: var(--font-mono) !important;
 }
-
+div[data-testid="stMarkdownContainer"] pre {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-lg) !important;
+}
 div[data-testid="stMarkdownContainer"] blockquote {
-    border-left: 3px solid var(--accent-emerald) !important;
-    background: rgba(16, 185, 129, 0.05) !important;
-    border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
-    padding: 10px 18px !important;
-    color: var(--ink-secondary) !important;
+    border-left: 3px solid var(--shu) !important;
+    background: var(--shu-soft) !important;
+    padding: 6px 16px !important;
     margin: 14px 0 !important;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+    color: var(--ink-secondary) !important;
 }
+[data-testid="stCaptionContainer"], .stCaption, small { color: var(--ink-muted) !important; }
 
-/* ==================== Linear-Style Elevated Sidebar ==================== */
+/* ---------- サイドバー ---------- */
 section[data-testid="stSidebar"] {
     background: var(--surface-1) !important;
     border-right: 1px solid var(--border-hairline) !important;
-}
-section[data-testid="stSidebar"] > div {
-    background: transparent !important;
-}
-section[data-testid="stSidebar"] .stMarkdown,
-section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] label {
-    color: var(--ink-secondary) !important;
-}
-
-.sb-brand-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 8px 18px;
-    border-bottom: 1px solid var(--border-hairline);
-    margin-bottom: 14px;
-}
-.sb-brand-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #ffffff;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-}
-.sb-brand-badge {
-    display: inline-block;
-    background: var(--accent-emerald-soft);
-    color: var(--accent-emerald-light);
-    border: 1px solid rgba(16, 185, 129, 0.28);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: var(--radius-full);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-
-.sb-section-label {
-    color: var(--ink-dim) !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.09em !important;
-    text-transform: uppercase !important;
-    padding: 16px 8px 6px !important;
-}
-
-section[data-testid="stSidebar"] .stButton > button,
-section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
-    background: transparent !important;
-    color: var(--ink-muted) !important;
-    border: 1px solid transparent !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: none !important;
-    min-height: 38px !important;
-    padding: 7px 10px !important;
-    text-align: left !important;
-    justify-content: flex-start !important;
-    font-size: 13.5px !important;
-    font-weight: 500 !important;
-    transition: all 0.16s var(--ease-spring) !important;
-    width: 100% !important;
-}
-section[data-testid="stSidebar"] .stButton > button:hover,
-section[data-testid="stSidebar"] [data-testid="stPopover"] > button:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: var(--ink-primary) !important;
-    transform: translateX(2px) !important;
-}
-
-/* Sidebar Active Chat */
-section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
-    background: var(--accent-emerald-soft) !important;
-    color: var(--accent-emerald-light) !important;
-    border: 1px solid rgba(16, 185, 129, 0.24) !important;
-    font-weight: 600 !important;
-}
-
-/* New Chat Primary Button */
-.sb-new-chat-btn button {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
-    border: 1px solid rgba(16, 185, 129, 0.35) !important;
-    color: var(--accent-emerald-light) !important;
-    font-weight: 600 !important;
-    font-size: 13.5px !important;
-    border-radius: var(--radius-md) !important;
-    padding: 9px 12px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    box-shadow: var(--accent-emerald-glow) !important;
-    transition: all 0.2s var(--ease-spring) !important;
-}
-.sb-new-chat-btn button:hover {
-    background: rgba(16, 185, 129, 0.25) !important;
-    border-color: var(--accent-emerald) !important;
-    color: #ffffff !important;
-    transform: translateY(-1px) !important;
-}
-
-/* Popover Bodies */
-div[data-testid="stPopoverBody"] {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: var(--radius-lg) !important;
-    box-shadow: var(--shadow-lg) !important;
-    padding: 14px !important;
-}
-div[data-testid="stPopoverBody"] button {
-    color: var(--ink-primary) !important;
-}
-
-/* ==================== Top Minimal Navigation Bar ==================== */
-.topbar-wrapper {
-    background: rgba(19, 22, 27, 0.75) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-full) !important;
-    padding: 6px 14px !important;
-    margin: -8px 0 28px !important;
-    box-shadow: var(--shadow-sm) !important;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.topbar-wrapper [data-testid="stButton"] > button,
-.topbar-wrapper [data-testid="stPopover"] > button {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    color: var(--ink-primary) !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius-full) !important;
-    font-size: 13.5px !important;
-    padding: 6px 14px !important;
-    transition: background 0.15s ease !important;
-}
-.topbar-wrapper [data-testid="stButton"] > button:hover,
-.topbar-wrapper [data-testid="stPopover"] > button:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Pulse Dot */
-.pulse-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--accent-emerald);
-    border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 0 10px var(--accent-emerald);
-    animation: pulseGlow 2.2s infinite;
-}
-@keyframes pulseGlow {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.55; transform: scale(0.85); }
-}
-
-/* ==================== Bento Hero Grid (Linear / Apple Pro Style) ==================== */
-.bento-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    margin: 24px auto 36px;
-    max-width: 860px;
-}
-.bento-card-btn button {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-xl) !important;
-    padding: 20px 22px !important;
-    text-align: left !important;
-    justify-content: flex-start !important;
-    align-items: flex-start !important;
-    color: var(--ink-primary) !important;
-    min-height: 110px !important;
-    height: 100% !important;
-    white-space: normal !important;
-    transition: all 0.22s var(--ease-spring) !important;
-    box-shadow: var(--shadow-sm) !important;
-}
-.bento-card-btn button:hover {
-    background: var(--surface-3) !important;
-    border-color: rgba(16, 185, 129, 0.35) !important;
-    transform: translateY(-3px) !important;
-    box-shadow: var(--shadow-lg), var(--accent-emerald-glow) !important;
-}
-
-/* ==================== Chat Timeline (High-End Linear & Messages) ==================== */
-div[data-testid="stChatMessage"] {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    padding: 10px 0 !important;
-    margin: 0 auto 18px !important;
-    max-width: 860px !important;
-    width: 100% !important;
-}
-div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] { display: none !important; }
-
-/* User Message: Elevated Charcoal Bubble */
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    max-width: 74% !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    background: linear-gradient(135deg, #181d26 0%, #1e2430 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 20px 20px 4px 20px !important;
-    padding: 14px 20px !important;
-    box-shadow: var(--shadow-md) !important;
-    color: #ffffff !important;
-}
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span,
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stMarkdownContainer"] * {
-    color: #f8fafc !important;
-}
-
-/* Assistant Message: Clean Minimalist Layout */
-div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) {
-    background: transparent !important;
-    padding: 4px 0 !important;
-    width: 100% !important;
-}
-div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) p {
-    color: var(--ink-primary) !important;
-    font-size: 15.5px !important;
-    line-height: 1.85 !important;
-}
-
-/* Character Badge */
-.char-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 3px 12px !important;
-    border-radius: var(--radius-full) !important;
-    font-size: 11.5px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.04em !important;
-    margin: 0 0 12px !important;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    color: var(--ink-secondary) !important;
-    text-transform: uppercase;
-}
-.char-badge.char-master {
-    border-color: rgba(217, 119, 6, 0.3) !important;
-    color: #fbbf24 !important;
-    background: rgba(217, 119, 6, 0.08) !important;
-}
-.char-badge.char-senior {
-    border-color: rgba(16, 185, 129, 0.3) !important;
-    color: #34d399 !important;
-    background: rgba(16, 185, 129, 0.08) !important;
-}
-.char-badge.char-analyst {
-    border-color: rgba(99, 102, 241, 0.35) !important;
-    color: #a5b4fc !important;
-    background: rgba(99, 102, 241, 0.08) !important;
-}
-
-/* Memory Badge */
-.memory-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 12px;
-    margin: 4px 0 12px;
-    background: var(--accent-emerald-soft) !important;
-    color: var(--accent-emerald-light) !important;
-    border: 1px solid rgba(16, 185, 129, 0.25) !important;
-    border-radius: var(--radius-full) !important;
-    font-size: 11.5px !important;
-    font-weight: 600 !important;
-}
-
-/* File Attachment Card */
-.file-attachment-card {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: var(--radius-lg) !important;
-    padding: 10px 16px !important;
-    margin-bottom: 10px !important;
-}
-.file-attachment-name { color: #ffffff !important; font-weight: 600 !important; font-size: 13.5px !important; }
-.file-attachment-meta { color: var(--accent-emerald-light) !important; font-size: 11px !important; }
-
-/* ==================== Floating Command Bar Input (Linear Prompt Deck) ==================== */
-div[data-testid="stBottom"] {
-    background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.88) 25%, #08090a 100%) !important;
-    backdrop-filter: blur(16px) !important;
-    border-top: 0 !important;
-    padding: 24px 0 calc(22px + env(safe-area-inset-bottom, 0px)) !important;
-    z-index: 9999 !important;
-}
-div[data-testid="stBottom"] > div {
-    max-width: 860px !important;
-    padding: 0 20px !important;
-    margin: auto !important;
-}
-div[data-testid="stChatInput"] {
-    background: rgba(19, 22, 27, 0.92) !important;
-    backdrop-filter: blur(28px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 26px !important;
-    box-shadow: var(--shadow-float) !important;
-    padding: 8px 16px !important;
-    transition: all 0.22s var(--ease-spring) !important;
-}
-div[data-testid="stChatInput"]:focus-within {
-    border-color: rgba(16, 185, 129, 0.45) !important;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15), var(--shadow-float) !important;
-    background: #14171d !important;
-}
-div[data-testid="stChatInput"] textarea {
-    color: #ffffff !important;
-    font-size: 15px !important;
-    background: transparent !important;
-    line-height: 1.6 !important;
-}
-div[data-testid="stChatInput"] textarea::placeholder {
-    color: var(--ink-dim) !important;
-}
-div[data-testid="stChatInput"] button {
-    background: transparent !important;
-    color: var(--ink-muted) !important;
-    border: 0 !important;
-    border-radius: var(--radius-full) !important;
-    transition: all 0.15s ease !important;
-}
-div[data-testid="stChatInput"] button:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: #ffffff !important;
-}
-
-/* ==================== Standard Buttons & Controls ==================== */
-.stButton > button, .stDownloadButton > button, button[kind="secondary"] {
-    background: var(--surface-2) !important;
-    color: var(--ink-primary) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: var(--shadow-sm) !important;
-    font-weight: 600 !important;
-    font-size: 13.5px !important;
-    min-height: 38px !important;
-    padding: 7px 16px !important;
-    transition: all 0.18s var(--ease-spring) !important;
-}
-.stButton > button:hover, .stDownloadButton > button:hover {
-    background: var(--surface-3) !important;
-    border-color: var(--border-subtle) !important;
-    color: #ffffff !important;
-    transform: translateY(-1px) !important;
-    box-shadow: var(--shadow-md) !important;
-}
-.stButton > button:active {
-    transform: scale(0.98) !important;
-}
-
-button[kind="primary"], .stFormSubmitButton > button {
-    background: var(--accent-emerald) !important;
-    color: #08090a !important;
-    border: 0 !important;
-    border-radius: var(--radius-md) !important;
-    font-weight: 700 !important;
-    box-shadow: var(--accent-emerald-glow) !important;
-    transition: all 0.2s var(--ease-spring) !important;
-}
-button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
-    background: var(--accent-emerald-light) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 0 28px rgba(16, 185, 129, 0.45) !important;
-}
-
-/* Inputs & Form Controls */
-div[data-baseweb="input"], div[data-baseweb="textarea"],
-div[data-baseweb="select"] > div {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-md) !important;
-    color: var(--ink-primary) !important;
-    transition: all 0.2s ease !important;
-}
-div[data-baseweb="input"]:focus-within,
-div[data-baseweb="textarea"]:focus-within,
-div[data-baseweb="select"]:focus-within {
-    border-color: var(--accent-emerald) !important;
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
-}
-input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; }
-input::placeholder, textarea::placeholder { color: var(--ink-dim) !important; }
-
-/* Tabs */
-div[data-baseweb="tab-list"] {
-    border-bottom: 1px solid var(--border-hairline) !important;
-    gap: 16px !important;
-}
-button[data-baseweb="tab"] {
-    color: var(--ink-muted) !important;
-    font-weight: 600 !important;
-    font-size: 13.5px !important;
-    padding: 10px 4px !important;
-}
-button[data-baseweb="tab"][aria-selected="true"] {
-    color: var(--accent-emerald-light) !important;
-    border-bottom: 2px solid var(--accent-emerald) !important;
-}
-
-div[data-testid="stExpander"] {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-lg) !important;
-}
-
-/* Plotly Chart Card */
-.stPlotlyChart {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-xl) !important;
-    padding: 14px;
-    box-shadow: var(--shadow-sm) !important;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-    .main .block-container { padding: 20px 16px 140px !important; }
-    .bento-grid { grid-template-columns: 1fr !important; }
-}
-@media (max-width: 600px) {
-    .main .block-container { padding: 14px 12px 130px !important; }
-    div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-        max-width: 88% !important;
-        padding: 12px 16px !important;
-    }
-    div[data-testid="stBottom"] > div { padding: 0 8px !important; }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ==================== 2026 UI Renewal：和紙 × 墨 × 朱 ====================
-# 既存機能を一切変更せず、Streamlitの表示層のみを上書きするデザイントークンです。
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700&display=swap');
-
-:root {
-    --canvas: #f7f5f0;
-    --canvas-subtle: #efede7;
-    --surface-1: #1c1d1b;
-    --surface-2: #ffffff;
-    --surface-3: #e9e5dc;
-    --border-hairline: rgba(42, 38, 32, 0.10);
-    --border-subtle: rgba(42, 38, 32, 0.16);
-    --border-strong: rgba(42, 38, 32, 0.24);
-    --accent-emerald: #ae382b;
-    --accent-emerald-light: #c34b3d;
-    --accent-emerald-soft: rgba(174, 56, 43, 0.09);
-    --accent-emerald-glow: 0 10px 28px rgba(117, 44, 34, 0.14);
-    --ink-primary: #24211d;
-    --ink-secondary: #514c45;
-    --ink-muted: #777269;
-    --ink-dim: #9b958b;
-    --shadow-sm: 0 1px 2px rgba(49, 43, 35, 0.05);
-    --shadow-md: 0 8px 28px rgba(49, 43, 35, 0.09);
-    --shadow-lg: 0 18px 55px rgba(49, 43, 35, 0.14);
-    --shadow-float: 0 18px 55px rgba(49, 43, 35, 0.15);
-}
-
-html, body, [class*="css"], .stApp {
-    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif !important;
-    color: var(--ink-primary) !important;
-    background: var(--canvas) !important;
-}
-
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    background-color: var(--canvas) !important;
-    background-image: radial-gradient(rgba(63, 56, 46, 0.065) 0.55px, transparent 0.7px) !important;
-    background-size: 5px 5px !important;
-}
-
-[data-testid="stHeader"] {
-    background: rgba(247, 245, 240, 0.84) !important;
-    border-bottom: 1px solid var(--border-hairline) !important;
-    backdrop-filter: blur(18px) !important;
-}
-
-.main .block-container {
-    max-width: 880px !important;
-    padding: 26px 30px 170px !important;
-}
-
-h1, h2, h3, h4 {
-    font-family: "Shippori Mincho", "Noto Sans JP", serif !important;
-    color: var(--ink-primary) !important;
-    letter-spacing: 0.025em !important;
-}
-
-.stMarkdown, .stMarkdown p, .stMarkdown li,
-[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
-    color: var(--ink-secondary) !important;
-}
-
-/* 墨色のナビゲーション */
-section[data-testid="stSidebar"] {
-    background: #1c1d1b !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 section[data-testid="stSidebar"] > div { background: transparent !important; }
 section[data-testid="stSidebar"] .stMarkdown,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
-section[data-testid="stSidebar"] label {
-    color: #aaa9a2 !important;
+section[data-testid="stSidebar"] label { color: var(--ink-secondary) !important; }
+section[data-testid="stSidebar"] strong { color: var(--ink-primary) !important; }
+
+.sb-brand-name {
+    font-family: var(--font-serif);
+    font-size: 18px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--ink-primary); line-height: 1.15;
 }
-section[data-testid="stSidebar"] strong { color: #f0ede5 !important; }
+.sb-brand-tag {
+    font-family: var(--font-sans);
+    font-size: 10px; font-weight: 600; letter-spacing: 0.16em; color: var(--ink-muted);
+    margin-top: 3px; display: block;
+}
 .sb-section-label {
-    color: #666761 !important;
-    font-size: 9px !important;
-    letter-spacing: 0.13em !important;
+    color: var(--ink-muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+    padding: 18px 10px 6px !important;
+    margin-top: 4px;
 }
+
 section[data-testid="stSidebar"] .stButton > button,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
-    color: #aaa9a2 !important;
     background: transparent !important;
-    border: 1px solid transparent !important;
-    border-radius: 7px !important;
+    color: var(--ink-secondary) !important;
+    border: 0 !important;
+    border-radius: var(--radius-md) !important;
     box-shadow: none !important;
+    min-height: 36px !important;
+    padding: 6px 10px !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    font-weight: 500 !important;
+    font-size: 13.5px !important;
+    letter-spacing: 0 !important;
+    transition: color 0.18s var(--ease), background 0.18s var(--ease) !important;
 }
 section[data-testid="stSidebar"] .stButton > button:hover,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button:hover {
-    color: #f2efe7 !important;
-    background: rgba(255, 255, 255, 0.055) !important;
+    color: var(--ink-primary) !important;
+    background: var(--surface-3) !important;
     transform: none !important;
 }
 section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
-    color: #f2efe7 !important;
-    background: rgba(255, 255, 255, 0.075) !important;
-    border-color: rgba(255, 255, 255, 0.04) !important;
+    color: var(--ink-primary) !important;
+    background: var(--surface-3) !important;
+    font-weight: 600 !important;
 }
-.sb-new-chat-btn button {
-    color: #f3f0e8 !important;
-    background: rgba(255, 255, 255, 0.055) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: none !important;
+/* 新しいチャット：唯一の塗りボタン */
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
+    color: var(--ink-primary) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-subtle) !important;
+    box-shadow: var(--shadow-sm) !important;
+    justify-content: center !important;
+    font-weight: 600 !important;
 }
-.sb-new-chat-btn button:hover {
-    background: rgba(255, 255, 255, 0.09) !important;
-    border-color: rgba(255, 255, 255, 0.13) !important;
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
+    background: var(--shu) !important;
+    border-color: var(--shu) !important;
+    color: var(--on-accent) !important;
 }
 
-/* ヘッダーとポップオーバー */
+[class*="st-key-hist_pin_"] { display: none !important; }
+/* PC（マウス操作）では行の「···」を隠し、右クリックメニューから操作する。
+   スマホ・タブレット（タッチ操作）では「···」をそのまま表示する。
+   display:none にするとポップオーバーの表示位置がずれるため、幅0・透明にして場所だけ残す */
+@media (hover: hover) and (pointer: fine) {
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) > div:first-child {
+        flex: 1 1 auto !important; width: auto !important; min-width: 0 !important;
+    }
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) > div:last-child {
+        flex: 0 0 0 !important; width: 0 !important; min-width: 0 !important;
+        overflow: visible !important; opacity: 0 !important; pointer-events: none !important;
+    }
+}
+/* サイドバーの縦の間隔を詰めて整頓 */
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: 0.2rem !important; }
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 1.2rem !important; }
+section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] { gap: 0.2rem !important; align-items: center !important; }
+section[data-testid="stSidebar"] [data-testid="stPopover"] > button { color: var(--ink-muted) !important; }
+
+/* ---------- ポップオーバー（サイドバー等より必ず前面） ---------- */
+div[data-baseweb="popover"], div[data-baseweb="layer"], div[data-testid="stPopoverBody"] { z-index: 2147483000 !important; }
 div[data-testid="stPopoverBody"] {
-    color: var(--ink-primary) !important;
-    background: rgba(255, 253, 248, 0.98) !important;
+    background: var(--surface-2) !important;
     border: 1px solid var(--border-subtle) !important;
-    border-radius: 13px !important;
+    border-radius: var(--radius-xl) !important;
     box-shadow: var(--shadow-lg) !important;
+    padding: 14px !important;
 }
 div[data-testid="stPopoverBody"] p,
 div[data-testid="stPopoverBody"] span,
-div[data-testid="stPopoverBody"] label {
-    color: var(--ink-secondary) !important;
-}
+div[data-testid="stPopoverBody"] label { color: var(--ink-secondary) !important; }
+div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; }
 
-/* ウェルカムアクション */
-.bento-card-btn button,
-.main .stButton > button {
-    color: var(--ink-primary) !important;
-    background: rgba(255, 255, 255, 0.58) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: 10px !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+/* ---------- 上部バー（コンテナ key="topbar"） ---------- */
+.st-key-topbar {
+    position: sticky; top: 0; z-index: 90;
+    background: var(--surface-glass);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
+    border-bottom: 1px solid var(--border-hairline);
+    padding: 8px 0 8px !important;
+    margin-bottom: 14px;
+    gap: 0 !important;
 }
-.bento-card-btn button:hover,
-.main .stButton > button:hover {
-    color: var(--ink-primary) !important;
-    background: rgba(255, 255, 255, 0.92) !important;
-    border-color: rgba(174, 56, 43, 0.26) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: var(--shadow-md) !important;
-}
-button[kind="primary"], .stFormSubmitButton > button {
-    color: #fff !important;
-    background: #ae382b !important;
-    border: 0 !important;
-    box-shadow: 0 8px 24px rgba(117, 44, 34, 0.18) !important;
-}
-
-/* 会話 */
-div[data-testid="stChatMessage"] {
-    max-width: 800px !important;
-}
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    color: var(--ink-primary) !important;
-    background: #e9e5dc !important;
-    border: 0 !important;
-    border-radius: 14px 14px 3px 14px !important;
+.st-key-topbar [data-testid="stHorizontalBlock"] { align-items: center !important; gap: 8px !important; }
+.st-key-topbar [data-testid="stPopover"] > button,
+[data-testid="stMain"] [data-testid="stPopover"] > button {
+    background: transparent !important;
+    border: 1px solid transparent !important;
     box-shadow: none !important;
+    color: var(--ink-primary) !important;
+    font-weight: 600 !important; border-radius: 999px !important;
+    font-size: 13.5px !important; letter-spacing: 0.01em !important;
+    padding: 4px 14px !important; min-height: 34px !important;
+    transition: background 0.18s var(--ease), border-color 0.18s var(--ease) !important;
 }
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span,
-div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stMarkdownContainer"] * {
+[data-testid="stMain"] [data-testid="stPopover"] > button:hover {
+    background: var(--surface-3) !important; transform: none !important;
+}
+.pulse-dot {
+    width: 6px; height: 6px; background: var(--shu); border-radius: 50%;
+    display: inline-block; animation: aiPulse 2.6s ease-in-out infinite;
+}
+@keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.top-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-hairline);
+    color: var(--ink-muted); font-size: 12px; font-weight: 500;
+}
+.top-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--shu); color: var(--on-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12.5px; font-weight: 700;
+}
+
+/* ---------- ウェルカム ---------- */
+.hero { margin: 7vh 0 24px; }
+.hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
+    color: var(--shu); background: var(--shu-soft);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 18px;
+}
+.hero-title {
+    font-family: var(--font-serif) !important;
+    font-size: clamp(28px, 4.2vw, 42px) !important;
+    font-weight: 600 !important; line-height: 1.42 !important;
+    letter-spacing: 0.02em !important;
+    color: var(--ink-primary) !important; margin: 0 0 14px !important;
+}
+.hero-title em { font-style: normal; color: var(--shu); }
+.hero-sub { font-size: 14.5px; line-height: 1.9; color: var(--ink-muted); max-width: 480px; }
+
+/* クイックアクション：余白のあるカード */
+[data-testid="stMain"] [class*="st-key-quick_act_"] button {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+    min-height: 56px !important;
+    padding: 14px 48px 14px 20px !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    color: var(--ink-primary) !important;
+    font-size: 15px !important; font-weight: 500 !important; letter-spacing: 0.01em !important;
+    position: relative;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease) !important;
+}
+[data-testid="stMain"] [class*="st-key-quick_act_"] button > div { justify-content: flex-start !important; }
+[data-testid="stMain"] [class*="st-key-quick_act_"] button::after {
+    content: "→"; position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-dim);
+    transition: transform 0.25s var(--ease), color 0.2s ease;
+}
+[data-testid="stMain"] [class*="st-key-quick_act_"] button:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--border-strong) !important;
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-1px) !important;
     color: var(--ink-primary) !important;
 }
-div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) p {
-    color: var(--ink-secondary) !important;
+[data-testid="stMain"] [class*="st-key-quick_act_"] button:hover::after { color: var(--shu); transform: translate(4px, -50%); }
+
+/* ---------- 会話 ---------- */
+div[data-testid="stChatMessage"] {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    padding: 6px 0 !important; margin: 0 auto 16px !important;
+    max-width: 100% !important; width: 100% !important;
 }
+div[data-testid="stChatMessage"] [data-testid^="stChatMessageAvatar"] { display: none !important; }
+
+/* あなた：右寄せのやわらかい吹き出し */
+div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    max-width: 78% !important; width: fit-content !important;
+    margin-left: auto !important; margin-right: 0 !important;
+    background: var(--surface-3) !important;
+    border: 0 !important;
+    border-radius: 20px 20px 6px 20px !important;
+    padding: 10px 18px !important;
+}
+div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) p,
+div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) span,
+div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"] * {
+    color: var(--ink-primary) !important;
+}
+/* AI：地に直接。枠なし、行間をゆったり */
+div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) {
+    padding: 2px 0 !important;
+}
+div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) p,
+div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) li {
+    color: var(--ink-primary) !important; font-size: 15.5px !important; line-height: 1.95 !important;
+}
+
 .char-badge {
-    color: #9e382d !important;
-    background: transparent !important;
-    border: 0 !important;
-    padding-left: 0 !important;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 !important; margin: 0 0 8px !important;
+    background: transparent !important; border: 0 !important; border-radius: 0 !important;
+    font-family: var(--font-sans) !important;
+    font-size: 12.5px !important; font-weight: 600 !important; letter-spacing: 0.04em !important;
+    color: var(--ink-muted) !important;
 }
-.char-badge.char-master,
-.char-badge.char-senior,
-.char-badge.char-analyst {
-    color: #9e382d !important;
-    background: transparent !important;
-    border: 0 !important;
+.char-badge.char-master, .char-badge.char-senior, .char-badge.char-analyst {
+    color: var(--ink-muted) !important; background: transparent !important; border: 0 !important;
 }
 .memory-badge {
-    color: #8f362c !important;
-    background: rgba(174, 56, 43, 0.07) !important;
-    border-color: rgba(174, 56, 43, 0.16) !important;
+    display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; margin: 2px 0 12px;
+    background: var(--shu-soft) !important; color: var(--shu) !important;
+    border: 0 !important; border-radius: 999px !important;
+    font-size: 11.5px !important; font-weight: 500 !important;
 }
 .file-attachment-card {
-    background: rgba(255, 255, 255, 0.64) !important;
-    border-color: var(--border-hairline) !important;
-    box-shadow: none !important;
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-lg) !important; padding: 10px 16px !important; margin-bottom: 10px !important;
 }
-.file-attachment-name { color: var(--ink-primary) !important; }
+.file-attachment-details { display: flex; flex-direction: column; }
+.file-attachment-name { color: var(--ink-primary) !important; font-weight: 600 !important; font-size: 13.5px !important; }
+.file-attachment-meta { color: var(--ink-muted) !important; font-size: 11px !important; }
 
-/* 入力デッキ */
+/* 回答下の操作列：控えめなテキストボタン */
+div[data-testid="stChatMessage"] .stButton > button,
+div[data-testid="stChatMessage"] [data-testid="stPopover"] > button {
+    min-height: 30px !important; padding: 2px 12px !important;
+    font-size: 12px !important; color: var(--ink-muted) !important;
+    border-color: transparent !important; background: transparent !important;
+}
+div[data-testid="stChatMessage"] .stButton > button:hover,
+div[data-testid="stChatMessage"] [data-testid="stPopover"] > button:hover {
+    color: var(--ink-primary) !important; border-color: transparent !important; background: var(--surface-3) !important;
+}
+
+/* ---------- 入力欄 ---------- */
+div[data-testid="stBottom"], div[data-testid="stBottom"] > div {
+    background: transparent !important; border-top: 0 !important;
+}
 div[data-testid="stBottom"] {
-    background: linear-gradient(180deg, rgba(247, 245, 240, 0), rgba(247, 245, 240, 0.92) 28%, #f7f5f0 100%) !important;
-    backdrop-filter: none !important;
+    background: linear-gradient(180deg, transparent 0%, var(--canvas) 42%) !important;
+    padding: 18px 0 calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 9999 !important;
+}
+div[data-testid="stBottomBlockContainer"] {
+    max-width: 760px !important; padding: 0 24px !important; margin: 0 auto !important;
 }
 div[data-testid="stChatInput"] {
-    color: var(--ink-primary) !important;
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: var(--surface-2) !important;
     border: 1px solid var(--border-subtle) !important;
-    border-radius: 16px !important;
-    box-shadow: var(--shadow-float), inset 0 1px 0 #fff !important;
+    border-radius: 24px !important;
+    box-shadow: var(--shadow-float) !important;
+    padding: 4px 10px !important;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    background: #fff !important;
-    border-color: rgba(174, 56, 43, 0.48) !important;
-    box-shadow: 0 0 0 3px rgba(174, 56, 43, 0.06), var(--shadow-float) !important;
+    border-color: var(--shu) !important;
+    box-shadow: 0 0 0 4px var(--shu-soft), var(--shadow-float) !important;
+}
+div[data-testid="stChatInput"] [data-baseweb="textarea"],
+div[data-testid="stChatInput"] [data-baseweb="base-input"],
+div[data-testid="stChatInput"] [data-baseweb="textarea"] > div {
+    border: 0 !important; background: transparent !important; box-shadow: none !important; border-radius: 0 !important;
 }
 div[data-testid="stChatInput"] textarea {
-    color: var(--ink-primary) !important;
+    background: transparent !important; color: var(--ink-primary) !important;
+    font-size: 15px !important; line-height: 1.7 !important;
 }
-div[data-testid="stChatInput"] textarea::placeholder { color: #aaa49a !important; }
-div[data-testid="stChatInput"] button { color: #847e74 !important; }
-div[data-testid="stChatInput"] button:hover {
-    color: #8f2c23 !important;
-    background: #efece5 !important;
+div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
+div[data-testid="stChatInput"] button {
+    background: transparent !important; color: var(--ink-muted) !important;
+    border: 0 !important; border-radius: 999px !important; transition: all 0.15s ease !important;
 }
+div[data-testid="stChatInput"] button:hover { background: var(--surface-3) !important; color: var(--ink-primary) !important; }
+/* 送信ボタンだけ塗り */
+div[data-testid="stChatInputSubmitButton"] button, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
+    background: var(--shu) !important; color: var(--on-accent) !important;
+}
+div[data-testid="stChatInputSubmitButton"] button:hover, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {
+    background: var(--shu) !important; color: var(--on-accent) !important; opacity: 0.88;
+}
+div[data-testid="stChatInput"] button:disabled { background: transparent !important; color: var(--ink-dim) !important; }
 
-/* フォームとグラフ */
-div[data-baseweb="input"], div[data-baseweb="textarea"],
-div[data-baseweb="select"] > div {
+/* ---------- ボタン・フォーム ---------- */
+.stButton > button, .stDownloadButton > button, button[kind="secondary"] {
+    background: var(--surface-2) !important;
     color: var(--ink-primary) !important;
-    background: rgba(255, 255, 255, 0.72) !important;
-    border-color: var(--border-hairline) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 999px !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-weight: 500 !important; font-size: 13px !important; letter-spacing: 0.01em !important;
+    min-height: 38px !important; padding: 6px 18px !important;
+    transition: background 0.18s var(--ease), border-color 0.18s var(--ease), color 0.18s var(--ease) !important;
 }
-input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; }
-.stPlotlyChart, div[data-testid="stExpander"] {
-    background: rgba(255, 255, 255, 0.56) !important;
-    border-color: var(--border-hairline) !important;
+.stButton > button:hover, .stDownloadButton > button:hover {
+    background: var(--surface-3) !important; border-color: var(--border-strong) !important;
+    color: var(--ink-primary) !important; transform: none !important;
+}
+.stButton > button:active { transform: scale(0.985) !important; }
+button[kind="primary"], .stFormSubmitButton > button {
+    background: var(--shu) !important; color: var(--on-accent) !important; border: 0 !important;
+    border-radius: 999px !important; font-weight: 600 !important; letter-spacing: 0.04em !important;
     box-shadow: var(--shadow-sm) !important;
 }
-button[data-baseweb="tab"] { color: var(--ink-muted) !important; }
-button[data-baseweb="tab"][aria-selected="true"] {
-    color: #9e382d !important;
-    border-bottom-color: #ae382b !important;
+button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
+    background: var(--shu) !important; color: var(--on-accent) !important; opacity: 0.9; transform: none !important;
 }
 
-::-webkit-scrollbar-thumb { background: rgba(51, 46, 40, 0.18) !important; }
+div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--ink-primary) !important;
+}
+div[data-baseweb="input"]:focus-within, div[data-baseweb="textarea"]:focus-within, div[data-baseweb="select"]:focus-within {
+    border-color: var(--shu) !important; box-shadow: 0 0 0 3px var(--shu-soft) !important;
+}
+input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; background-color: transparent !important; }
+input::placeholder, textarea::placeholder { color: var(--ink-dim) !important; }
+[data-testid="stWidgetLabel"] p, label { color: var(--ink-secondary) !important; font-size: 13px !important; }
+div[role="radiogroup"] label p { color: var(--ink-secondary) !important; }
 
+div[data-baseweb="tab-list"] { border-bottom: 1px solid var(--border-hairline) !important; gap: 18px !important; }
+button[data-baseweb="tab"] { color: var(--ink-muted) !important; font-weight: 500 !important; font-size: 13px !important; padding: 10px 4px !important; }
+button[data-baseweb="tab"][aria-selected="true"] { color: var(--ink-primary) !important; font-weight: 600 !important; }
+div[data-baseweb="tab-highlight"] { background-color: var(--shu) !important; height: 2px !important; }
+
+div[data-testid="stExpander"] {
+    background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-lg) !important;
+}
+div[data-testid="stAlert"] {
+    background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
+    border-left: 3px solid var(--shu) !important; border-radius: var(--radius-md) !important;
+}
+div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
+.stSpinner > div { border-top-color: var(--shu) !important; }
+.stPlotlyChart {
+    background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-xl) !important; padding: 10px; box-shadow: var(--shadow-sm) !important;
+}
+
+/* ---------- ログイン ---------- */
+.login-wrap { max-width: 520px; margin: 9vh auto 18px; text-align: left; }
+.login-logo {
+    width: 48px; height: 48px; border-radius: 14px; background: var(--shu); color: var(--on-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+}
+.login-title { font-family: var(--font-serif); font-size: 34px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-primary); }
+.login-subtitle { margin-top: 10px; font-size: 13.5px; line-height: 1.9; color: var(--ink-muted); }
+
+/* ---------- レスポンシブ ---------- */
+@media (max-width: 900px) {
+    [data-testid="stMainBlockContainer"] { padding: 20px 16px 150px !important; }
+    .hero { margin-top: 3vh; }
+    .st-key-topbar { padding-left: 44px !important; }
+}
 @media (max-width: 600px) {
-    .main .block-container { padding: 16px 12px 140px !important; }
+    [data-testid="stMainBlockContainer"] { padding: 14px 12px 140px !important; }
+    div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { max-width: 90% !important; padding: 10px 16px !important; }
     div[data-testid="stBottom"] > div { padding: 0 9px !important; }
+    [data-testid="stMain"] [class*="st-key-quick_act_"] button { font-size: 14.5px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -1629,141 +1370,206 @@ def switch_ai_character(new_char: str):
                 "content": CHARACTERS[new_char]["welcome"]
             }]
 
+# ==================== サイドバーのピン留め／プロジェクト（ユーザーが自由に追加・編集・削除） ====================
+def _sidebar_items_path() -> str:
+    user = st.session_state.get("logged_in_user", "default")
+    user_safe = "".join(c for c in user if c.isalnum() or c in ("-", "_")) or "default"
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sidebar_items")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, f"{user_safe}.json")
+
+def load_sidebar_items(kind: str) -> list:
+    """kind は 'pins'。初期状態は空。旧「プロジェクト」項目があればピン留めへ移行する。"""
+    try:
+        with open(_sidebar_items_path(), "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        if not isinstance(data, dict):
+            return []
+        items = data.get(kind, [])
+        items = items if isinstance(items, list) else []
+        legacy = data.get("projects", [])
+        if kind == "pins" and isinstance(legacy, list) and legacy:
+            items = items + legacy
+            data["pins"], data["projects"] = items, []
+            with open(_sidebar_items_path(), "w", encoding="utf-8") as fp:
+                json.dump(data, fp, ensure_ascii=False, indent=2)
+        return items
+    except Exception:
+        return []
+
+def save_sidebar_items(kind: str, items: list):
+    path = _sidebar_items_path()
+    try:
+        with open(path, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        if not isinstance(data, dict):
+            data = {}
+    except Exception:
+        data = {}
+    data[kind] = items
+    with open(path, "w", encoding="utf-8") as fp:
+        json.dump(data, fp, ensure_ascii=False, indent=2)
+
+def _toggle_session_pin(sess: dict, is_pinned: bool):
+    pins = load_sidebar_items("pins")
+    if is_pinned:
+        pins = [x for x in pins if x.get("session_id") != sess["id"]]
+    else:
+        pins.append({"id": f"{int(time.time() * 1000)}", "label": sess["title"], "session_id": sess["id"]})
+    save_sidebar_items("pins", pins)
+
+def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
+    st.markdown(f"<div class='sb-section-label'>{title}</div>", unsafe_allow_html=True)
+    items = load_sidebar_items(kind)
+
+    for it in items:
+        c_use, c_opt = st.columns([0.82, 0.18])
+        with c_use:
+            if st.button(it["label"], key=f"{kind}_use_{it['id']}", icon=item_icon, use_container_width=True):
+                if it.get("session_id"):
+                    loaded = load_session_messages(it["session_id"])
+                    if loaded is not None:
+                        st.session_state.current_session_id = it["session_id"]
+                        st.session_state.messages = loaded
+                else:
+                    st.session_state["sidebar_prompt"] = it.get("prompt") or it["label"]
+                st.rerun()
+        with c_opt:
+            with st.popover("···", use_container_width=True):
+                new_label = st.text_input("名前", value=it["label"], key=f"{kind}_ren_{it['id']}")
+                new_prompt = it.get("prompt", "")
+                if not it.get("session_id"):
+                    new_prompt = st.text_area("送信する質問（空なら名前をそのまま送信）", value=it.get("prompt", ""),
+                                              height=90, key=f"{kind}_prm_{it['id']}")
+                if st.button("保存", key=f"{kind}_save_{it['id']}", use_container_width=True):
+                    it["label"] = new_label.strip() or it["label"]
+                    it["prompt"] = new_prompt.strip()
+                    save_sidebar_items(kind, items)
+                    st.rerun()
+                if st.button("削除", key=f"{kind}_del_{it['id']}", icon=":material/delete:", use_container_width=True):
+                    save_sidebar_items(kind, [x for x in items if x["id"] != it["id"]])
+                    st.rerun()
+
+    with st.popover("追加", icon=":material/add:", use_container_width=True):
+        add_label = st.text_input("名前", key=f"{kind}_new_label", placeholder="例: 会の伸び合い")
+        add_prompt = st.text_area("送信する質問（任意）", key=f"{kind}_new_prompt", height=90,
+                                  placeholder="空なら名前をそのまま送信します")
+        if st.button("追加する", key=f"{kind}_add_btn", use_container_width=True, type="primary"):
+            if add_label.strip():
+                items.append({"id": f"{int(time.time() * 1000)}", "label": add_label.strip(), "prompt": add_prompt.strip()})
+                save_sidebar_items(kind, items)
+                st.session_state.pop(f"{kind}_new_label", None)
+                st.session_state.pop(f"{kind}_new_prompt", None)
+                st.rerun()
+
 # ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
 
     # ── ブランドヘッダー（ロゴ + バッジ） ─────────────────────────
     logo_b64 = get_asset_base64("kyudo_ai_logo.jpg")
     if logo_b64:
-        logo_html = f'<img src="data:image/jpeg;base64,{logo_b64}" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 16px rgba(16,185,129,0.25); object-fit: cover;">'
+        logo_html = f'<img src="data:image/jpeg;base64,{logo_b64}" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-subtle); object-fit: cover;">'
     else:
-        logo_html = '<div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; font-size: 20px;">🏹</div>'
+        logo_html = '<div style="width: 38px; height: 38px; border-radius: 10px; background: var(--shu); color: var(--on-accent); display: flex; align-items: center; justify-content: center; font-size: 19px;">🏹</div>'
 
     st.markdown(f"""
-    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 10px 4px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            {logo_html}
-            <div>
-                <span style="font-size: 16px; font-weight: 700; color: #ececec; letter-spacing: -0.02em;">ChatGPT</span>
-                <span style="font-size: 10.5px; color: #10b981; font-weight: 600; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);">弓道AI</span>
-            </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 14px; color: #8e8e8e; font-size: 15px;">
-            <span style="cursor: pointer;" title="検索">🔍</span>
-            <span style="cursor: pointer;" title="サイドバーを折りたたむ">◫</span>
+    <div style="display: flex; align-items: center; gap: 12px; padding: 8px 4px 16px 4px;">
+        {logo_html}
+        <div>
+            <div class="sb-brand-name">弓道AI道場</div>
+            <span class="sb-brand-tag">KYUDO AI DOJO</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # ── 新規チャットボタン ──────────────────────────────────────
-    st.markdown('<div class="sb-new-chat-btn">', unsafe_allow_html=True)
-    if st.button("✏️  新しいチャット", key="sidebar_new_chat_btn", use_container_width=True):
+    if st.button("新しいチャット", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # ── スタジオ・分析メニュー ──────────────────────────────────
-    st.markdown("<div class='sb-section-label'>スタジオ・分析</div>", unsafe_allow_html=True)
-
-    with st.popover("🖼️  画像（射形3D解析）", use_container_width=True):
-        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
-        st.caption("画面下の入力欄の「＋」ボタンから動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
-
-    with st.popover("⏱️  スケジュール", use_container_width=True):
-        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
-        st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
-        st.text_input("今日の稽古目標:", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
-        if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
-            st.success("稽古目標を記録しました！")
-
-    with st.popover("📖  ライブラリ", use_container_width=True):
-        st.markdown("""
-        <div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
-        <div style='font-size: 12px; color: #cbd5e1; line-height: 1.7;'>
-        <b>1. 足踏み</b> : 両足を開く基本の土台<br>
-        <b>2. 胴造り</b> : 丹田に息を沈め姿勢を正す<br>
-        <b>3. 弓構え</b> : 取懸け・手の内・物見を整える<br>
-        <b>4. 打起し</b> : 静かに頭上へ持ち上げる<br>
-        <b>5. 引分け</b> : 左右均等に押し引き開く<br>
-        <b>6. 会</b> : 狙いと伸び合いの極致<br>
-        <b>7. 離れ</b> : 伸び合いの極まりで放たれる<br>
-        <b>8. 残心</b> : 姿勢と精神を保つ
-        </div>
-        """, unsafe_allow_html=True)
-
-    with st.popover("🧩  プラグイン", use_container_width=True):
-        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
-        st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
-
-    # ── 指導陣（キャラクター切替） ──────────────────────────────
+    # ── ツール（解析・稽古目標・射法八節・生体力学を1つに集約） ──────
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
-    with st.popover("…  探索（指導陣切替）", use_container_width=True):
-        st.markdown("<div style='font-size: 11px; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;'>指導陣（AIモデル）を選択</div>", unsafe_allow_html=True)
-        for cname in CHARACTERS.keys():
-            c_info_item = CHARACTERS[cname]
-            is_active = (cname == cur_c)
-            avatar_b64 = get_asset_base64(c_info_item.get("avatar_file", ""))
-            if avatar_b64:
-                prefix = f'<img src="data:image/jpeg;base64,{avatar_b64}" style="width: 22px; height: 22px; border-radius: 50%; vertical-align: middle; margin-right: 8px;">'
-            else:
-                prefix = f"{c_info_item['icon']} "
-            
-            btn_label = f"{'✓ ' if is_active else '　 '}{c_info_item['icon']} {cname}"
-            if st.button(btn_label, key=f"sb_explore_char_{cname}", use_container_width=True, help=c_info_item["desc"]):
-                switch_ai_character(cname)
-                st.rerun()
+    with st.popover("ツール", icon=":material/apps:", use_container_width=True):
+        t_an, t_goal, t_lib, t_bio = st.tabs(["解析", "稽古目標", "射法八節", "生体力学"])
+        with t_an:
+            st.markdown("**射形動画・写真の3D解析**")
+            st.caption("画面下の入力欄の「＋」から動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
+        with t_goal:
+            st.markdown("**稽古スケジュール＆課題**")
+            st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
+            st.text_input("今日の稽古目標", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
+            if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
+                st.success("稽古目標を記録しました！")
+        with t_lib:
+            st.markdown("""
+            <div style='font-size: 12.5px; color: var(--ink-secondary); line-height: 1.9;'>
+            <b>1. 足踏み</b> : 両足を開く基本の土台<br>
+            <b>2. 胴造り</b> : 丹田に息を沈め姿勢を正す<br>
+            <b>3. 弓構え</b> : 取懸け・手の内・物見を整える<br>
+            <b>4. 打起し</b> : 静かに頭上へ持ち上げる<br>
+            <b>5. 引分け</b> : 左右均等に押し引き開く<br>
+            <b>6. 会</b> : 狙いと伸び合いの極致<br>
+            <b>7. 離れ</b> : 伸び合いの極まりで放たれる<br>
+            <b>8. 残心</b> : 姿勢と精神を保つ
+            </div>
+            """, unsafe_allow_html=True)
+        with t_bio:
+            st.markdown("**弓道生体力学プラグイン**")
+            st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
 
-    # ── ピン留め ──────────────────────────────────────────────
-    st.markdown("<div class='sb-section-label'>ピン留め稽古</div>", unsafe_allow_html=True)
-    sidebar_pins = [
-        ("pin_chu_sha", "🎯 弓道中と斜の使い方", "弓道における『中（ちゅう）』と『斜（しゃ）』の使い方・身体の意識の相違点を教えてください。"),
-        ("pin_taikai", "📊 弓道大会記録システム", "弓道の大会や記録会で的中率を安定させるためのルーティンと記録分析方法を教えてください。"),
-        ("pin_kimono", "🥋 黒い着物の女性", "弓道着・黒紋付や着物での射術・体配の要点について教えてください。"),
-        ("pin_line_icon", "🎨 LINEアイコン作成", "弓道をモチーフにした洗練されたアイコンデザインのアイデアを教えてください。"),
-    ]
-    for pin_key, pin_label, pin_prompt in sidebar_pins:
-        if st.button(pin_label, key=pin_key, use_container_width=True):
-            st.session_state["sidebar_prompt"] = pin_prompt
-            st.rerun()
+    # ── ピン留め・プロジェクト（初期は空。自由に追加・編集・削除） ──
+    render_custom_sidebar_section("pins", "ピン留め", ":material/push_pin:")
 
-    # ── プロジェクト ──────────────────────────────────────────
-    st.markdown("<div class='sb-section-label'>プロジェクト</div>", unsafe_allow_html=True)
-    sidebar_projects = [
-        ("proj_writing", "🟣 ライティング", "弓道に関する解説記事や文章の推敲・執筆をサポートしてください。"),
-        ("proj_portfolio", "🎓 ポートフォリオ", "これまでの弓道の修練歴や実績、課題をポートフォリオ形式で整理してください。"),
-    ]
-    for proj_key, proj_label, proj_prompt in sidebar_projects:
-        if st.button(proj_label, key=proj_key, use_container_width=True):
-            st.session_state["sidebar_prompt"] = proj_prompt
-            st.rerun()
-
-    # ── 履歴（今日／昨日／過去7日間／それ以前） ──────────────
+    # ── 履歴（今日／昨日／過去7日間／それ以前）：各行にピン留めボタン ──────
     all_sess = get_all_sessions()
     if all_sess:
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
+        pinned_ids = {x.get("session_id") for x in load_sidebar_items("pins") if x.get("session_id")}
 
         for group_name, group_items in group_sessions_by_date(all_sess[:30]).items():
             st.markdown(f"<div class='sb-section-label'>{group_name}</div>", unsafe_allow_html=True)
 
             for sess in group_items:
                 is_active = (sess["id"] == cur_id)
+                is_pinned = sess["id"] in pinned_ids
+                col_btn, col_opt = st.columns([0.84, 0.16])
 
-                if is_active:
-                    col_btn, col_opt = st.columns([0.82, 0.18])
-                    with col_btn:
-                        st.button(f"💬 {sess['title']}", key=f"sess_active_{sess['id']}", use_container_width=True)
-                    with col_opt:
-                        with st.popover("···", use_container_width=True):
-                            st.caption("チャット設定")
-                            rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
-                            if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
-                                rename_session(sess["id"], rename_val)
-                                st.rerun()
-                            if st.button("🗑️ このチャットを削除", key=f"b_del_{sess['id']}", use_container_width=True):
-                                delete_session(sess["id"])
+                with col_btn:
+                    btn_key = f"sess_active_{sess['id']}" if is_active else f"sess_btn_{sess['id']}"
+                    if st.button(sess['title'], key=btn_key, use_container_width=True) and not is_active:
+                        st.session_state.current_session_id = sess["id"]
+                        loaded = load_session_messages(sess["id"])
+                        if loaded is not None:
+                            st.session_state.messages = loaded
+                        st.rerun()
+                    # 右クリックメニュー用（画面には表示しない）
+                    if st.button("unpin" if is_pinned else "pin", key=f"hist_pin_{sess['id']}"):
+                        _toggle_session_pin(sess, is_pinned)
+                        st.rerun()
+
+                with col_opt:
+                    with st.popover("···", use_container_width=True):
+                        st.caption("チャット設定")
+                        rename_val = st.text_input("タイトル変更", value=sess["title"], key=f"ren_{sess['id']}")
+                        if st.button("ピン留めを外す" if is_pinned else "ピン留めする", key=f"b_pin_{sess['id']}",
+                                     icon=":material/push_pin:", use_container_width=True):
+                            _toggle_session_pin(sess, is_pinned)
+                            st.rerun()
+                        if st.button("変更保存", key=f"b_ren_{sess['id']}", use_container_width=True):
+                            rename_session(sess["id"], rename_val)
+                            _pins = load_sidebar_items("pins")
+                            for x in _pins:
+                                if x.get("session_id") == sess["id"] and rename_val.strip():
+                                    x["label"] = rename_val.strip()
+                            save_sidebar_items("pins", _pins)
+                            st.rerun()
+                        if st.button("このチャットを削除", key=f"b_del_{sess['id']}", icon=":material/delete:", use_container_width=True):
+                            delete_session(sess["id"])
+                            save_sidebar_items("pins", [x for x in load_sidebar_items("pins") if x.get("session_id") != sess["id"]])
+                            if is_active:
                                 remains = get_all_sessions()
                                 if remains:
                                     st.session_state.current_session_id = remains[0]["id"]
@@ -1772,28 +1578,8 @@ with st.sidebar:
                                     new_id = f"session_{int(time.time())}"
                                     st.session_state.current_session_id = new_id
                                     st.session_state.messages = []
-                                st.rerun()
-                else:
-                    if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
-                        st.session_state.current_session_id = sess["id"]
-                        loaded = load_session_messages(sess["id"])
-                        if loaded is not None:
-                            st.session_state.messages = loaded
-                        st.rerun()
+                            st.rerun()
 
-    else:
-        st.markdown("<div class='sb-section-label'>最近の項目</div>", unsafe_allow_html=True)
-        recent_samples = [
-            ("志望動機作成:VEVENT", "弓道の指導員・武道関連の志望動機書（VEVENT形式）の作成をサポートしてください。"),
-            ("志望動機作成", "大学弓道部や実業団弓道部への志望動機文の添削をお願いします。"),
-            ("履歴書修正対応", "弓道有段者としての実績や礼儀作法をアピールする履歴書の自己PRを作成してください。"),
-            ("面接用自己紹介作成", "弓道で培った集中力と残心の精神を伝える面接自己紹介を作ってください。"),
-            ("配慮事項の承諾結果", "大会や合宿での健康管理・配慮事項に関する確認事項を整理してください。"),
-        ]
-        for s_idx, (s_title, s_prompt) in enumerate(recent_samples):
-            if st.button(f"💬 {s_title}", key=f"sample_sess_{s_idx}", use_container_width=True):
-                st.session_state["sidebar_prompt"] = s_prompt
-                st.rerun()
 
     # ── スペーサー ──────────────────────────────────────────────
     st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
@@ -1805,34 +1591,21 @@ with st.sidebar:
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    sb_u_c1, sb_u_c2 = st.columns([0.62, 0.38])
-    with sb_u_c1:
-        st.markdown("""
-        <div style="display: flex; align-items: center; gap: 10px; padding: 4px 0;">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: #2f2f2f; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #ffffff; font-weight: 700;">
-                R
-            </div>
-            <div>
-                <div style="font-size: 13.5px; font-weight: 600; color: #ffffff; line-height: 1.2;">runtyoma</div>
-                <div style="font-size: 11px; color: #8e8e8e;">無料</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    with sb_u_c2:
-        st.markdown("""
-        <div style="text-align: right; padding-top: 6px;">
-            <span style="display: inline-block; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ececec; font-size: 11px; font-weight: 600; cursor: pointer;">アップグレード</span>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 4px 4px; border-top: 1px solid var(--border-hairline);">
+        <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--shu); color: var(--on-accent); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700;">{(disp_name or "R")[:1].upper()}</div>
+        <div style="font-size: 13.5px; font-weight: 600; color: var(--ink-primary);">{disp_name}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    with st.popover("⚙️ アカウント設定・射手カルテ", use_container_width=True):
+    with st.popover("アカウント設定・射手カルテ", icon=":material/settings:", use_container_width=True):
         st.markdown(f"""
         <div style="border: 1px solid var(--border-hairline); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface-2);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: var(--accent-emerald-soft); color: var(--accent-emerald-light); border: 1px solid rgba(16,185,129,0.3); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 10px;">KYUDO AI PRO</span>
+                <span style="background: var(--accent-emerald-soft); color: var(--accent-emerald-light); border: 1px solid var(--border-subtle); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.08em;">KYUDO AI PRO</span>
                 <span style="font-size: 11px; font-weight: 600; color: var(--accent-emerald-light);">● 稼働中</span>
             </div>
-            <div style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 2px 0;">{disp_name}</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--ink-primary); margin: 2px 0;">{disp_name}</div>
             <div style="font-size: 11px; color: var(--ink-dim); font-family: monospace;">ID: KYD-8820-{user_id_num}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1850,17 +1623,6 @@ with st.sidebar:
             cur_size = size_map[font_size_choice]
             st.markdown(f"<style>.stMarkdown p, div[data-testid='stChatMessage'] p {{ font-size: {cur_size} !important; }}</style>", unsafe_allow_html=True)
             
-            if st.button("🗑️ この会話をリセット", use_container_width=True, key="reset_chat_sb"):
-                cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
-                st.session_state.messages = [{
-                    "role": "assistant",
-                    "char": cur_c,
-                    "content": CHARACTERS[cur_c]["welcome"]
-                }]
-                if "current_session_id" in st.session_state:
-                    save_current_session(st.session_state.current_session_id, st.session_state.messages)
-                st.rerun()
-
             st.divider()
             if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
                 st.session_state.authenticated = False
@@ -1877,7 +1639,7 @@ with st.sidebar:
                 for idx, note in enumerate(user_notes):
                     col_n1, col_n2 = st.columns([0.80, 0.20])
                     with col_n1:
-                        st.markdown(f"<div style='font-size: 12px; padding: 4px 8px; background: var(--surface-3); border-radius: 6px; margin-bottom: 4px; color: #ffffff;'>📌 {note}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 12px; padding: 4px 8px; background: var(--surface-3); border-radius: 6px; margin-bottom: 4px; color: var(--ink-primary);'>📌 {note}</div>", unsafe_allow_html=True)
                     with col_n2:
                         if st.button("✕", key=f"del_mem_p_{idx}", help="削除"):
                             remove_user_memory_item(cur_user, idx)
@@ -1915,11 +1677,96 @@ with st.sidebar:
                     mime="text/plain",
                     use_container_width=True
                 )
+            # 履歴の一括削除（確認チェック付き）
+            st.divider()
+            confirm_wipe = st.checkbox("すべての履歴を削除することを確認しました", key="confirm_wipe_all_history")
+            if st.button("履歴をすべて削除", icon=":material/delete_sweep:", use_container_width=True,
+                         key="btn_wipe_all_history", disabled=not confirm_wipe):
+                for _s in get_all_sessions():
+                    delete_session(_s["id"])
+                st.session_state.current_session_id = f"session_{int(time.time())}"
+                st.session_state.messages = []
+                st.session_state.pop("confirm_wipe_all_history", None)
+                st.rerun()
             st.markdown("""
-            <div style="background-color: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 8px; padding: 10px; font-size: 11.5px; color: #34d399; margin-top: 8px;">
+            <div style="background-color: transparent; border: 1px dashed var(--border-strong); border-radius: 8px; padding: 10px; font-size: 11.5px; color: var(--ink-secondary); margin-top: 8px;">
                 🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
             """, unsafe_allow_html=True)
+
+# ==================== サイドバーの右クリックメニュー（履歴・ピン留め・プロジェクト） ====================
+# Streamlit には右クリックメニューの機能がないため、親ページに小さなJSを1回だけ注入し、
+# 右クリックされた行の「ピン」ボタン／「···」ボタンを代わりに押す方式で実現する。
+_CTX_MENU_JS = r"""
+(function () {
+  if (document.getElementById('kyudo-ctx-script-v1')) return;
+  var marker = document.createElement('meta'); marker.id = 'kyudo-ctx-script-v1'; document.head.appendChild(marker);
+
+  var st = document.createElement('style');
+  st.textContent = [
+    '#kyudo-ctx{position:fixed;z-index:2147483647;display:none;min-width:190px;padding:6px;',
+    'background:var(--surface-2,#fff);color:var(--ink-primary,#1c1917);border:1px solid var(--border-subtle,rgba(0,0,0,.12));',
+    'border-radius:12px;box-shadow:var(--shadow-lg,0 18px 48px -14px rgba(0,0,0,.25));font-family:var(--font-sans,sans-serif);font-size:13.5px;}',
+    '#kyudo-ctx button{display:block;width:100%;text-align:left;padding:8px 12px;border:0;border-radius:8px;background:transparent;',
+    'color:inherit;font:inherit;cursor:pointer;}',
+    '#kyudo-ctx button:hover{background:var(--surface-3,#eeebe5);}'
+  ].join('');
+  document.head.appendChild(st);
+
+  var menu = document.createElement('div'); menu.id = 'kyudo-ctx'; document.body.appendChild(menu);
+  function hide() { menu.style.display = 'none'; menu.innerHTML = ''; }
+  function addItem(label, fn) {
+    var b = document.createElement('button'); b.textContent = label;
+    b.addEventListener('click', function (ev) { ev.stopPropagation(); hide(); setTimeout(fn, 0); });
+    menu.appendChild(b);
+  }
+
+  document.addEventListener('contextmenu', function (e) {
+    var sel = '[class*="st-key-sess_btn_"],[class*="st-key-sess_active_"],[class*="st-key-pins_use_"]';
+    var row = e.target.closest ? e.target.closest(sel) : null;
+    if (!row) { hide(); return; }
+    var block = row.closest('[data-testid="stHorizontalBlock"]');
+    if (!block) return;
+    var moreBtn = block.querySelector('[data-testid="stPopover"] button');
+    var pinBtn = block.querySelector('[class*="st-key-hist_pin_"] button');
+    e.preventDefault();
+    menu.innerHTML = '';
+    if (pinBtn) {
+      var pinned = (pinBtn.textContent || '').indexOf('unpin') !== -1;
+      addItem(pinned ? 'ピン留めを外す' : 'ピン留めする', function () { pinBtn.click(); });
+    }
+    if (moreBtn) {
+      var isHist = !!pinBtn;
+      addItem(isHist ? '名前を変更・削除…' : '編集・削除…', function () { moreBtn.click(); });
+    }
+    if (!menu.children.length) return;
+    menu.style.display = 'block';
+    var x = Math.min(e.clientX, window.innerWidth - menu.offsetWidth - 8);
+    var y = Math.min(e.clientY, window.innerHeight - menu.offsetHeight - 8);
+    menu.style.left = Math.max(8, x) + 'px'; menu.style.top = Math.max(8, y) + 'px';
+  }, true);
+
+  document.addEventListener('click', hide, true);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
+  window.addEventListener('scroll', hide, true);
+  window.addEventListener('resize', hide);
+})();
+"""
+
+def render_sidebar_context_menu():
+    loader = (
+        "<script>(function(){try{var d=window.parent.document;"
+        "var s=d.createElement('script');s.textContent=" + json.dumps(_CTX_MENU_JS).replace("</", "<\\/") + ";"
+        "d.head.appendChild(s);}catch(e){console.warn('context menu unavailable',e);}})();</script>"
+    )
+    try:
+        components.html(loader, height=0)
+    except Exception:
+        if hasattr(st, "iframe"):
+            st.iframe(loader, height=1)
+
+with st.sidebar:
+    render_sidebar_context_menu()
 
 # APIキーの安全な読み込み
 env_api_key = os.environ.get("GEMINI_API_KEY", "")
@@ -1946,10 +1793,9 @@ active_api_key = env_api_key
 cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 short_char_name = cur_char_val.split("（")[0]
 
-top_cols = st.columns([0.68, 0.32])
-with top_cols[0]:
-    with st.popover(f"● {short_char_name} ▾", use_container_width=False):
-        st.markdown("<div style='font-size: 11px; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;'>指導陣（AIモデル）を選択</div>", unsafe_allow_html=True)
+with st.container(key="topbar"):
+    with st.popover(f"{short_char_name}", icon=":material/expand_more:", use_container_width=False):
+        st.caption("指導陣（AIモデル）を選択")
         for cname in CHARACTERS.keys():
             c_info_item = CHARACTERS[cname]
             is_active = (cname == cur_char_val)
@@ -1957,18 +1803,6 @@ with top_cols[0]:
             if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
                 switch_ai_character(cname)
                 st.rerun()
-
-with top_cols[1]:
-    st.markdown("""
-    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 4px;">
-        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; font-size: 12.5px; font-weight: 600; cursor: pointer;">
-            <span>✦</span><span>アップグレード</span>
-        </div>
-        <div style="width: 30px; height: 30px; border-radius: 50%; background: #2f2f2f; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #ffffff; font-weight: 600;">
-            R
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 selected_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 char_info = CHARACTERS[selected_char]
@@ -2150,9 +1984,9 @@ def create_muscle_radar_chart(muscle_scores: dict):
         r=values_closed,
         theta=categories_closed,
         fill='toself',
-        fillcolor='rgba(16, 185, 129, 0.22)',
-        line=dict(color='#10b981', width=2.5),
-        marker=dict(size=6, color='#34d399'),
+        fillcolor='rgba(91, 132, 196, 0.22)',
+        line=dict(color='#5b84c4', width=2.5),
+        marker=dict(size=6, color='#5b84c4'),
         name='筋活動バランス'
     ))
     
@@ -2161,19 +1995,19 @@ def create_muscle_radar_chart(muscle_scores: dict):
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
-                tickfont=dict(size=10, color='#64748b'),
-                gridcolor='#222733',
-                linecolor='#222733'
+                tickfont=dict(size=10, color='rgba(120,113,108,0.95)'),
+                gridcolor='rgba(120,113,108,0.25)',
+                linecolor='rgba(120,113,108,0.25)'
             ),
             angularaxis=dict(
-                tickfont=dict(size=11, color='#f8fafc', weight=600),
-                gridcolor='#222733',
-                linecolor='#222733'
+                tickfont=dict(size=11, color='rgba(120,113,108,1)', weight=600),
+                gridcolor='rgba(120,113,108,0.25)',
+                linecolor='rgba(120,113,108,0.25)'
             ),
-            bgcolor='#0e1013'
+            bgcolor='rgba(0,0,0,0)'
         ),
-        paper_bgcolor='#13161b',
-        plot_bgcolor='#13161b',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=35, r=35, t=25, b=25),
         height=340,
         showlegend=False
@@ -2213,29 +2047,29 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     # 骨格リンク定義
     bones = [
         ("Head", "Neck", "#f43f5e", 6),
-        ("Neck", "Chest", "#10b981", 7),
-        ("Chest", "Pelvis", "#10b981", 8),
+        ("Neck", "Chest", "#7a8c82", 7),
+        ("Chest", "Pelvis", "#7a8c82", 8),
         # 押手リンク
-        ("Chest", "L_Shoulder", "#10b981", 6),
-        ("L_Shoulder", "L_Elbow", "#38bdf8", 6),
-        ("L_Elbow", "L_Wrist", "#38bdf8", 6),
+        ("Chest", "L_Shoulder", "#7a8c82", 6),
+        ("L_Shoulder", "L_Elbow", "#5b84c4", 6),
+        ("L_Elbow", "L_Wrist", "#5b84c4", 6),
         # 妻手リンク
-        ("Chest", "R_Shoulder", "#10b981", 6),
-        ("R_Shoulder", "R_Elbow", "#fbbf24", 6),
-        ("R_Elbow", "R_Wrist", "#fbbf24", 6),
+        ("Chest", "R_Shoulder", "#7a8c82", 6),
+        ("R_Shoulder", "R_Elbow", "#c58b3a", 6),
+        ("R_Elbow", "R_Wrist", "#c58b3a", 6),
         # 下半身リンク
-        ("Pelvis", "L_Hip", "#10b981", 6),
-        ("L_Hip", "L_Foot", "#10b981", 6),
-        ("Pelvis", "R_Hip", "#10b981", 6),
-        ("R_Hip", "R_Foot", "#10b981", 6),
+        ("Pelvis", "L_Hip", "#7a8c82", 6),
+        ("L_Hip", "L_Foot", "#7a8c82", 6),
+        ("Pelvis", "R_Hip", "#7a8c82", 6),
+        ("R_Hip", "R_Foot", "#7a8c82", 6),
         # 弓幹
-        ("Bow_Bottom", "L_Wrist", "#a855f7", 4),
-        ("L_Wrist", "Bow_Top", "#a855f7", 4),
+        ("Bow_Bottom", "L_Wrist", "#8a6bb0", 4),
+        ("L_Wrist", "Bow_Top", "#8a6bb0", 4),
         # 矢（L_Wrist から R_Wrist への水平ベクトル）
-        ("L_Wrist", "R_Wrist", "#eab308", 5),
+        ("L_Wrist", "R_Wrist", "#b8912f", 5),
         # 弦（Bow_Top -> R_Wrist -> Bow_Bottom）
-        ("Bow_Top", "R_Wrist", "#94a3b8", 2),
-        ("R_Wrist", "Bow_Bottom", "#94a3b8", 2)
+        ("Bow_Top", "R_Wrist", "#a8a29e", 2),
+        ("R_Wrist", "Bow_Bottom", "#a8a29e", 2)
     ]
     
     fig = go.Figure()
@@ -2262,25 +2096,25 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     fig.add_trace(go.Scatter3d(
         x=jx, y=jy, z=jz,
         mode='markers+text',
-        marker=dict(size=6, color='#10b981'),
+        marker=dict(size=6, color='#2b4c7e'),
         text=["頭", "頸", "胸", "丹田", "押手肩", "押手肘", "角見(押手)", "妻手肩", "妻手肘", "取懸け", "左腰", "左足", "右腰", "右足", "弓(本)", "弓(末)"],
         textposition="top center",
-        textfont=dict(size=10, color='#f8fafc'),
+        textfont=dict(size=10, color='rgba(120,113,108,1)'),
         hoverinfo='text',
         showlegend=False
     ))
     
     fig.update_layout(
         scene=dict(
-            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='#0e1013', gridcolor='#222733', linecolor='#222733', color='#64748b'),
-            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='#0e1013', gridcolor='#222733', linecolor='#222733', color='#64748b'),
-            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='#0e1013', gridcolor='#222733', linecolor='#222733', color='#64748b'),
+            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
+            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
+            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
             camera=dict(
                 eye=dict(x=1.3, y=-1.5, z=0.8) # 斜め前からの自然な視点
             ),
             aspectratio=dict(x=1.4, y=0.8, z=1.5)
         ),
-        paper_bgcolor='#13161b',
+        paper_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=5, r=5, t=5, b=5),
         height=360
     )
@@ -2457,10 +2291,9 @@ quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバー�
 if not st.session_state.messages:
     # ===== ChatGPT公式完全一致：ウェルカム画面（今日は何をしましょうか？） =====
     st.markdown("""
-    <div style="text-align: center; margin: 14vh 0 32px 0;">
-        <h1 style="font-size: clamp(26px, 3.2vw, 34px); font-weight: 700; color: #ececec; margin: 0 0 16px 0; letter-spacing: -0.02em;">
-            今日は何をしましょうか？
-        </h1>
+    <div class="hero">
+        <h1 class="hero-title">今日の稽古は、<br><em>何</em>から始めますか。</h1>
+        <div class="hero-sub">射形の解析、早気や離れの相談、射法八節の学び直し。<br>下の入力欄から、いつでも道場へ。</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -2471,11 +2304,11 @@ if not st.session_state.messages:
         <div style="max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px;">
         """, unsafe_allow_html=True)
         
-        if st.button("🖼️　画像またはステッカーを作成（射形動画・写真の3D分析）", key="quick_act_1", use_container_width=True):
+        if st.button("射形を3Dで解析する　射形動画・写真", key="quick_act_1", use_container_width=True):
             quick_prompt = "射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。"
-        if st.button("✏️　記述または編集（射癖・早気の改善相談）", key="quick_act_2", use_container_width=True):
+        if st.button("早気・射癖の悩みを相談する", key="quick_act_2", use_container_width=True):
             quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("🌐　ウェブを検索（弓道教本・射法八節の検索）", key="quick_act_3", use_container_width=True):
+        if st.button("射法八節の要点を学び直す", key="quick_act_3", use_container_width=True):
             quick_prompt = "射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。"
 
         st.markdown("</div>", unsafe_allow_html=True)
@@ -2497,7 +2330,7 @@ for idx, msg in enumerate(st.session_state.messages):
                     <span class="file-attachment-icon">{icon}</span>
                     <div class="file-attachment-details">
                         <span class="file-attachment-name">{f_name}</span>
-                        <span class="file-attachment-meta" style="color: #166534; font-weight: 500;">
+                        <span class="file-attachment-meta" style="font-weight: 500;">
                             🛡️ 個人情報保護：分析完了後に完全抹消済（{f_size}）
                         </span>
                     </div>
@@ -2538,7 +2371,7 @@ for idx, msg in enumerate(st.session_state.messages):
             has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
             if is_last_msg and has_user_prompt:
                 current_msg_char = msg.get("char", selected_char)
-                bar_cols = st.columns([0.30, 0.34, 0.36])
+                bar_cols = st.columns([0.12, 0.20, 0.28, 0.40])
                 with bar_cols[0]:
                     render_chatgpt_toolbar(msg.get("content", ""))
                 with bar_cols[1]:
@@ -2612,7 +2445,7 @@ chat_submission = st.chat_input(
 
 # 弓道AI道場 フッター注釈
 st.markdown("""
-<div style="text-align: center; font-size: 11.5px; color: #64748b; margin-top: 8px; letter-spacing: 0.01em; font-family: 'Inter', sans-serif;">
+<div style="text-align: center; font-size: 11px; color: var(--ink-dim); margin-top: 8px; letter-spacing: 0.02em;">
     弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。
 </div>
 """, unsafe_allow_html=True)
