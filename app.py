@@ -5,11 +5,24 @@ import re
 import tempfile
 import hashlib
 import secrets
+import base64
+ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
 from google import genai
 from google.genai import types
+
+def get_asset_base64(filename: str) -> str:
+    """assetsディレクトリ内の画像をBase64文字列に変換"""
+    asset_path = os.path.join(os.path.dirname(__file__), "assets", filename)
+    if os.path.exists(asset_path):
+        try:
+            with open(asset_path, "rb") as f:
+                return base64.b64encode(f.read()).decode("utf-8")
+        except Exception:
+            return ""
+    return ""
 
 def render_chatgpt_toolbar(text_content: str):
     """ChatGPT（2026年版）風：アイコンのみのアクションバー（コピー／読み上げ）。ダークテーマ対応"""
@@ -211,108 +224,141 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
-# ==================== Apple Design Award & iF Gold 受賞水準：世界最高峰UI ====================
+# ==================== Linear Dark Canvas × Apple HIG：世界最高峰UIデザインシステム ====================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
 
 :root {
-    --canvas: #f8fafc;
-    --canvas-subtle: #f1f5f9;
-    --surface-glass: rgba(255, 255, 255, 0.82);
-    --surface-solid: #ffffff;
-    --ink-primary: #0f172a;
-    --ink-secondary: #334155;
-    --ink-muted: #64748b;
-    --ink-faint: #94a3b8;
-    --border-glass: rgba(15, 23, 42, 0.07);
-    --border-strong: rgba(15, 23, 42, 0.12);
-    --brand-indigo: #2563eb;
-    --brand-dark: #0f172a;
-    --gold-accent: #b45309;
-    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
-    --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-    --shadow-lg: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
-    --shadow-float: 0 20px 48px -8px rgba(15, 23, 42, 0.12), 0 6px 16px -4px rgba(15, 23, 42, 0.04);
+    --canvas: #000000;
+    --canvas-subtle: #0d0d0d;
+    --surface-1: #171717;
+    --surface-2: #212121;
+    --surface-3: #2f2f2f;
+    --surface-glass: rgba(19, 22, 27, 0.88);
+    
+    --border-hairline: rgba(255, 255, 255, 0.06);
+    --border-subtle: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    
+    --accent-emerald: #10b981;
+    --accent-emerald-light: #34d399;
+    --accent-emerald-glow: 0 0 24px rgba(16, 185, 129, 0.28);
+    --accent-emerald-soft: rgba(16, 185, 129, 0.12);
+    
+    --accent-blue: #5e6ad2;
+    --accent-blue-soft: rgba(94, 106, 210, 0.14);
+    
+    --ink-primary: #f8fafc;
+    --ink-secondary: #cbd5e1;
+    --ink-muted: #94a3b8;
+    --ink-dim: #64748b;
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 20px -2px rgba(0, 0, 0, 0.6), 0 2px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 16px 40px -4px rgba(0, 0, 0, 0.7), 0 4px 14px -2px rgba(0, 0, 0, 0.4);
+    --shadow-float: 0 24px 64px -8px rgba(0, 0, 0, 0.8), 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+    
     --radius-full: 9999px;
-    --radius-2xl: 24px;
-    --radius-xl: 18px;
-    --radius-lg: 14px;
-    --radius-md: 10px;
+    --radius-2xl: 22px;
+    --radius-xl: 16px;
+    --radius-lg: 12px;
+    --radius-md: 9px;
     --radius-sm: 6px;
     --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Base Typography & Background */
+/* Base Canvas & Typography */
 html, body, [class*="css"], .stApp {
     font-family: "Plus Jakarta Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background-color: var(--canvas) !important;
     color: var(--ink-primary) !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    background: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--canvas) 60%, var(--canvas-subtle) 100%) !important;
+    background: radial-gradient(circle at 50% 0%, #11141a 0%, var(--canvas) 70%) !important;
     color: var(--ink-primary) !important;
 }
 
-/* Header & Clean Slate */
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px !important; height: 5px !important; }
+::-webkit-scrollbar-track { background: transparent !important; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12) !important; border-radius: 9999px !important; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25) !important; }
+
+/* Streamlit Header Minimalized */
 [data-testid="stHeader"] {
-    background: rgba(255, 255, 255, 0.72) !important;
+    background: rgba(8, 9, 10, 0.85) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid var(--border-glass) !important;
+    border-bottom: 1px solid var(--border-hairline) !important;
 }
 [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
 
+/* Collapsed Sidebar Icon */
+div[data-testid="collapsedControl"] {
+    top: 12px !important;
+    left: 14px !important;
+    z-index: 1001 !important;
+}
+div[data-testid="collapsedControl"] button {
+    background: transparent !important;
+    border: none !important;
+    color: var(--ink-secondary) !important;
+    font-size: 20px !important;
+}
+
 /* Main Container Centering & Rhythms */
 .main .block-container {
-    max-width: 980px !important;
-    padding: 28px 32px 160px !important;
+    max-width: 900px !important;
+    padding: 24px 28px 160px !important;
     margin: 0 auto !important;
 }
 
-/* Typography Scale (Apple Human Interface Guidelines) */
+/* Typography Hierarchy */
 .stMarkdown, .stMarkdown p, .stMarkdown li,
 [data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
     color: var(--ink-secondary) !important;
     font-size: 15.5px !important;
-    line-height: 1.8 !important;
-    letter-spacing: -0.011em !important;
+    line-height: 1.82 !important;
+    letter-spacing: -0.008em !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--ink-primary) !important;
     font-weight: 700 !important;
-    letter-spacing: -0.025em !important;
+    letter-spacing: -0.03em !important;
 }
-
-h1 { font-size: clamp(26px, 3.2vw, 36px) !important; font-weight: 800 !important; }
+h1 { font-size: clamp(28px, 3.4vw, 38px) !important; font-weight: 800 !important; }
 h2 { font-size: 22px !important; }
 h3 { font-size: 18px !important; }
+strong { color: #ffffff !important; font-weight: 600 !important; }
 
-a {
-    color: var(--brand-indigo) !important;
-    text-decoration: none !important;
-    font-weight: 500 !important;
-    transition: color 0.15s ease !important;
-}
-a:hover {
-    color: #1d4ed8 !important;
-    text-decoration: underline !important;
-}
-
-hr, [data-testid="stDivider"] {
-    border-color: var(--border-glass) !important;
-    margin: 20px 0 !important;
+div[data-testid="stMarkdownContainer"] code {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--border-hairline) !important;
+    color: var(--accent-emerald-light) !important;
+    border-radius: 5px !important;
+    padding: 2px 7px !important;
+    font-size: 13.5px !important;
+    font-family: "JetBrains Mono", monospace !important;
 }
 
-/* ==================== macOS / iPadOS Style Translucent Sidebar ==================== */
+div[data-testid="stMarkdownContainer"] blockquote {
+    border-left: 3px solid var(--accent-emerald) !important;
+    background: rgba(16, 185, 129, 0.05) !important;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+    padding: 10px 18px !important;
+    color: var(--ink-secondary) !important;
+    margin: 14px 0 !important;
+}
+
+/* ==================== Linear-Style Elevated Sidebar ==================== */
 section[data-testid="stSidebar"] {
-    background: rgba(255, 255, 255, 0.78) !important;
-    backdrop-filter: blur(28px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-    border-right: 1px solid var(--border-glass) !important;
+    background: var(--surface-1) !important;
+    border-right: 1px solid var(--border-hairline) !important;
 }
 section[data-testid="stSidebar"] > div {
     background: transparent !important;
@@ -321,91 +367,128 @@ section[data-testid="stSidebar"] .stMarkdown,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
 section[data-testid="stSidebar"] label {
-    color: var(--ink-primary) !important;
+    color: var(--ink-secondary) !important;
 }
 
-.sb-brand {
+.sb-brand-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 10px 22px;
-    color: var(--ink-primary) !important;
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    padding: 10px 8px 18px;
+    border-bottom: 1px solid var(--border-hairline);
+    margin-bottom: 14px;
 }
-.sb-brand span:first-child {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+.sb-brand-title {
+    font-size: 16px;
+    font-weight: 800;
     color: #ffffff;
-    font-size: 20px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+.sb-brand-badge {
+    display: inline-block;
+    background: var(--accent-emerald-soft);
+    color: var(--accent-emerald-light);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .sb-section-label {
-    color: var(--ink-muted) !important;
-    font-size: 11px !important;
+    color: var(--ink-dim) !important;
+    font-size: 10.5px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.09em !important;
     text-transform: uppercase !important;
-    padding: 20px 10px 8px !important;
+    padding: 16px 8px 6px !important;
 }
 
 section[data-testid="stSidebar"] .stButton > button,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
     background: transparent !important;
-    color: var(--ink-secondary) !important;
+    color: var(--ink-muted) !important;
     border: 1px solid transparent !important;
     border-radius: var(--radius-md) !important;
     box-shadow: none !important;
-    min-height: 40px !important;
-    padding: 8px 12px !important;
+    min-height: 38px !important;
+    padding: 7px 10px !important;
     text-align: left !important;
     justify-content: flex-start !important;
     font-size: 13.5px !important;
     font-weight: 500 !important;
-    transition: all 0.2s var(--ease-spring) !important;
+    transition: all 0.16s var(--ease-spring) !important;
+    width: 100% !important;
 }
 section[data-testid="stSidebar"] .stButton > button:hover,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button:hover {
-    background: rgba(15, 23, 42, 0.05) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
     color: var(--ink-primary) !important;
     transform: translateX(2px) !important;
 }
+
+/* Sidebar Active Chat */
 section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
-    background: rgba(37, 99, 235, 0.08) !important;
-    color: var(--brand-indigo) !important;
-    border-color: rgba(37, 99, 235, 0.15) !important;
+    background: var(--accent-emerald-soft) !important;
+    color: var(--accent-emerald-light) !important;
+    border: 1px solid rgba(16, 185, 129, 0.24) !important;
     font-weight: 600 !important;
 }
 
-section[data-testid="stSidebar"] [data-testid="stPopoverBody"] {
-    background: rgba(255, 255, 255, 0.94) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid var(--border-glass) !important;
+/* New Chat Primary Button */
+.sb-new-chat-btn button {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    color: var(--accent-emerald-light) !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    border-radius: var(--radius-md) !important;
+    padding: 9px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: var(--accent-emerald-glow) !important;
+    transition: all 0.2s var(--ease-spring) !important;
+}
+.sb-new-chat-btn button:hover {
+    background: rgba(16, 185, 129, 0.25) !important;
+    border-color: var(--accent-emerald) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Popover Bodies */
+div[data-testid="stPopoverBody"] {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-subtle) !important;
     border-radius: var(--radius-lg) !important;
     box-shadow: var(--shadow-lg) !important;
     padding: 14px !important;
 }
+div[data-testid="stPopoverBody"] button {
+    color: var(--ink-primary) !important;
+}
 
-/* ==================== Top Navigation Glass Bar ==================== */
-.st-key-topbar {
-    background: rgba(255, 255, 255, 0.72) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1px solid var(--border-glass) !important;
+/* ==================== Top Minimal Navigation Bar ==================== */
+.topbar-wrapper {
+    background: rgba(19, 22, 27, 0.75) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid var(--border-hairline) !important;
     border-radius: var(--radius-full) !important;
     padding: 6px 14px !important;
     margin: -8px 0 28px !important;
     box-shadow: var(--shadow-sm) !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-.st-key-topbar [data-testid="stButton"] > button,
-.st-key-topbar [data-testid="stPopover"] > button {
+.topbar-wrapper [data-testid="stButton"] > button,
+.topbar-wrapper [data-testid="stPopover"] > button {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
@@ -416,133 +499,78 @@ section[data-testid="stSidebar"] [data-testid="stPopoverBody"] {
     padding: 6px 14px !important;
     transition: background 0.15s ease !important;
 }
-.st-key-topbar [data-testid="stButton"] > button:hover,
-.st-key-topbar [data-testid="stPopover"] > button:hover {
-    background: rgba(15, 23, 42, 0.06) !important;
+.topbar-wrapper [data-testid="stButton"] > button:hover,
+.topbar-wrapper [data-testid="stPopover"] > button:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ==================== Apple Design Award Standard Buttons ==================== */
-.stButton > button, .stDownloadButton > button, button[kind="secondary"] {
-    background: rgba(255, 255, 255, 0.85) !important;
-    color: var(--ink-primary) !important;
-    border: 1px solid var(--border-glass) !important;
-    border-radius: var(--radius-lg) !important;
-    box-shadow: var(--shadow-sm) !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    min-height: 42px !important;
-    padding: 8px 18px !important;
-    transition: all 0.2s var(--ease-spring) !important;
-    backdrop-filter: blur(12px) !important;
+/* Pulse Dot */
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-emerald);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 10px var(--accent-emerald);
+    animation: pulseGlow 2.2s infinite;
 }
-.stButton > button:hover, .stDownloadButton > button:hover {
-    background: #ffffff !important;
-    border-color: rgba(15, 23, 42, 0.16) !important;
-    color: var(--ink-primary) !important;
-    transform: translateY(-1.5px) !important;
-    box-shadow: var(--shadow-md) !important;
-}
-.stButton > button:active {
-    transform: scale(0.98) !important;
+@keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.85); }
 }
 
-button[kind="primary"], .stFormSubmitButton > button,
-[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: var(--radius-lg) !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18) !important;
-    transition: all 0.2s var(--ease-spring) !important;
-}
-button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
-    transform: translateY(-1.5px) !important;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25) !important;
-}
-
-/* Inputs & Form Controls */
-div[data-baseweb="input"], div[data-baseweb="textarea"],
-div[data-baseweb="select"] > div {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border: 1px solid var(--border-glass) !important;
-    border-radius: var(--radius-md) !important;
-    color: var(--ink-primary) !important;
-    transition: all 0.2s ease !important;
-    box-shadow: var(--shadow-sm) !important;
-}
-div[data-baseweb="input"]:focus-within,
-div[data-baseweb="textarea"]:focus-within,
-div[data-baseweb="select"]:focus-within {
-    border-color: var(--brand-indigo) !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-    background: #ffffff !important;
-}
-input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; }
-input::placeholder, textarea::placeholder { color: var(--ink-faint) !important; }
-
-/* ==================== Interactive Action Tiles (Craft & Flighty Style) ==================== */
-.st-key-quick_list {
+/* ==================== Bento Hero Grid (Linear / Apple Pro Style) ==================== */
+.bento-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin: 28px auto 0;
-    max-width: 920px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin: 24px auto 36px;
+    max-width: 860px;
 }
-.st-key-quick_list [data-testid="stButton"] > button {
-    min-height: 120px !important;
-    height: 100% !important;
-    padding: 22px 20px !important;
+.bento-card-btn button {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-xl) !important;
+    padding: 20px 22px !important;
     text-align: left !important;
     justify-content: flex-start !important;
     align-items: flex-start !important;
-    white-space: normal !important;
-    line-height: 1.55 !important;
-    background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1px solid var(--border-glass) !important;
-    border-radius: var(--radius-xl) !important;
     color: var(--ink-primary) !important;
-    font-size: 14.5px !important;
-    font-weight: 600 !important;
+    min-height: 110px !important;
+    height: 100% !important;
+    white-space: normal !important;
+    transition: all 0.22s var(--ease-spring) !important;
     box-shadow: var(--shadow-sm) !important;
-    transition: all 0.24s var(--ease-spring) !important;
 }
-.st-key-quick_list [data-testid="stButton"] > button:hover {
-    border-color: rgba(37, 99, 235, 0.3) !important;
-    background: #ffffff !important;
-    transform: translateY(-4px) scale(1.008) !important;
-    box-shadow: var(--shadow-lg) !important;
-    color: var(--brand-indigo) !important;
-}
-.st-key-quick_list [data-testid="stButton"] button [data-testid="stMarkdownContainer"] {
-    text-align: left !important;
+.bento-card-btn button:hover {
+    background: var(--surface-3) !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: var(--shadow-lg), var(--accent-emerald-glow) !important;
 }
 
-/* ==================== World-Class Chat Timeline (Craft / Apple Messages) ==================== */
+/* ==================== Chat Timeline (High-End Linear & Messages) ==================== */
 div[data-testid="stChatMessage"] {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
-    padding: 8px 0 !important;
-    margin: 0 auto 16px !important;
-    max-width: 880px !important;
+    padding: 10px 0 !important;
+    margin: 0 auto 18px !important;
+    max-width: 860px !important;
     width: 100% !important;
 }
 div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] { display: none !important; }
 
-/* User Message: Elevated Obsidian Pill */
+/* User Message: Elevated Charcoal Bubble */
 div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-    max-width: 76% !important;
+    max-width: 74% !important;
     margin-left: auto !important;
     margin-right: 0 !important;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    background: linear-gradient(135deg, #181d26 0%, #1e2430 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 22px 22px 6px 22px !important;
-    padding: 16px 22px !important;
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15), 0 2px 6px rgba(15, 23, 42, 0.08) !important;
+    border-radius: 20px 20px 4px 20px !important;
+    padding: 14px 20px !important;
+    box-shadow: var(--shadow-md) !important;
     color: #ffffff !important;
 }
 div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
@@ -551,117 +579,115 @@ div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-
     color: #f8fafc !important;
 }
 
-/* Assistant Message: Floating Frosted Canvas Card */
+/* Assistant Message: Clean Minimalist Layout */
 div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) {
-    background: rgba(255, 255, 255, 0.84) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border: 1px solid var(--border-glass) !important;
-    border-radius: var(--radius-2xl) !important;
-    padding: 24px 28px !important;
-    box-shadow: var(--shadow-md) !important;
-    transition: box-shadow 0.2s ease !important;
+    background: transparent !important;
+    padding: 4px 0 !important;
+    width: 100% !important;
 }
-div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])):hover {
-    box-shadow: var(--shadow-lg) !important;
-}
-
-div[data-testid="stChatMessage"] p {
+div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) p {
+    color: var(--ink-primary) !important;
     font-size: 15.5px !important;
     line-height: 1.85 !important;
 }
 
-/* Character Gradient Badges */
+/* Character Badge */
 .char-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 12px !important;
+    gap: 8px;
+    padding: 3px 12px !important;
     border-radius: var(--radius-full) !important;
-    font-size: 12px !important;
+    font-size: 11.5px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0.04em !important;
     margin: 0 0 12px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    color: var(--ink-secondary) !important;
+    text-transform: uppercase;
 }
 .char-badge.char-master {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-    color: #92400e !important;
-    border: 1px solid rgba(217, 119, 6, 0.25) !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+    color: #fbbf24 !important;
+    background: rgba(217, 119, 6, 0.08) !important;
 }
 .char-badge.char-senior {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
-    color: #166534 !important;
-    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    color: #34d399 !important;
+    background: rgba(16, 185, 129, 0.08) !important;
 }
 .char-badge.char-analyst {
-    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
-    color: #3730a3 !important;
-    border: 1px solid rgba(99, 102, 241, 0.25) !important;
+    border-color: rgba(99, 102, 241, 0.35) !important;
+    color: #a5b4fc !important;
+    background: rgba(99, 102, 241, 0.08) !important;
 }
 
+/* Memory Badge */
 .memory-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 3px 12px;
     margin: 4px 0 12px;
-    background: rgba(37, 99, 235, 0.06) !important;
-    color: var(--brand-indigo) !important;
-    border: 1px solid rgba(37, 99, 235, 0.15) !important;
+    background: var(--accent-emerald-soft) !important;
+    color: var(--accent-emerald-light) !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
     border-radius: var(--radius-full) !important;
     font-size: 11.5px !important;
     font-weight: 600 !important;
 }
 
+/* File Attachment Card */
 .file-attachment-card {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: 1px solid var(--border-glass) !important;
-    border-radius: var(--radius-md) !important;
-    padding: 12px 16px !important;
-    box-shadow: var(--shadow-sm) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 10px 16px !important;
+    margin-bottom: 10px !important;
 }
-.file-attachment-name { color: var(--ink-primary) !important; font-weight: 700 !important; }
-.file-attachment-meta { color: var(--ink-muted) !important; }
+.file-attachment-name { color: #ffffff !important; font-weight: 600 !important; font-size: 13.5px !important; }
+.file-attachment-meta { color: var(--accent-emerald-light) !important; font-size: 11px !important; }
 
-/* ==================== Floating Island Composer (Linear / Apple Intelligence) ==================== */
+/* ==================== Floating Command Bar Input (Linear Prompt Deck) ==================== */
 div[data-testid="stBottom"] {
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.88) 32%, #f8fafc 100%) !important;
-    backdrop-filter: blur(12px) !important;
+    background: linear-gradient(180deg, rgba(8, 9, 10, 0) 0%, rgba(8, 9, 10, 0.88) 25%, #08090a 100%) !important;
+    backdrop-filter: blur(16px) !important;
     border-top: 0 !important;
-    padding: 24px 0 calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 24px 0 calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 9999 !important;
 }
 div[data-testid="stBottom"] > div {
-    max-width: 880px !important;
+    max-width: 860px !important;
     padding: 0 20px !important;
     margin: auto !important;
 }
 div[data-testid="stChatInput"] {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(32px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
-    border: 1px solid rgba(15, 23, 42, 0.09) !important;
-    border-radius: 28px !important;
+    background: rgba(19, 22, 27, 0.92) !important;
+    backdrop-filter: blur(28px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 26px !important;
     box-shadow: var(--shadow-float) !important;
-    padding: 10px 16px !important;
-    transition: all 0.25s var(--ease-spring) !important;
+    padding: 8px 16px !important;
+    transition: all 0.22s var(--ease-spring) !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    border-color: rgba(37, 99, 235, 0.35) !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14), var(--shadow-float) !important;
-    background: #ffffff !important;
+    border-color: rgba(16, 185, 129, 0.45) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15), var(--shadow-float) !important;
+    background: #14171d !important;
 }
 div[data-testid="stChatInput"] textarea {
-    color: var(--ink-primary) !important;
-    font-size: 15.5px !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
     background: transparent !important;
     line-height: 1.6 !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder {
-    color: var(--ink-faint) !important;
+    color: var(--ink-dim) !important;
 }
 div[data-testid="stChatInput"] button {
     background: transparent !important;
@@ -671,116 +697,110 @@ div[data-testid="stChatInput"] button {
     transition: all 0.15s ease !important;
 }
 div[data-testid="stChatInput"] button:hover {
-    background: rgba(15, 23, 42, 0.06) !important;
-    color: var(--ink-primary) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
 }
 
-/* Tabs & Popovers */
+/* ==================== Standard Buttons & Controls ==================== */
+.stButton > button, .stDownloadButton > button, button[kind="secondary"] {
+    background: var(--surface-2) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-sm) !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    min-height: 38px !important;
+    padding: 7px 16px !important;
+    transition: all 0.18s var(--ease-spring) !important;
+}
+.stButton > button:hover, .stDownloadButton > button:hover {
+    background: var(--surface-3) !important;
+    border-color: var(--border-subtle) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+.stButton > button:active {
+    transform: scale(0.98) !important;
+}
+
+button[kind="primary"], .stFormSubmitButton > button {
+    background: var(--accent-emerald) !important;
+    color: #08090a !important;
+    border: 0 !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 700 !important;
+    box-shadow: var(--accent-emerald-glow) !important;
+    transition: all 0.2s var(--ease-spring) !important;
+}
+button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
+    background: var(--accent-emerald-light) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 28px rgba(16, 185, 129, 0.45) !important;
+}
+
+/* Inputs & Form Controls */
+div[data-baseweb="input"], div[data-baseweb="textarea"],
+div[data-baseweb="select"] > div {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--ink-primary) !important;
+    transition: all 0.2s ease !important;
+}
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="textarea"]:focus-within,
+div[data-baseweb="select"]:focus-within {
+    border-color: var(--accent-emerald) !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; }
+input::placeholder, textarea::placeholder { color: var(--ink-dim) !important; }
+
+/* Tabs */
 div[data-baseweb="tab-list"] {
-    border-bottom: 1px solid var(--border-glass) !important;
-    gap: 18px !important;
+    border-bottom: 1px solid var(--border-hairline) !important;
+    gap: 16px !important;
 }
 button[data-baseweb="tab"] {
     color: var(--ink-muted) !important;
     font-weight: 600 !important;
-    font-size: 14px !important;
+    font-size: 13.5px !important;
     padding: 10px 4px !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    color: var(--brand-indigo) !important;
-    border-bottom: 2px solid var(--brand-indigo) !important;
+    color: var(--accent-emerald-light) !important;
+    border-bottom: 2px solid var(--accent-emerald) !important;
 }
-div[data-testid="stExpander"], div[data-testid="stPopoverBody"] {
-    background: rgba(255, 255, 255, 0.94) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid var(--border-glass) !important;
-    border-radius: var(--radius-xl) !important;
-    box-shadow: var(--shadow-lg) !important;
-}
-div[data-testid="stAlert"] {
+
+div[data-testid="stExpander"] {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
     border-radius: var(--radius-lg) !important;
-    border: 1px solid var(--border-glass) !important;
 }
-div[data-testid="stCode"], pre {
-    background: #0f172a !important;
-    color: #f8fafc !important;
-    border-radius: var(--radius-lg) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
+
+/* Plotly Chart Card */
 .stPlotlyChart {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(16px) !important;
-    border: 1px solid var(--border-glass) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
     border-radius: var(--radius-xl) !important;
-    padding: 12px;
+    padding: 14px;
     box-shadow: var(--shadow-sm) !important;
-}
-
-/* ==================== Login Screen (Apple Modal Style) ==================== */
-.login-wrap {
-    max-width: 440px;
-    margin: 50px auto 0;
-    padding: 0 16px;
-}
-.login-card-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-.login-logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 68px;
-    height: 68px;
-    margin-bottom: 18px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #ffffff;
-    font-size: 34px;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-}
-.login-title {
-    color: var(--ink-primary) !important;
-    font-size: 27px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-}
-.login-subtitle {
-    color: var(--ink-muted) !important;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-top: 6px;
-}
-
-/* Keyframes */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-.hero-greeting {
-    animation: fadeInUp 0.45s var(--ease-spring);
 }
 
 /* Responsive */
 @media (max-width: 900px) {
-    .main .block-container { padding: 20px 18px 140px !important; }
-    .st-key-quick_list { grid-template-columns: 1fr !important; }
-    .st-key-quick_list [data-testid="stButton"] > button { min-height: 76px !important; }
+    .main .block-container { padding: 20px 16px 140px !important; }
+    .bento-grid { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 600px) {
     .main .block-container { padding: 14px 12px 130px !important; }
     div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
-        max-width: 90% !important;
+        max-width: 88% !important;
         padding: 12px 16px !important;
     }
-    div[data-testid="stBottom"] > div { padding: 0 10px !important; }
-    h1 { font-size: 24px !important; }
+    div[data-testid="stBottom"] > div { padding: 0 8px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -829,6 +849,7 @@ COMMON_INSTRUCTION = (
 CHARACTERS = {
     "師範（無幻先生）": {
         "icon": "🥋",
+        "avatar_file": "avatar_master.jpg",
         "badge_class": "char-master",
         "desc": "教士八段格のベテラン師範。射法八節・射品射格・礼法・心の平静を重んじ、温かくも深みのある言葉で導きます。",
         "prompt": (
@@ -842,6 +863,7 @@ CHARACTERS = {
     },
     "弓道部の先輩（葵先輩）": {
         "icon": "🏹",
+        "avatar_file": "avatar_senior.jpg",
         "badge_class": "char-senior",
         "desc": "大学弓道部の頼れる3年生。早気や離れのブレ、日々の練習の悩みに親身に共感し、実践的な工夫を教えてくれます。",
         "prompt": (
@@ -855,6 +877,7 @@ CHARACTERS = {
     },
     "射技動作分析AI（KYUDO-ANALYST）": {
         "icon": "📐",
+        "avatar_file": "avatar_analyst.jpg",
         "badge_class": "char-analyst",
         "desc": "現代弓道科学・バイオメカニクスに基づき、骨格・筋肉の作用、物理的な力学（ベクトルの釣り合い）から論理的に解説します。",
         "prompt": (
@@ -1358,36 +1381,59 @@ def switch_ai_character(new_char: str):
                 "content": CHARACTERS[new_char]["welcome"]
             }]
 
-# ==================== 弓道AI道場 ナビゲーション ====================
+# ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
 
-    # ── ブランド ──────────────────────────────────────────────
-    st.markdown("""
-    <div class="sb-brand"><span>🏹</span><span>弓道AI道場</span></div>
+    # ── ブランドヘッダー（ロゴ + バッジ） ─────────────────────────
+    logo_b64 = get_asset_base64("kyudo_ai_logo.jpg")
+    if logo_b64:
+        logo_html = f'<img src="data:image/jpeg;base64,{logo_b64}" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 16px rgba(16,185,129,0.25); object-fit: cover;">'
+    else:
+        logo_html = '<div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; font-size: 20px;">🏹</div>'
+
+    st.markdown(f"""
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px 10px 4px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            {logo_html}
+            <div>
+                <span style="font-size: 16px; font-weight: 700; color: #ececec; letter-spacing: -0.02em;">ChatGPT</span>
+                <span style="font-size: 10.5px; color: #10b981; font-weight: 600; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25);">弓道AI</span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; color: #8e8e8e; font-size: 15px;">
+            <span style="cursor: pointer;" title="検索">🔍</span>
+            <span style="cursor: pointer;" title="サイドバーを折りたたむ">◫</span>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-    # ── メインナビゲーション ──────────────────────────────────
-    if st.button("新しいチャット", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True):
+    # ── 新規チャットボタン ──────────────────────────────────────
+    st.markdown('<div class="sb-new-chat-btn">', unsafe_allow_html=True)
+    if st.button("✏️  新しいチャット", key="sidebar_new_chat_btn", use_container_width=True):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with st.popover("画像・3D動画分析", icon=":material/image:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
+    # ── スタジオ・分析メニュー ──────────────────────────────────
+    st.markdown("<div class='sb-section-label'>スタジオ・分析</div>", unsafe_allow_html=True)
+
+    with st.popover("🖼️  画像（射形3D解析）", use_container_width=True):
+        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 6px;'>🎬 射形動画・写真の3D解析</div>", unsafe_allow_html=True)
         st.caption("画面下の入力欄の「＋」ボタンから動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
 
-    with st.popover("スケジュール", icon=":material/schedule:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
+    with st.popover("⏱️  スケジュール", use_container_width=True):
+        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 6px;'>📅 稽古スケジュール＆課題</div>", unsafe_allow_html=True)
         st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
         st.text_input("今日の稽古目標:", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
         if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
             st.success("稽古目標を記録しました！")
 
-    with st.popover("ライブラリ", icon=":material/menu_book:", use_container_width=True):
+    with st.popover("📖  ライブラリ", use_container_width=True):
         st.markdown("""
-        <div style='font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
-        <div style='font-size: 12px; color: #475569; line-height: 1.6;'>
+        <div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 8px;'>📖 弓道教本・射法八節</div>
+        <div style='font-size: 12px; color: #cbd5e1; line-height: 1.7;'>
         <b>1. 足踏み</b> : 両足を開く基本の土台<br>
         <b>2. 胴造り</b> : 丹田に息を沈め姿勢を正す<br>
         <b>3. 弓構え</b> : 取懸け・手の内・物見を整える<br>
@@ -1399,47 +1445,50 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
 
-    with st.popover("プラグイン", icon=":material/extension:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
+    with st.popover("🧩  プラグイン", use_container_width=True):
+        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 6px;'>⚡ 弓道生体力学プラグイン</div>", unsafe_allow_html=True)
         st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
 
+    # ── 指導陣（キャラクター切替） ──────────────────────────────
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
-    with st.popover("探索", icon=":material/more_horiz:", use_container_width=True):
-        st.markdown("<div style='font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 8px;'>指導陣（AIモデル）を探す</div>", unsafe_allow_html=True)
+    with st.popover("…  探索（指導陣切替）", use_container_width=True):
+        st.markdown("<div style='font-size: 11px; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;'>指導陣（AIモデル）を選択</div>", unsafe_allow_html=True)
         for cname in CHARACTERS.keys():
             c_info_item = CHARACTERS[cname]
             is_active = (cname == cur_c)
-            if st.button(
-                f"{'✓' if is_active else '　'} {c_info_item['icon']} {cname}",
-                key=f"sb_explore_char_{cname}",
-                use_container_width=True,
-                help=c_info_item["desc"]
-            ):
+            avatar_b64 = get_asset_base64(c_info_item.get("avatar_file", ""))
+            if avatar_b64:
+                prefix = f'<img src="data:image/jpeg;base64,{avatar_b64}" style="width: 22px; height: 22px; border-radius: 50%; vertical-align: middle; margin-right: 8px;">'
+            else:
+                prefix = f"{c_info_item['icon']} "
+            
+            btn_label = f"{'✓ ' if is_active else '　 '}{c_info_item['icon']} {cname}"
+            if st.button(btn_label, key=f"sb_explore_char_{cname}", use_container_width=True, help=c_info_item["desc"]):
                 switch_ai_character(cname)
                 st.rerun()
 
     # ── ピン留め ──────────────────────────────────────────────
-    st.markdown("<div class='sb-section-label'>ピン留め</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sb-section-label'>ピン留め稽古</div>", unsafe_allow_html=True)
     sidebar_pins = [
-        ("pin_chu_sha", "弓道中と斜の使い方", "弓道における『中（ちゅう）』と『斜（しゃ）』の使い方・身体の意識の相違点を教えてください。"),
-        ("pin_taikai", "弓道大会記録システム", "弓道の大会や記録会で的中率を安定させるためのルーティンと記録分析方法を教えてください。"),
-        ("pin_hayake", "早気の克服と会の伸び合い", "会でじっくり保てず早く離れてしまう早気の原因と、科学的な克服ドリルを教えてください。"),
-        ("pin_tsunomi", "手の内と角見のトルク力学", "左手の手の内（角見）の正しい効かせ方と、弓返りを生み出す回転モーメントの力学を教えてください。"),
+        ("pin_chu_sha", "🎯 弓道中と斜の使い方", "弓道における『中（ちゅう）』と『斜（しゃ）』の使い方・身体の意識の相違点を教えてください。"),
+        ("pin_taikai", "📊 弓道大会記録システム", "弓道の大会や記録会で的中率を安定させるためのルーティンと記録分析方法を教えてください。"),
+        ("pin_kimono", "🥋 黒い着物の女性", "弓道着・黒紋付や着物での射術・体配の要点について教えてください。"),
+        ("pin_line_icon", "🎨 LINEアイコン作成", "弓道をモチーフにした洗練されたアイコンデザインのアイデアを教えてください。"),
     ]
     for pin_key, pin_label, pin_prompt in sidebar_pins:
-        if st.button(pin_label, key=pin_key, icon=":material/push_pin:", use_container_width=True):
+        if st.button(pin_label, key=pin_key, use_container_width=True):
             st.session_state["sidebar_prompt"] = pin_prompt
             st.rerun()
 
     # ── プロジェクト ──────────────────────────────────────────
     st.markdown("<div class='sb-section-label'>プロジェクト</div>", unsafe_allow_html=True)
     sidebar_projects = [
-        ("proj_shinsa", "昇段審査対策（参段・四段）", "昇段審査（参段・四段）で審査員が特に重視する射品射格、体配、射法八節の減点ポイントを教えてください。"),
-        ("proj_biomech", "射法八節バイオメカニクス研究", "射法八節における筋電図（EMG）と床反力データに基づいた最適な運動連鎖について詳しく教えてください。"),
+        ("proj_writing", "🟣 ライティング", "弓道に関する解説記事や文章の推敲・執筆をサポートしてください。"),
+        ("proj_portfolio", "🎓 ポートフォリオ", "これまでの弓道の修練歴や実績、課題をポートフォリオ形式で整理してください。"),
     ]
     for proj_key, proj_label, proj_prompt in sidebar_projects:
-        if st.button(proj_label, key=proj_key, icon=":material/folder:", use_container_width=True):
+        if st.button(proj_label, key=proj_key, use_container_width=True):
             st.session_state["sidebar_prompt"] = proj_prompt
             st.rerun()
 
@@ -1457,7 +1506,7 @@ with st.sidebar:
                 if is_active:
                     col_btn, col_opt = st.columns([0.82, 0.18])
                     with col_btn:
-                        st.button(sess["title"], key=f"sess_active_{sess['id']}", use_container_width=True)
+                        st.button(f"💬 {sess['title']}", key=f"sess_active_{sess['id']}", use_container_width=True)
                     with col_opt:
                         with st.popover("···", use_container_width=True):
                             st.caption("チャット設定")
@@ -1477,32 +1526,66 @@ with st.sidebar:
                                     st.session_state.messages = []
                                 st.rerun()
                 else:
-                    if st.button(sess["title"], key=f"sess_btn_{sess['id']}", use_container_width=True):
+                    if st.button(f"💬 {sess['title']}", key=f"sess_btn_{sess['id']}", use_container_width=True):
                         st.session_state.current_session_id = sess["id"]
                         loaded = load_session_messages(sess["id"])
                         if loaded is not None:
                             st.session_state.messages = loaded
                         st.rerun()
 
+    else:
+        st.markdown("<div class='sb-section-label'>最近の項目</div>", unsafe_allow_html=True)
+        recent_samples = [
+            ("志望動機作成:VEVENT", "弓道の指導員・武道関連の志望動機書（VEVENT形式）の作成をサポートしてください。"),
+            ("志望動機作成", "大学弓道部や実業団弓道部への志望動機文の添削をお願いします。"),
+            ("履歴書修正対応", "弓道有段者としての実績や礼儀作法をアピールする履歴書の自己PRを作成してください。"),
+            ("面接用自己紹介作成", "弓道で培った集中力と残心の精神を伝える面接自己紹介を作ってください。"),
+            ("配慮事項の承諾結果", "大会や合宿での健康管理・配慮事項に関する確認事項を整理してください。"),
+        ]
+        for s_idx, (s_title, s_prompt) in enumerate(recent_samples):
+            if st.button(f"💬 {s_title}", key=f"sample_sess_{s_idx}", use_container_width=True):
+                st.session_state["sidebar_prompt"] = s_prompt
+                st.rerun()
+
     # ── スペーサー ──────────────────────────────────────────────
     st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
 
-    # ── 最下部：ユーザープロフィール（ChatGPT公式：アバター + runtyoma + 無料 + アップグレード） ─
+    # ── 最下部：ユーザープロフィール ────────────────────────────
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
     disp_name = cur_uinfo.get("display_name", "runtyoma")
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    with st.popover(f"{disp_name}", icon=":material/account_circle:", use_container_width=True):
-        st.markdown(f"""
-        <div style="border: 1px solid rgba(15,23,42,0.08); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: rgba(15,23,42,0.04);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: #10a37f; color: #ffffff; font-weight: 600; font-size: 11px; padding: 2px 8px; border-radius: 10px;">弓道AI</span>
-                <span style="font-size: 11px; font-weight: 600; color: #10a37f;">● 有効</span>
+    sb_u_c1, sb_u_c2 = st.columns([0.62, 0.38])
+    with sb_u_c1:
+        st.markdown("""
+        <div style="display: flex; align-items: center; gap: 10px; padding: 4px 0;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: #2f2f2f; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #ffffff; font-weight: 700;">
+                R
             </div>
-            <div style="font-size: 15px; font-weight: 600; color: #0f172a; margin: 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: #64748b; font-family: monospace;">プラン: 無料 / Pro機能解放中</div>
+            <div>
+                <div style="font-size: 13.5px; font-weight: 600; color: #ffffff; line-height: 1.2;">runtyoma</div>
+                <div style="font-size: 11px; color: #8e8e8e;">無料</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with sb_u_c2:
+        st.markdown("""
+        <div style="text-align: right; padding-top: 6px;">
+            <span style="display: inline-block; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ececec; font-size: 11px; font-weight: 600; cursor: pointer;">アップグレード</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.popover("⚙️ アカウント設定・射手カルテ", use_container_width=True):
+        st.markdown(f"""
+        <div style="border: 1px solid var(--border-hairline); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface-2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="background: var(--accent-emerald-soft); color: var(--accent-emerald-light); border: 1px solid rgba(16,185,129,0.3); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 10px;">KYUDO AI PRO</span>
+                <span style="font-size: 11px; font-weight: 600; color: var(--accent-emerald-light);">● 稼働中</span>
+            </div>
+            <div style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 2px 0;">{disp_name}</div>
+            <div style="font-size: 11px; color: var(--ink-dim); font-family: monospace;">ID: KYD-8820-{user_id_num}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1546,7 +1629,7 @@ with st.sidebar:
                 for idx, note in enumerate(user_notes):
                     col_n1, col_n2 = st.columns([0.80, 0.20])
                     with col_n1:
-                        st.markdown(f"<div style='font-size: 12px; padding: 3px 6px; background: rgba(15,23,42,0.04); border-radius: 4px; margin-bottom: 3px; color: #0f172a;'>📌 {note}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 12px; padding: 4px 8px; background: var(--surface-3); border-radius: 6px; margin-bottom: 4px; color: #ffffff;'>📌 {note}</div>", unsafe_allow_html=True)
                     with col_n2:
                         if st.button("✕", key=f"del_mem_p_{idx}", help="削除"):
                             remove_user_memory_item(cur_user, idx)
@@ -1585,7 +1668,7 @@ with st.sidebar:
                     use_container_width=True
                 )
             st.markdown("""
-            <div style="background-color: rgba(16,163,127,0.15); border: 1px solid rgba(16,163,127,0.3); border-radius: 6px; padding: 8px; font-size: 11px; color: #10a37f; margin-top: 8px;">
+            <div style="background-color: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); border-radius: 8px; padding: 10px; font-size: 11.5px; color: #34d399; margin-top: 8px;">
                 🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
             """, unsafe_allow_html=True)
@@ -1611,31 +1694,37 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== 弓道AI道場 トップナビゲーション ====================
+# ==================== 弓道AI道場 トップナビゲーション（フローティング・グラスバー） ====================
 cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 short_char_name = cur_char_val.split("（")[0]
 
-with st.container(key="topbar"):
-    top_cols = st.columns([0.12, 0.88])
-    with top_cols[0]:
-        if st.button(" ", key="top_new_chat_btn", icon=":material/edit_square:", help="新しいチャット"):
-            st.session_state.messages = []
-            st.session_state.current_session_id = f"session_{int(time.time())}"
-            st.rerun()
-    with top_cols[1]:
-        with st.popover(f"弓道AI　{short_char_name}", use_container_width=False):
-            st.markdown("<div style='font-size: 12px; font-weight: 500; color: #64748b; margin-bottom: 8px;'>指導陣（モデル）を選択</div>", unsafe_allow_html=True)
-            for cname in CHARACTERS.keys():
-                c_info_item = CHARACTERS[cname]
-                is_active = (cname == cur_char_val)
-                btn_prefix = "✓ " if is_active else "　 "
-                if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
-                    switch_ai_character(cname)
-                    st.rerun()
+top_cols = st.columns([0.68, 0.32])
+with top_cols[0]:
+    with st.popover(f"● {short_char_name} ▾", use_container_width=False):
+        st.markdown("<div style='font-size: 11px; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;'>指導陣（AIモデル）を選択</div>", unsafe_allow_html=True)
+        for cname in CHARACTERS.keys():
+            c_info_item = CHARACTERS[cname]
+            is_active = (cname == cur_char_val)
+            btn_prefix = "✓ " if is_active else "　 "
+            if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
+                switch_ai_character(cname)
+                st.rerun()
+
+with top_cols[1]:
+    st.markdown("""
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-top: 4px;">
+        <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 9999px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+            <span>✦</span><span>アップグレード</span>
+        </div>
+        <div style="width: 30px; height: 30px; border-radius: 50%; background: #2f2f2f; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #ffffff; font-weight: 600;">
+            R
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 selected_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 char_info = CHARACTERS[selected_char]
-st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
 
 # 応答生成関数（テキスト用）
 def generate_response(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False) -> str:
@@ -1799,7 +1888,7 @@ def get_local_response(user_input: str, char_name: str) -> str:
     else:
         return f"入力パラメータ『{user_input}』を受領。解析の結果、運動連鎖における体幹の安定性および肩甲胸郭関節（肩甲骨まわり）の可動域が当該事象に寄与している可能性が高いと推定されます。矢束（引き尺の長さ）の均等性と左右の筋出力バランスを再確認することを推奨します。"
 
-# ==================== 3D立体骨格＆筋肉活動可視化関数（ChatGPTクリーン・ライトスタイル） ====================
+# ==================== 3D立体骨格＆筋肉活動可視化関数（Linear Cyber Dark スタイル） ====================
 def create_muscle_radar_chart(muscle_scores: dict):
     categories = list(muscle_scores.keys())
     values = list(muscle_scores.values())
@@ -1813,9 +1902,9 @@ def create_muscle_radar_chart(muscle_scores: dict):
         r=values_closed,
         theta=categories_closed,
         fill='toself',
-        fillcolor='rgba(16, 163, 127, 0.2)',
-        line=dict(color='#10a37f', width=2.5),
-        marker=dict(size=6, color='#10a37f'),
+        fillcolor='rgba(16, 185, 129, 0.22)',
+        line=dict(color='#10b981', width=2.5),
+        marker=dict(size=6, color='#34d399'),
         name='筋活動バランス'
     ))
     
@@ -1824,17 +1913,19 @@ def create_muscle_radar_chart(muscle_scores: dict):
             radialaxis=dict(
                 visible=True,
                 range=[0, 100],
-                tickfont=dict(size=10, color='#6b7280'),
-                gridcolor='#e5e7eb'
+                tickfont=dict(size=10, color='#64748b'),
+                gridcolor='#222733',
+                linecolor='#222733'
             ),
             angularaxis=dict(
-                tickfont=dict(size=11, color='#111827', weight=600),
-                gridcolor='#e5e7eb'
+                tickfont=dict(size=11, color='#f8fafc', weight=600),
+                gridcolor='#222733',
+                linecolor='#222733'
             ),
-            bgcolor='#f8f9fa'
+            bgcolor='#0e1013'
         ),
-        paper_bgcolor='#ffffff',
-        plot_bgcolor='#ffffff',
+        paper_bgcolor='#13161b',
+        plot_bgcolor='#13161b',
         margin=dict(l=35, r=35, t=25, b=25),
         height=340,
         showlegend=False
@@ -1848,7 +1939,6 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     elbow_offset = float(posture_params.get("shoulder_draw_level", 0.0)) * 0.02 # 妻手肘の上下
     
     # 3Dキーポイント座標 (x: 左右, y: 前後, z: 上下)
-    # 弓道「会」の姿勢
     joints = {
         "Head": [0.0 + tilt_roll*0.01, 0.0 + tilt_pitch*0.01, 1.70],
         "Neck": [0.0 + tilt_roll*0.008, 0.0 + tilt_pitch*0.008, 1.50],
@@ -1874,30 +1964,30 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     
     # 骨格リンク定義
     bones = [
-        ("Head", "Neck", "#ef4444", 6),
-        ("Neck", "Chest", "#10a37f", 7),
-        ("Chest", "Pelvis", "#10a37f", 8),
+        ("Head", "Neck", "#f43f5e", 6),
+        ("Neck", "Chest", "#10b981", 7),
+        ("Chest", "Pelvis", "#10b981", 8),
         # 押手リンク
-        ("Chest", "L_Shoulder", "#10a37f", 6),
-        ("L_Shoulder", "L_Elbow", "#0284c7", 6),
-        ("L_Elbow", "L_Wrist", "#0284c7", 6),
+        ("Chest", "L_Shoulder", "#10b981", 6),
+        ("L_Shoulder", "L_Elbow", "#38bdf8", 6),
+        ("L_Elbow", "L_Wrist", "#38bdf8", 6),
         # 妻手リンク
-        ("Chest", "R_Shoulder", "#10a37f", 6),
-        ("R_Shoulder", "R_Elbow", "#d97706", 6),
-        ("R_Elbow", "R_Wrist", "#d97706", 6),
+        ("Chest", "R_Shoulder", "#10b981", 6),
+        ("R_Shoulder", "R_Elbow", "#fbbf24", 6),
+        ("R_Elbow", "R_Wrist", "#fbbf24", 6),
         # 下半身リンク
-        ("Pelvis", "L_Hip", "#10a37f", 6),
-        ("L_Hip", "L_Foot", "#10a37f", 6),
-        ("Pelvis", "R_Hip", "#10a37f", 6),
-        ("R_Hip", "R_Foot", "#10a37f", 6),
+        ("Pelvis", "L_Hip", "#10b981", 6),
+        ("L_Hip", "L_Foot", "#10b981", 6),
+        ("Pelvis", "R_Hip", "#10b981", 6),
+        ("R_Hip", "R_Foot", "#10b981", 6),
         # 弓幹
-        ("Bow_Bottom", "L_Wrist", "#7c3aed", 4),
-        ("L_Wrist", "Bow_Top", "#7c3aed", 4),
+        ("Bow_Bottom", "L_Wrist", "#a855f7", 4),
+        ("L_Wrist", "Bow_Top", "#a855f7", 4),
         # 矢（L_Wrist から R_Wrist への水平ベクトル）
         ("L_Wrist", "R_Wrist", "#eab308", 5),
         # 弦（Bow_Top -> R_Wrist -> Bow_Bottom）
-        ("Bow_Top", "R_Wrist", "#6b7280", 2),
-        ("R_Wrist", "Bow_Bottom", "#6b7280", 2)
+        ("Bow_Top", "R_Wrist", "#94a3b8", 2),
+        ("R_Wrist", "Bow_Bottom", "#94a3b8", 2)
     ]
     
     fig = go.Figure()
@@ -1920,30 +2010,29 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     jx = [pt[0] for pt in joints.values()]
     jy = [pt[1] for pt in joints.values()]
     jz = [pt[2] for pt in joints.values()]
-    labels = list(joints.keys())
     
     fig.add_trace(go.Scatter3d(
         x=jx, y=jy, z=jz,
         mode='markers+text',
-        marker=dict(size=6, color='#10a37f'),
+        marker=dict(size=6, color='#10b981'),
         text=["頭", "頸", "胸", "丹田", "押手肩", "押手肘", "角見(押手)", "妻手肩", "妻手肘", "取懸け", "左腰", "左足", "右腰", "右足", "弓(本)", "弓(末)"],
         textposition="top center",
-        textfont=dict(size=10, color='#111827'),
+        textfont=dict(size=10, color='#f8fafc'),
         hoverinfo='text',
         showlegend=False
     ))
     
     fig.update_layout(
         scene=dict(
-            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='#f8f9fa', gridcolor='#e5e7eb'),
-            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='#f8f9fa', gridcolor='#e5e7eb'),
-            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='#f8f9fa', gridcolor='#e5e7eb'),
+            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='#0e1013', gridcolor='#222733', linecolor='#222733', color='#64748b'),
+            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='#0e1013', gridcolor='#222733', linecolor='#222733', color='#64748b'),
+            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='#0e1013', gridcolor='#222733', linecolor='#222733', color='#64748b'),
             camera=dict(
                 eye=dict(x=1.3, y=-1.5, z=0.8) # 斜め前からの自然な視点
             ),
             aspectratio=dict(x=1.4, y=0.8, z=1.5)
         ),
-        paper_bgcolor='#ffffff',
+        paper_bgcolor='#13161b',
         margin=dict(l=5, r=5, t=5, b=5),
         height=360
     )
@@ -2118,29 +2207,30 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバーのピン留め／プロジェクトからの質問
 
 if not st.session_state.messages:
-    # ===== 世界最高峰UI：ウェルカム画面 =====
+    # ===== ChatGPT公式完全一致：ウェルカム画面（今日は何をしましょうか？） =====
     st.markdown("""
-    <div class="hero-greeting" style="text-align: center; margin: 9vh 0 32px 0;">
-        <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 9999px; background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.18); color: #2563eb; font-size: 13px; font-weight: 600; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(37,99,235,0.06);">
-            <span>🏹</span><span>Apple Design Award & iF Gold 水準の美学 × 弓道科学</span>
-        </div>
-        <h1 style="font-size: clamp(28px, 3.5vw, 38px); font-weight: 800; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.03em;">
-            今日の稽古、何から始めますか？
+    <div style="text-align: center; margin: 14vh 0 32px 0;">
+        <h1 style="font-size: clamp(26px, 3.2vw, 34px); font-weight: 700; color: #ececec; margin: 0 0 16px 0; letter-spacing: -0.02em;">
+            今日は何をしましょうか？
         </h1>
-        <p style="font-size: 15px; color: #64748b; margin: 0 auto; max-width: 520px; line-height: 1.65;">
-            3D骨格分析・射癖相談から射法八節の極意まで、世界最高水準の対話体験でお応えします。
-        </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # ChatGPT風クイックサジェスト（key付きコンテナでCSSを確実に適用）
-    with st.container(key="quick_list"):
-        if st.button("射形動画または写真を3D分析", key="quick_act_1", icon=":material/image:", use_container_width=True):
+    # ChatGPT公式スタイル：3つの縦並びクイックアクション
+    col_w1, col_w_center, col_w2 = st.columns([0.15, 0.70, 0.15])
+    with col_w_center:
+        st.markdown("""
+        <div style="max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px;">
+        """, unsafe_allow_html=True)
+        
+        if st.button("🖼️　画像またはステッカーを作成（射形動画・写真の3D分析）", key="quick_act_1", use_container_width=True):
             quick_prompt = "射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。"
-        if st.button("射癖（早気・もたれ）の改善相談", key="quick_act_2", icon=":material/edit:", use_container_width=True):
+        if st.button("✏️　記述または編集（射癖・早気の改善相談）", key="quick_act_2", use_container_width=True):
             quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("射法八節・審査の要点を整理", key="quick_act_3", icon=":material/menu_book:", use_container_width=True):
+        if st.button("🌐　ウェブを検索（弓道教本・射法八節の検索）", key="quick_act_3", use_container_width=True):
             quick_prompt = "射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。"
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<div style="margin-bottom: 40px;"></div>', unsafe_allow_html=True)
 
@@ -2170,7 +2260,8 @@ for idx, msg in enumerate(st.session_state.messages):
     else:
         msg_char = msg.get("char", selected_char)
         c_info = CHARACTERS.get(msg_char, char_info)
-        with st.chat_message("assistant", avatar=c_info["icon"]):
+        avatar_img = os.path.join(ASSETS_DIR, c_info.get("avatar_file", "")) if c_info.get("avatar_file") and os.path.exists(os.path.join(ASSETS_DIR, c_info.get("avatar_file", ""))) else c_info["icon"]
+        with st.chat_message("assistant", avatar=avatar_img):
             st.markdown(f'<span class="char-badge {c_info["badge_class"]}">{c_info["icon"]} {msg_char}</span>', unsafe_allow_html=True)
 
             # ChatGPT風：メモリ更新バッジ通知
@@ -2266,7 +2357,7 @@ if "pending_regen" in st.session_state:
 
 # チャット入力欄（ChatGPT Web公式完全一致：プレースホルダー「ChatGPT に聞く」）
 chat_submission = st.chat_input(
-    placeholder="何でも聞いてください",
+    placeholder="弓道AIに聞く",
     accept_file=True,
     file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
 )
@@ -2357,7 +2448,8 @@ if text_to_send or files_to_send:
         with st.chat_message("user"):
             st.markdown(text_to_send)
 
-        with st.chat_message("assistant", avatar=char_info["icon"]):
+        avatar_img_stream = os.path.join(ASSETS_DIR, char_info.get("avatar_file", "")) if char_info.get("avatar_file") and os.path.exists(os.path.join(ASSETS_DIR, char_info.get("avatar_file", ""))) else char_info["icon"]
+        with st.chat_message("assistant", avatar=avatar_img_stream):
             st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
             if new_mem_items:
                 mem_tags = "、".join(new_mem_items)
