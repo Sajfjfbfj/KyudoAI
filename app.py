@@ -805,6 +805,254 @@ div[data-testid="stExpander"] {
 </style>
 """, unsafe_allow_html=True)
 
+# ==================== 2026 UI Renewal：和紙 × 墨 × 朱 ====================
+# 既存機能を一切変更せず、Streamlitの表示層のみを上書きするデザイントークンです。
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700&display=swap');
+
+:root {
+    --canvas: #f7f5f0;
+    --canvas-subtle: #efede7;
+    --surface-1: #1c1d1b;
+    --surface-2: #ffffff;
+    --surface-3: #e9e5dc;
+    --border-hairline: rgba(42, 38, 32, 0.10);
+    --border-subtle: rgba(42, 38, 32, 0.16);
+    --border-strong: rgba(42, 38, 32, 0.24);
+    --accent-emerald: #ae382b;
+    --accent-emerald-light: #c34b3d;
+    --accent-emerald-soft: rgba(174, 56, 43, 0.09);
+    --accent-emerald-glow: 0 10px 28px rgba(117, 44, 34, 0.14);
+    --ink-primary: #24211d;
+    --ink-secondary: #514c45;
+    --ink-muted: #777269;
+    --ink-dim: #9b958b;
+    --shadow-sm: 0 1px 2px rgba(49, 43, 35, 0.05);
+    --shadow-md: 0 8px 28px rgba(49, 43, 35, 0.09);
+    --shadow-lg: 0 18px 55px rgba(49, 43, 35, 0.14);
+    --shadow-float: 0 18px 55px rgba(49, 43, 35, 0.15);
+}
+
+html, body, [class*="css"], .stApp {
+    font-family: "Noto Sans JP", -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: var(--ink-primary) !important;
+    background: var(--canvas) !important;
+}
+
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    background-color: var(--canvas) !important;
+    background-image: radial-gradient(rgba(63, 56, 46, 0.065) 0.55px, transparent 0.7px) !important;
+    background-size: 5px 5px !important;
+}
+
+[data-testid="stHeader"] {
+    background: rgba(247, 245, 240, 0.84) !important;
+    border-bottom: 1px solid var(--border-hairline) !important;
+    backdrop-filter: blur(18px) !important;
+}
+
+.main .block-container {
+    max-width: 880px !important;
+    padding: 26px 30px 170px !important;
+}
+
+h1, h2, h3, h4 {
+    font-family: "Shippori Mincho", "Noto Sans JP", serif !important;
+    color: var(--ink-primary) !important;
+    letter-spacing: 0.025em !important;
+}
+
+.stMarkdown, .stMarkdown p, .stMarkdown li,
+[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
+    color: var(--ink-secondary) !important;
+}
+
+/* 墨色のナビゲーション */
+section[data-testid="stSidebar"] {
+    background: #1c1d1b !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+section[data-testid="stSidebar"] > div { background: transparent !important; }
+section[data-testid="stSidebar"] .stMarkdown,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label {
+    color: #aaa9a2 !important;
+}
+section[data-testid="stSidebar"] strong { color: #f0ede5 !important; }
+.sb-section-label {
+    color: #666761 !important;
+    font-size: 9px !important;
+    letter-spacing: 0.13em !important;
+}
+section[data-testid="stSidebar"] .stButton > button,
+section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
+    color: #aaa9a2 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 7px !important;
+    box-shadow: none !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover,
+section[data-testid="stSidebar"] [data-testid="stPopover"] > button:hover {
+    color: #f2efe7 !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    transform: none !important;
+}
+section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
+    color: #f2efe7 !important;
+    background: rgba(255, 255, 255, 0.075) !important;
+    border-color: rgba(255, 255, 255, 0.04) !important;
+}
+.sb-new-chat-btn button {
+    color: #f3f0e8 !important;
+    background: rgba(255, 255, 255, 0.055) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+}
+.sb-new-chat-btn button:hover {
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+}
+
+/* ヘッダーとポップオーバー */
+div[data-testid="stPopoverBody"] {
+    color: var(--ink-primary) !important;
+    background: rgba(255, 253, 248, 0.98) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 13px !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+div[data-testid="stPopoverBody"] p,
+div[data-testid="stPopoverBody"] span,
+div[data-testid="stPopoverBody"] label {
+    color: var(--ink-secondary) !important;
+}
+
+/* ウェルカムアクション */
+.bento-card-btn button,
+.main .stButton > button {
+    color: var(--ink-primary) !important;
+    background: rgba(255, 255, 255, 0.58) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 10px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+.bento-card-btn button:hover,
+.main .stButton > button:hover {
+    color: var(--ink-primary) !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-color: rgba(174, 56, 43, 0.26) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+button[kind="primary"], .stFormSubmitButton > button {
+    color: #fff !important;
+    background: #ae382b !important;
+    border: 0 !important;
+    box-shadow: 0 8px 24px rgba(117, 44, 34, 0.18) !important;
+}
+
+/* 会話 */
+div[data-testid="stChatMessage"] {
+    max-width: 800px !important;
+}
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
+    color: var(--ink-primary) !important;
+    background: #e9e5dc !important;
+    border: 0 !important;
+    border-radius: 14px 14px 3px 14px !important;
+    box-shadow: none !important;
+}
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) p,
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) span,
+div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid="stMarkdownContainer"] * {
+    color: var(--ink-primary) !important;
+}
+div[data-testid="stChatMessage"]:not(:has([data-testid="chatAvatarIcon-user"])) p {
+    color: var(--ink-secondary) !important;
+}
+.char-badge {
+    color: #9e382d !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding-left: 0 !important;
+}
+.char-badge.char-master,
+.char-badge.char-senior,
+.char-badge.char-analyst {
+    color: #9e382d !important;
+    background: transparent !important;
+    border: 0 !important;
+}
+.memory-badge {
+    color: #8f362c !important;
+    background: rgba(174, 56, 43, 0.07) !important;
+    border-color: rgba(174, 56, 43, 0.16) !important;
+}
+.file-attachment-card {
+    background: rgba(255, 255, 255, 0.64) !important;
+    border-color: var(--border-hairline) !important;
+    box-shadow: none !important;
+}
+.file-attachment-name { color: var(--ink-primary) !important; }
+
+/* 入力デッキ */
+div[data-testid="stBottom"] {
+    background: linear-gradient(180deg, rgba(247, 245, 240, 0), rgba(247, 245, 240, 0.92) 28%, #f7f5f0 100%) !important;
+    backdrop-filter: none !important;
+}
+div[data-testid="stChatInput"] {
+    color: var(--ink-primary) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-float), inset 0 1px 0 #fff !important;
+}
+div[data-testid="stChatInput"]:focus-within {
+    background: #fff !important;
+    border-color: rgba(174, 56, 43, 0.48) !important;
+    box-shadow: 0 0 0 3px rgba(174, 56, 43, 0.06), var(--shadow-float) !important;
+}
+div[data-testid="stChatInput"] textarea {
+    color: var(--ink-primary) !important;
+}
+div[data-testid="stChatInput"] textarea::placeholder { color: #aaa49a !important; }
+div[data-testid="stChatInput"] button { color: #847e74 !important; }
+div[data-testid="stChatInput"] button:hover {
+    color: #8f2c23 !important;
+    background: #efece5 !important;
+}
+
+/* フォームとグラフ */
+div[data-baseweb="input"], div[data-baseweb="textarea"],
+div[data-baseweb="select"] > div {
+    color: var(--ink-primary) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    border-color: var(--border-hairline) !important;
+}
+input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; }
+.stPlotlyChart, div[data-testid="stExpander"] {
+    background: rgba(255, 255, 255, 0.56) !important;
+    border-color: var(--border-hairline) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+button[data-baseweb="tab"] { color: var(--ink-muted) !important; }
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #9e382d !important;
+    border-bottom-color: #ae382b !important;
+}
+
+::-webkit-scrollbar-thumb { background: rgba(51, 46, 40, 0.18) !important; }
+
+@media (max-width: 600px) {
+    .main .block-container { padding: 16px 12px 140px !important; }
+    div[data-testid="stBottom"] > div { padding: 0 9px !important; }
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ==================== 弓道に関する科学的論文・生体力学（バイオメカニクス）研究データベース ====================
 KYUDO_SCIENTIFIC_EVIDENCE = """
 【弓道の科学的論文・生体力学（バイオメカニクス）研究知見データベース】
