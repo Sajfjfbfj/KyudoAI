@@ -24,6 +24,14 @@ def get_asset_base64(filename: str) -> str:
             return ""
     return ""
 
+def _toolbar_theme_css() -> str:
+    t = st.session_state.get("ui_theme", "自動")
+    if t == "ライト":
+        return ":root{color-scheme:light}.btn{color:#78716c}.btn:hover{background:rgba(28,25,23,.06);color:#1c1917}"
+    if t == "ダーク":
+        return ":root{color-scheme:dark}.btn{color:#9a948a}.btn:hover{background:rgba(244,240,233,.09);color:#f3f0ea}"
+    return ""
+
 def render_chatgpt_toolbar(text_content: str):
     """ChatGPT（2026年版）風：アイコンのみのアクションバー（コピー／読み上げ）。ダークテーマ対応"""
     safe_text_json = json.dumps(text_content).replace("</", "<\\/")
@@ -54,6 +62,7 @@ def render_chatgpt_toolbar(text_content: str):
                 .btn { color: #9a948a; }
                 .btn:hover { background: rgba(244, 240, 233, 0.09); color: #f3f0ea; }
             }
+            __THEME_CSS__
         </style>
     </head>
     <body>
@@ -136,7 +145,7 @@ def render_chatgpt_toolbar(text_content: str):
         </script>
     </body>
     </html>
-    """.replace("__TEXT__", safe_text_json)
+    """.replace("__TEXT__", safe_text_json).replace("__THEME_CSS__", _toolbar_theme_css())
     # components.html は非推奨のため、st.iframe があればそちらを優先（旧バージョンはフォールバック）
     if hasattr(st, "iframe"):
         st.iframe(toolbar_html.strip(), height=40)
@@ -204,6 +213,36 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
+# ==================== 表示テーマ（自動／ライト／ダーク） ====================
+THEME_CHOICES = ["自動", "ライト", "ダーク"]
+_THEME_LIGHT_VARS = "--canvas: #faf9f7; --canvas-subtle: #f5f3ef; --surface-1: #f4f2ee; --surface-2: #ffffff; --surface-3: #eeebe5; --surface-glass: rgba(250, 249, 247, 0.82); --border-hairline: rgba(28, 25, 23, 0.07); --border-subtle: rgba(28, 25, 23, 0.12); --border-strong: rgba(28, 25, 23, 0.22); --shu: #2b4c7e; --shu-light: #2b4c7e; --shu-soft: rgba(43, 76, 126, 0.08); --on-accent: #ffffff; --accent-emerald: var(--shu); --accent-emerald-light: var(--shu-light); --accent-emerald-soft: var(--shu-soft); --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0); --accent-blue: var(--shu); --accent-blue-soft: var(--shu-soft); --ink-primary: #1c1917; --ink-secondary: #44403c; --ink-muted: #78716c; --ink-dim: #a8a29e; --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06); --shadow-md: 0 8px 24px -10px rgba(28, 25, 23, 0.16); --shadow-lg: 0 18px 48px -14px rgba(28, 25, 23, 0.22); --shadow-float: 0 10px 34px -14px rgba(28, 25, 23, 0.22), 0 1px 2px rgba(28, 25, 23, 0.05); --radius-full: 9999px; --radius-xl: 16px; --radius-lg: 12px; --radius-md: 10px; --radius-sm: 6px; --ease: cubic-bezier(0.22, 1, 0.36, 1); --font-serif: \"Shippori Mincho\", \"Yu Mincho\", \"Hiragino Mincho ProN\", serif; --font-sans: \"Noto Sans JP\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; --font-mono: \"JetBrains Mono\", ui-monospace, monospace;"
+_THEME_DARK_VARS = "--canvas: #141312; --canvas-subtle: #181716; --surface-1: #1a1918; --surface-2: #211f1e; --surface-3: #2a2826; --surface-glass: rgba(20, 19, 18, 0.82); --border-hairline: rgba(244, 240, 233, 0.07); --border-subtle: rgba(244, 240, 233, 0.13); --border-strong: rgba(244, 240, 233, 0.24); --shu: #9dbbea; --shu-light: #b6cdf1; --shu-soft: rgba(157, 187, 234, 0.12); --on-accent: #0e1a2b; --ink-primary: #f3f0ea; --ink-secondary: #cfc9bf; --ink-muted: #9a948a; --ink-dim: #6f6a62; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6); --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7); --shadow-float: 0 10px 34px -14px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.4);"
+
+def _ui_theme_path() -> str:
+    user = st.session_state.get("logged_in_user") or "archer"
+    user_safe = "".join(c for c in user if c.isalnum() or c in ("-", "_")) or "archer"
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sidebar_items")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, f"{user_safe}_theme.json")
+
+def load_ui_theme() -> str:
+    try:
+        with open(_ui_theme_path(), "r", encoding="utf-8") as fp:
+            v = json.load(fp).get("theme", "自動")
+        return v if v in THEME_CHOICES else "自動"
+    except Exception:
+        return "自動"
+
+def save_ui_theme():
+    try:
+        with open(_ui_theme_path(), "w", encoding="utf-8") as fp:
+            json.dump({"theme": st.session_state.get("ui_theme", "自動")}, fp, ensure_ascii=False)
+    except Exception:
+        pass
+
+if "ui_theme" not in st.session_state:
+    st.session_state.ui_theme = load_ui_theme()
+
 # ==================== UI Renewal 2026-11-18：藍（AI）— 余白・淡い面・1色のアクセント ====================
 # 方針：装飾を減らし、タイポグラフィと余白で洗練を出す。ライト／ダークは OS 設定に自動追従。
 # 機能ロジックには一切触れず、表示層（CSS と静的HTML）のみを差し替える。
@@ -223,7 +262,7 @@ st.markdown("""
     --canvas: #faf9f7;
     --canvas-subtle: #f5f3ef;
     --surface-1: #f4f2ee;
-    --surface-2: var(--ink-primary);
+    --surface-2: #ffffff;
     --surface-3: #eeebe5;
     --surface-glass: rgba(250, 249, 247, 0.82);
 
@@ -236,7 +275,7 @@ st.markdown("""
     --shu: #2b4c7e;
     --shu-light: #2b4c7e;
     --shu-soft: rgba(43, 76, 126, 0.08);
-    --on-accent: var(--ink-primary);
+    --on-accent: #ffffff;
     --accent-emerald: var(--shu);
     --accent-emerald-light: var(--shu-light);
     --accent-emerald-soft: var(--shu-soft);
@@ -793,6 +832,12 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
 }
 </style>
 """, unsafe_allow_html=True)
+
+# 選択されたテーマを強制（「自動」のときは OS 設定に従う）
+if st.session_state.get("ui_theme") == "ライト":
+    st.markdown(f"<style>:root {{ color-scheme: light; {_THEME_LIGHT_VARS} }}</style>", unsafe_allow_html=True)
+elif st.session_state.get("ui_theme") == "ダーク":
+    st.markdown(f"<style>:root {{ color-scheme: dark; {_THEME_DARK_VARS} }}</style>", unsafe_allow_html=True)
 
 # ==================== 弓道に関する科学的論文・生体力学（バイオメカニクス）研究データベース ====================
 KYUDO_SCIENTIFIC_EVIDENCE = """
@@ -1613,6 +1658,7 @@ with st.sidebar:
         tab_profile, tab_memory, tab_inst, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ", "🎯 指示", "💾 会話"])
 
         with tab_profile:
+            st.radio("表示テーマ", THEME_CHOICES, key="ui_theme", horizontal=True, on_change=save_ui_theme)
             font_size_choice = st.radio(
                 "文字の大きさ:",
                 options=["標準 (16px)", "大きめ (18px)", "特大 (22px)"],
