@@ -933,7 +933,12 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
 /* ---------- レスポンシブ ---------- */
 @media (max-width: 900px) {
     [data-testid="stMainBlockContainer"] { padding: 20px 16px 150px !important; }
-    .hero { margin-top: 3vh; }
+    .hero { margin-top: 0; }
+    /* ウェルカム画面を、ヘッダーと入力欄の間の縦中央に表示 */
+    .st-key-welcome_wrap {
+        min-height: calc(100vh - 250px); min-height: calc(100dvh - 250px);
+        display: flex !important; flex-direction: column; justify-content: center;
+    }
     .st-key-topbar { padding-left: 44px !important; }
 }
 @media (max-width: 600px) {
@@ -2733,7 +2738,7 @@ quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバー�
 welcome_slot = None
 if not st.session_state.messages and not quick_prompt:
   welcome_slot = st.empty()
-  with welcome_slot.container():
+  with welcome_slot.container(key="welcome_wrap"):
     # ===== ウェルカム画面（送信と同時に welcome_slot ごと消す） =====
     st.markdown("""
     <div class="hero">
@@ -2952,6 +2957,9 @@ if text_to_send or files_to_send:
         attached_media = files_to_send[0]
         user_msg_text = text_to_send if text_to_send else "🎥 射形動画を分析してください。（筋肉の使い方と3D骨格バランス）"
         file_size_str = f"{round(attached_media.size / (1024*1024), 1)} MB"
+
+        if welcome_slot is not None:
+            welcome_slot.empty()
 
         # ユーザー発言を履歴に追加（ライブ描画は一切しない）
         st.session_state.messages.append({
