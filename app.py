@@ -1476,8 +1476,76 @@ def guest_consume_one():
         json.dump(data, fp, ensure_ascii=False, indent=2)
     os.replace(tmp, GUEST_USAGE_FILE)
 
-def _complete_login(username: str, guest: bool = False):
+# ---- ログイン状態の保持（Cookie + サーバー側トークン。リロードしてもログイン画面を出さない） ----
+LOGIN_COOKIE = "kyudo_auth"
+LOGIN_TOKEN_DAYS = 30
+LOGIN_TOKENS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "login_tokens.json")
+
+def _load_login_tokens() -> dict:
+    try:
+        with open(LOGIN_TOKENS_FILE, "r", encoding="utf-8") as fp:
+            d = json.load(fp)
+        return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+def _save_login_tokens(d: dict):
+    os.makedirs(os.path.dirname(LOGIN_TOKENS_FILE), exist_ok=True)
+    tmp = LOGIN_TOKENS_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fp:
+        json.dump(d, fp, ensure_ascii=False, indent=2)
+    os.replace(tmp, LOGIN_TOKENS_FILE)
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+def issue_login_token(username: str) -> str:
+    token = secrets.token_urlsafe(32)
+    now = time.time()
+    tokens = {k: v for k, v in _load_login_tokens().items() if v.get("exp", 0) > now}
+    tokens[_hash_token(token)] = {"user": username, "exp": now + LOGIN_TOKEN_DAYS * 86400}
+    _save_login_tokens(tokens)
+    return token
+
+def username_from_token(token: str):
+    if not token:
+        return None
+    entry = _load_login_tokens().get(_hash_token(token))
+    if not entry or entry.get("exp", 0) <= time.time():
+        return None
+    return entry.get("user") if entry.get("user") in load_users() else None
+
+def revoke_login_token(token: str):
+    if not token:
+        return
+    tokens = _load_login_tokens()
+    if tokens.pop(_hash_token(token), None) is not None:
+        _save_login_tokens(tokens)
+
+def _browser_login_cookie() -> str:
+    try:
+        return st.context.cookies.get(LOGIN_COOKIE, "") or ""
+    except Exception:
+        return ""
+
+def _flush_cookie_js():
+    """ブラウザのCookieを設定／削除する（ログイン・ログアウト直後の次の再実行で1回だけ出力）。"""
+    set_tok = st.session_state.pop("_cookie_set", None)
+    clear = st.session_state.pop("_cookie_clear", False)
+    if not (set_tok or clear):
+        return
+    if set_tok:
+        js = (f"var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_TOKEN_DAYS * 86400}; SameSite=Lax';"
+              "if(window.parent.location.protocol==='https:'){c+='; Secure';}"
+              "window.parent.document.cookie=c;")
+    else:
+        js = f"window.parent.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';"
+    components.html(f"<script>try{{{js}}}catch(e){{}}</script>", height=0)
+
+def _complete_login(username: str, guest: bool = False, issue_token: bool = True):
     """ログイン成功時の共通処理。ユーザー専用の履歴・テーマ設定を読み直す。"""
+    if not guest and issue_token:
+        st.session_state["_cookie_set"] = issue_login_token(username.strip().lower())
     st.session_state.authenticated = True
     st.session_state.is_guest = guest
     st.session_state.logged_in_user = username.strip().lower()
@@ -1545,6 +1613,11 @@ def render_login_screen():
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+    # リロード等で新しいセッションになった場合：Cookieのトークンが有効なら自動ログイン
+    _auto_user = username_from_token(_browser_login_cookie())
+    if _auto_user:
+        _complete_login(_auto_user, issue_token=False)
+_flush_cookie_js()
 if not st.session_state.authenticated:
     render_login_screen()
     st.stop()
@@ -1872,6 +1945,8 @@ with st.sidebar:
             
             st.divider()
             if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
+                revoke_login_token(_browser_login_cookie())
+                st.session_state["_cookie_clear"] = True
                 st.session_state.authenticated = False
                 st.session_state.is_guest = False
                 st.session_state.logged_in_user = ""
