@@ -28,9 +28,9 @@ def get_asset_base64(filename: str) -> str:
 def _toolbar_theme_css() -> str:
     t = st.session_state.get("ui_theme", "自動")
     if t == "ライト":
-        return ":root{color-scheme:light}.btn{color:#78716c}.btn:hover{background:rgba(28,25,23,.06);color:#1c1917}"
+        return ":root{color-scheme:light}.btn{color:#6f6f6f}.btn:hover{background:rgba(0,0,0,.06);color:#0d0d0d}"
     if t == "ダーク":
-        return ":root{color-scheme:dark}.btn{color:#9a948a}.btn:hover{background:rgba(244,240,233,.09);color:#f3f0ea}"
+        return ":root{color-scheme:dark}.btn{color:#9b9b9b}.btn:hover{background:rgba(255,255,255,.10);color:#ececec}"
     return ""
 
 def render_chatgpt_toolbar(text_content: str):
@@ -52,16 +52,16 @@ def render_chatgpt_toolbar(text_content: str):
             .bar { display: flex; align-items: center; gap: 2px; padding-top: 4px; }
             .btn {
                 width: 32px; height: 32px; border: none; border-radius: 8px;
-                background: transparent; color: #78716c;
+                background: transparent; color: #6f6f6f;
                 display: inline-flex; align-items: center; justify-content: center;
                 cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
             }
-            .btn:hover { background: rgba(28, 25, 23, 0.06); color: #1c1917; }
+            .btn:hover { background: rgba(0, 0, 0, 0.06); color: #0d0d0d; }
             .btn:active { transform: scale(0.94); }
             .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
             @media (prefers-color-scheme: dark) {
-                .btn { color: #9a948a; }
-                .btn:hover { background: rgba(244, 240, 233, 0.09); color: #f3f0ea; }
+                .btn { color: #9b9b9b; }
+                .btn:hover { background: rgba(255, 255, 255, 0.10); color: #ececec; }
             }
             __THEME_CSS__
         </style>
@@ -216,8 +216,8 @@ font_sizes = {
 
 # ==================== 表示テーマ（自動／ライト／ダーク） ====================
 THEME_CHOICES = ["自動", "ライト", "ダーク"]
-_THEME_LIGHT_VARS = "--canvas: #faf9f7; --canvas-subtle: #f5f3ef; --surface-1: #f4f2ee; --surface-2: #ffffff; --surface-3: #eeebe5; --surface-glass: rgba(250, 249, 247, 0.82); --border-hairline: rgba(28, 25, 23, 0.07); --border-subtle: rgba(28, 25, 23, 0.12); --border-strong: rgba(28, 25, 23, 0.22); --shu: #2b4c7e; --shu-light: #2b4c7e; --shu-soft: rgba(43, 76, 126, 0.08); --on-accent: #ffffff; --accent-emerald: var(--shu); --accent-emerald-light: var(--shu-light); --accent-emerald-soft: var(--shu-soft); --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0); --accent-blue: var(--shu); --accent-blue-soft: var(--shu-soft); --ink-primary: #1c1917; --ink-secondary: #44403c; --ink-muted: #78716c; --ink-dim: #a8a29e; --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06); --shadow-md: 0 8px 24px -10px rgba(28, 25, 23, 0.16); --shadow-lg: 0 18px 48px -14px rgba(28, 25, 23, 0.22); --shadow-float: 0 10px 34px -14px rgba(28, 25, 23, 0.22), 0 1px 2px rgba(28, 25, 23, 0.05); --radius-full: 9999px; --radius-xl: 16px; --radius-lg: 12px; --radius-md: 10px; --radius-sm: 6px; --ease: cubic-bezier(0.22, 1, 0.36, 1); --font-serif: \"Shippori Mincho\", \"Yu Mincho\", \"Hiragino Mincho ProN\", serif; --font-sans: \"Noto Sans JP\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; --font-mono: \"JetBrains Mono\", ui-monospace, monospace;"
-_THEME_DARK_VARS = "--canvas: #141312; --canvas-subtle: #181716; --surface-1: #1a1918; --surface-2: #211f1e; --surface-3: #2a2826; --surface-glass: rgba(20, 19, 18, 0.82); --border-hairline: rgba(244, 240, 233, 0.07); --border-subtle: rgba(244, 240, 233, 0.13); --border-strong: rgba(244, 240, 233, 0.24); --shu: #9dbbea; --shu-light: #b6cdf1; --shu-soft: rgba(157, 187, 234, 0.12); --on-accent: #0e1a2b; --ink-primary: #f3f0ea; --ink-secondary: #cfc9bf; --ink-muted: #9a948a; --ink-dim: #6f6a62; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6); --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7); --shadow-float: 0 10px 34px -14px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.4);"
+_THEME_LIGHT_VARS = "--canvas: #ffffff; --canvas-subtle: #f9f9f9; --surface-1: #f9f9f9; --surface-2: #ffffff; --surface-3: #ececec; --surface-glass: rgba(255, 255, 255, 0.85); --composer: #f4f4f4; --user-bubble: #f4f4f4; --border-hairline: rgba(0, 0, 0, 0.06); --border-subtle: rgba(0, 0, 0, 0.10); --border-strong: rgba(0, 0, 0, 0.20); --shu: #0d0d0d; --shu-light: #0d0d0d; --shu-soft: rgba(0, 0, 0, 0.05); --on-accent: #ffffff; --link: #0a66c2; --ink-primary: #0d0d0d; --ink-secondary: #424242; --ink-muted: #6f6f6f; --ink-dim: #8f8f8f; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08); --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.14); --shadow-float: 0 9px 9px 0 rgba(0, 0, 0, 0.01), 0 2px 5px 0 rgba(0, 0, 0, 0.06); --accent-emerald: var(--shu); --accent-emerald-light: var(--shu-light); --accent-emerald-soft: var(--shu-soft); --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0); --accent-blue: var(--shu); --accent-blue-soft: var(--shu-soft); --radius-full: 9999px; --radius-xl: 20px; --radius-lg: 14px; --radius-md: 10px; --radius-sm: 6px; --ease: cubic-bezier(0.22, 1, 0.36, 1); --font-serif: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif; --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif; --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;"
+_THEME_DARK_VARS = "--canvas: #212121; --canvas-subtle: #1a1a1a; --surface-1: #171717; --surface-2: #2a2a2a; --surface-3: #333333; --surface-glass: rgba(33, 33, 33, 0.85); --composer: #303030; --user-bubble: #303030; --border-hairline: rgba(255, 255, 255, 0.08); --border-subtle: rgba(255, 255, 255, 0.15); --border-strong: rgba(255, 255, 255, 0.28); --shu: #ececec; --shu-light: #ffffff; --shu-soft: rgba(255, 255, 255, 0.08); --on-accent: #0d0d0d; --link: #7ab7ff; --ink-primary: #ececec; --ink-secondary: #cdcdcd; --ink-muted: #9b9b9b; --ink-dim: #7a7a7a; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6); --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7); --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.25);"
 
 def _ui_theme_path() -> str:
     user = st.session_state.get("logged_in_user") or "archer"
@@ -244,94 +244,87 @@ def save_ui_theme():
 if "ui_theme" not in st.session_state:
     st.session_state.ui_theme = load_ui_theme()
 
-# ==================== UI Renewal 2026-11-18：藍（AI）— 余白・淡い面・1色のアクセント ====================
-# 方針：装飾を減らし、タイポグラフィと余白で洗練を出す。ライト／ダークは OS 設定に自動追従。
+# ==================== UI：ChatGPT風（ニュートラル配色・ゴシック体・黒／白のアクセント） ====================
+# 方針：色味を持たせず、ChatGPT のように白／チャコールの面と余白だけで構成する。ライト／ダークは OS 設定に自動追従。
 # 機能ロジックには一切触れず、表示層（CSS と静的HTML）のみを差し替える。
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* =====================================================================
-   弓道AI道場 — 藍（AI）デザイン
-   方針：余白・淡い面・1色の藍だけで構成する。装飾（円相・点描・印・縦書き）は使わない。
+   弓道AI道場 — ChatGPT風デザイン
+   方針：ニュートラルな面・ゴシック体・黒（ダークは白）の1色アクセント。装飾は使わない。
    ライト／ダークは OS 設定に自動追従（prefers-color-scheme）。
    ===================================================================== */
 :root {
     color-scheme: light dark;
 
-    /* 地と面（ライト：生成りの紙） */
-    --canvas: #faf9f7;
-    --canvas-subtle: #f5f3ef;
-    --surface-1: #f4f2ee;
+    --canvas: #ffffff;
+    --canvas-subtle: #f9f9f9;
+    --surface-1: #f9f9f9;
     --surface-2: #ffffff;
-    --surface-3: #eeebe5;
-    --surface-glass: rgba(250, 249, 247, 0.82);
-
-    /* 罫線 */
-    --border-hairline: rgba(28, 25, 23, 0.07);
-    --border-subtle: rgba(28, 25, 23, 0.12);
-    --border-strong: rgba(28, 25, 23, 0.22);
-
-    /* アクセント：藍（唯一の色）。旧変数名も互換のため同じ値に割り当て */
-    --shu: #2b4c7e;
-    --shu-light: #2b4c7e;
-    --shu-soft: rgba(43, 76, 126, 0.08);
+    --surface-3: #ececec;
+    --surface-glass: rgba(255, 255, 255, 0.85);
+    --composer: #f4f4f4;
+    --user-bubble: #f4f4f4;
+    --border-hairline: rgba(0, 0, 0, 0.06);
+    --border-subtle: rgba(0, 0, 0, 0.10);
+    --border-strong: rgba(0, 0, 0, 0.20);
+    --shu: #0d0d0d;
+    --shu-light: #0d0d0d;
+    --shu-soft: rgba(0, 0, 0, 0.05);
     --on-accent: #ffffff;
+    --link: #0a66c2;
+    --ink-primary: #0d0d0d;
+    --ink-secondary: #424242;
+    --ink-muted: #6f6f6f;
+    --ink-dim: #8f8f8f;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.14);
+    --shadow-float: 0 9px 9px 0 rgba(0, 0, 0, 0.01), 0 2px 5px 0 rgba(0, 0, 0, 0.06);
     --accent-emerald: var(--shu);
     --accent-emerald-light: var(--shu-light);
     --accent-emerald-soft: var(--shu-soft);
     --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0);
     --accent-blue: var(--shu);
     --accent-blue-soft: var(--shu-soft);
-
-    /* 文字 */
-    --ink-primary: #1c1917;
-    --ink-secondary: #44403c;
-    --ink-muted: #78716c;
-    --ink-dim: #a8a29e;
-
-    --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
-    --shadow-md: 0 8px 24px -10px rgba(28, 25, 23, 0.16);
-    --shadow-lg: 0 18px 48px -14px rgba(28, 25, 23, 0.22);
-    --shadow-float: 0 10px 34px -14px rgba(28, 25, 23, 0.22), 0 1px 2px rgba(28, 25, 23, 0.05);
-
     --radius-full: 9999px;
-    --radius-xl: 16px;
-    --radius-lg: 12px;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
     --radius-md: 10px;
     --radius-sm: 6px;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --font-serif: "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif;
-    --font-sans: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-serif: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif;
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --canvas: #141312;
-        --canvas-subtle: #181716;
-        --surface-1: #1a1918;
-        --surface-2: #211f1e;
-        --surface-3: #2a2826;
-        --surface-glass: rgba(20, 19, 18, 0.82);
-
-        --border-hairline: rgba(244, 240, 233, 0.07);
-        --border-subtle: rgba(244, 240, 233, 0.13);
-        --border-strong: rgba(244, 240, 233, 0.24);
-
-        --shu: #9dbbea;
-        --shu-light: #b6cdf1;
-        --shu-soft: rgba(157, 187, 234, 0.12);
-        --on-accent: #0e1a2b;
-
-        --ink-primary: #f3f0ea;
-        --ink-secondary: #cfc9bf;
-        --ink-muted: #9a948a;
-        --ink-dim: #6f6a62;
-
+        --canvas: #212121;
+        --canvas-subtle: #1a1a1a;
+        --surface-1: #171717;
+        --surface-2: #2a2a2a;
+        --surface-3: #333333;
+        --surface-glass: rgba(33, 33, 33, 0.85);
+        --composer: #303030;
+        --user-bubble: #303030;
+        --border-hairline: rgba(255, 255, 255, 0.08);
+        --border-subtle: rgba(255, 255, 255, 0.15);
+        --border-strong: rgba(255, 255, 255, 0.28);
+        --shu: #ececec;
+        --shu-light: #ffffff;
+        --shu-soft: rgba(255, 255, 255, 0.08);
+        --on-accent: #0d0d0d;
+        --link: #7ab7ff;
+        --ink-primary: #ececec;
+        --ink-secondary: #cdcdcd;
+        --ink-muted: #9b9b9b;
+        --ink-dim: #7a7a7a;
         --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
         --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
         --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7);
-        --shadow-float: 0 10px 34px -14px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(0, 0, 0, 0.4);
+        --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 }
 
@@ -346,9 +339,7 @@ html, body, [class*="css"], .stApp {
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     color: var(--ink-primary) !important;
     background-color: var(--canvas) !important;
-    /* 上部にごく淡い藍のにじみだけ。操作を邪魔しない */
-    background-image: radial-gradient(900px 420px at 50% -8%, var(--shu-soft), transparent 70%) !important;
-    background-attachment: fixed !important;
+    background-image: none !important;
 }
 ::selection { background: var(--shu-soft); color: var(--ink-primary); }
 
@@ -381,7 +372,7 @@ html, body, [class*="css"], .stApp {
 [data-testid="stExpandSidebarButton"] *, [data-testid="stSidebarCollapseButton"] button * { color: inherit !important; }
 
 [data-testid="stMainBlockContainer"] {
-    max-width: 760px !important;
+    max-width: 768px !important;
     padding: 10px 24px 150px !important;
     margin: 0 auto !important;
 }
@@ -389,24 +380,24 @@ html, body, [class*="css"], .stApp {
 /* ---------- タイポグラフィ ---------- */
 .stMarkdown, .stMarkdown p, .stMarkdown li,
 [data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p {
-    color: var(--ink-secondary) !important;
-    font-size: 15.5px !important;
-    line-height: 1.85 !important;
-    letter-spacing: 0.01em !important;
+    color: var(--ink-primary) !important;
+    font-size: 16px !important;
+    line-height: 1.75 !important;
+    letter-spacing: 0 !important;
 }
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans) !important;
     color: var(--ink-primary) !important;
     font-weight: 600 !important;
-    letter-spacing: 0.01em !important;
+    letter-spacing: 0 !important;
 }
-h1 { font-size: clamp(26px, 3.4vw, 34px) !important; line-height: 1.4 !important; }
-h2 { font-size: 21px !important; }
-h3 { font-size: 17.5px !important; }
-h4 { font-size: 15.5px !important; }
+h1 { font-size: clamp(24px, 3vw, 30px) !important; line-height: 1.4 !important; }
+h2 { font-size: 20px !important; }
+h3 { font-size: 17px !important; }
+h4 { font-size: 16px !important; }
 strong { color: var(--ink-primary) !important; font-weight: 600 !important; }
 hr, [data-testid="stDivider"] hr { border-color: var(--border-hairline) !important; }
-a { color: var(--shu) !important; text-underline-offset: 3px; }
+a { color: var(--link) !important; text-underline-offset: 3px; }
 
 div[data-testid="stMarkdownContainer"] code {
     background: var(--surface-3) !important;
@@ -414,28 +405,44 @@ div[data-testid="stMarkdownContainer"] code {
     color: var(--ink-primary) !important;
     border-radius: 6px !important;
     padding: 2px 6px !important;
-    font-size: 13.5px !important;
+    font-size: 0.875em !important;
     font-family: var(--font-mono) !important;
 }
 div[data-testid="stMarkdownContainer"] pre {
-    background: var(--surface-2) !important;
+    background: var(--canvas-subtle) !important;
     border: 1px solid var(--border-hairline) !important;
     border-radius: var(--radius-lg) !important;
 }
 div[data-testid="stMarkdownContainer"] blockquote {
-    border-left: 3px solid var(--shu) !important;
-    background: var(--shu-soft) !important;
-    padding: 6px 16px !important;
+    border-left: 3px solid var(--border-strong) !important;
+    background: transparent !important;
+    padding: 2px 16px !important;
     margin: 14px 0 !important;
-    border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
-    color: var(--ink-secondary) !important;
+    border-radius: 0 !important;
+    color: var(--ink-muted) !important;
+}
+/* 表：ChatGPT のように罫線だけの軽い見た目 */
+div[data-testid="stMarkdownContainer"] table {
+    border-collapse: collapse !important; width: 100%; margin: 12px 0 !important;
+    font-size: 15px !important;
+}
+div[data-testid="stMarkdownContainer"] th {
+    background: transparent !important; color: var(--ink-primary) !important;
+    font-weight: 600 !important; text-align: left !important;
+    border: 0 !important; border-bottom: 1px solid var(--border-strong) !important;
+    padding: 8px 12px !important;
+}
+div[data-testid="stMarkdownContainer"] td {
+    background: transparent !important; color: var(--ink-primary) !important;
+    border: 0 !important; border-bottom: 1px solid var(--border-hairline) !important;
+    padding: 8px 12px !important;
 }
 [data-testid="stCaptionContainer"], .stCaption, small { color: var(--ink-muted) !important; }
 
 /* ---------- サイドバー ---------- */
 section[data-testid="stSidebar"] {
     background: var(--surface-1) !important;
-    border-right: 1px solid var(--border-hairline) !important;
+    border-right: 0 !important;
 }
 section[data-testid="stSidebar"] > div { background: transparent !important; }
 section[data-testid="stSidebar"] .stMarkdown,
@@ -446,12 +453,12 @@ section[data-testid="stSidebar"] strong { color: var(--ink-primary) !important; 
 
 .sb-brand-name {
     font-family: var(--font-serif);
-    font-size: 18px; font-weight: 700; letter-spacing: 0.08em;
-    color: var(--ink-primary); line-height: 1.15;
+    font-size: 17px; font-weight: 600; letter-spacing: 0;
+    color: var(--ink-primary); line-height: 1.2;
 }
 .sb-brand-tag {
     font-family: var(--font-sans);
-    font-size: 10px; font-weight: 600; letter-spacing: 0.16em; color: var(--ink-muted);
+    font-size: 10px; font-weight: 500; letter-spacing: 0.08em; color: var(--ink-muted);
     margin-top: 3px; display: block;
 }
 .sb-section-label {
@@ -490,19 +497,18 @@ section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
     background: var(--surface-3) !important;
     font-weight: 600 !important;
 }
-/* 新しいチャット：唯一の塗りボタン */
+/* 新しいチャット：ChatGPT と同じく、枠なしのメニュー行 */
 section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
     color: var(--ink-primary) !important;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-subtle) !important;
-    box-shadow: var(--shadow-sm) !important;
-    justify-content: center !important;
-    font-weight: 600 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    justify-content: flex-start !important;
+    font-weight: 500 !important;
 }
 section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
-    background: var(--shu) !important;
-    border-color: var(--shu) !important;
-    color: var(--on-accent) !important;
+    background: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
 }
 
 [class*="st-key-hist_pin_"] { display: none !important; }
@@ -597,7 +603,7 @@ div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; 
 }
 
 /* ---------- ウェルカム ---------- */
-.hero { margin: 7vh 0 24px; }
+.hero { margin: 10vh 0 28px; text-align: center; }
 .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
@@ -606,43 +612,36 @@ div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; 
 }
 .hero-title {
     font-family: var(--font-serif) !important;
-    font-size: clamp(28px, 4.2vw, 42px) !important;
-    font-weight: 600 !important; line-height: 1.42 !important;
-    letter-spacing: 0.02em !important;
+    font-size: clamp(24px, 3.2vw, 30px) !important;
+    font-weight: 500 !important; line-height: 1.5 !important;
+    letter-spacing: 0 !important;
     color: var(--ink-primary) !important; margin: 0 0 14px !important;
 }
-.hero-title em { font-style: normal; color: var(--shu); }
-.hero-sub { font-size: 14.5px; line-height: 1.9; color: var(--ink-muted); max-width: 480px; }
+.hero-title em { font-style: normal; color: inherit; }
+.hero-sub { font-size: 14px; line-height: 1.8; color: var(--ink-muted); max-width: 480px; margin: 0 auto; }
 
-/* クイックアクション：余白のあるカード */
+/* クイックアクション：枠だけの控えめなチップ */
 [data-testid="stMain"] [class*="st-key-quick_act_"] button {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: var(--radius-lg) !important;
-    box-shadow: var(--shadow-sm) !important;
-    min-height: 56px !important;
-    padding: 14px 48px 14px 20px !important;
+    background: transparent !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 18px !important;
+    box-shadow: none !important;
+    min-height: 48px !important;
+    padding: 10px 18px !important;
     justify-content: flex-start !important;
     text-align: left !important;
     color: var(--ink-primary) !important;
-    font-size: 15px !important; font-weight: 500 !important; letter-spacing: 0.01em !important;
-    position: relative;
-    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease) !important;
+    font-size: 15px !important; font-weight: 400 !important; letter-spacing: 0 !important;
+    transition: background 0.15s ease !important;
 }
 [data-testid="stMain"] [class*="st-key-quick_act_"] button > div { justify-content: flex-start !important; }
-[data-testid="stMain"] [class*="st-key-quick_act_"] button::after {
-    content: "→"; position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-    color: var(--ink-dim);
-    transition: transform 0.25s var(--ease), color 0.2s ease;
-}
 [data-testid="stMain"] [class*="st-key-quick_act_"] button:hover {
-    background: var(--surface-2) !important;
-    border-color: var(--border-strong) !important;
-    box-shadow: var(--shadow-md) !important;
-    transform: translateY(-1px) !important;
+    background: var(--surface-3) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: none !important;
+    transform: none !important;
     color: var(--ink-primary) !important;
 }
-[data-testid="stMain"] [class*="st-key-quick_act_"] button:hover::after { color: var(--shu); transform: translate(4px, -50%); }
 
 /* ---------- 会話 ---------- */
 div[data-testid="stChatMessage"] {
@@ -654,12 +653,12 @@ div[data-testid="stChatMessage"] [data-testid^="stChatMessageAvatar"] { display:
 
 /* あなた：右寄せのやわらかい吹き出し */
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    max-width: 78% !important; width: fit-content !important;
+    max-width: 70% !important; width: fit-content !important;
     margin-left: auto !important; margin-right: 0 !important;
-    background: var(--surface-3) !important;
+    background: var(--user-bubble) !important;
     border: 0 !important;
-    border-radius: 20px 20px 6px 20px !important;
-    padding: 10px 18px !important;
+    border-radius: 24px !important;
+    padding: 10px 20px !important;
 }
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) p,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) span,
@@ -672,15 +671,21 @@ div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"
 }
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) p,
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) li {
-    color: var(--ink-primary) !important; font-size: 15.5px !important; line-height: 1.95 !important;
+    color: var(--ink-primary) !important; font-size: 16px !important; line-height: 1.75 !important;
 }
+
+/* 回答内の見出しは ChatGPT 並みに控えめなサイズへ */
+div[data-testid="stChatMessage"] h1 { font-size: 22px !important; margin: 18px 0 8px !important; }
+div[data-testid="stChatMessage"] h2 { font-size: 19px !important; margin: 16px 0 6px !important; }
+div[data-testid="stChatMessage"] h3 { font-size: 17px !important; margin: 14px 0 4px !important; }
+div[data-testid="stChatMessage"] h4 { font-size: 16px !important; margin: 12px 0 4px !important; }
 
 .char-badge {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 0 !important; margin: 0 0 8px !important;
     background: transparent !important; border: 0 !important; border-radius: 0 !important;
     font-family: var(--font-sans) !important;
-    font-size: 12.5px !important; font-weight: 600 !important; letter-spacing: 0.04em !important;
+    font-size: 12.5px !important; font-weight: 500 !important; letter-spacing: 0 !important;
     color: var(--ink-muted) !important;
 }
 .char-badge.char-master, .char-badge.char-senior, .char-badge.char-analyst {
@@ -723,19 +728,19 @@ div[data-testid="stBottom"] {
     z-index: 9999 !important;
 }
 div[data-testid="stBottomBlockContainer"] {
-    max-width: 760px !important; padding: 0 24px !important; margin: 0 auto !important;
+    max-width: 768px !important; padding: 0 24px !important; margin: 0 auto !important;
 }
 div[data-testid="stChatInput"] {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: 24px !important;
+    background: var(--composer) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 28px !important;
     box-shadow: var(--shadow-float) !important;
     padding: 4px 10px !important;
     transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    border-color: var(--shu) !important;
-    box-shadow: 0 0 0 4px var(--shu-soft), var(--shadow-float) !important;
+    border-color: var(--border-subtle) !important;
+    box-shadow: var(--shadow-float) !important;
 }
 div[data-testid="stChatInput"] [data-baseweb="textarea"],
 div[data-testid="stChatInput"] [data-baseweb="base-input"],
@@ -748,7 +753,7 @@ div[data-testid="stChatInput"] [data-baseweb] {
 }
 div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
-    font-size: 15px !important; line-height: 1.7 !important;
+    font-size: 16px !important; line-height: 1.6 !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
 div[data-testid="stChatInput"] button {
@@ -771,8 +776,8 @@ div[data-testid="stChatInput"] button:disabled { background: transparent !import
     color: var(--ink-primary) !important;
     border: 1px solid var(--border-subtle) !important;
     border-radius: 999px !important;
-    box-shadow: var(--shadow-sm) !important;
-    font-weight: 500 !important; font-size: 13px !important; letter-spacing: 0.01em !important;
+    box-shadow: none !important;
+    font-weight: 500 !important; font-size: 14px !important; letter-spacing: 0 !important;
     min-height: 38px !important; padding: 6px 18px !important;
     transition: background 0.18s var(--ease), border-color 0.18s var(--ease), color 0.18s var(--ease) !important;
 }
@@ -783,8 +788,8 @@ div[data-testid="stChatInput"] button:disabled { background: transparent !import
 .stButton > button:active { transform: scale(0.985) !important; }
 button[kind="primary"], .stFormSubmitButton > button {
     background: var(--shu) !important; color: var(--on-accent) !important; border: 0 !important;
-    border-radius: 999px !important; font-weight: 600 !important; letter-spacing: 0.04em !important;
-    box-shadow: var(--shadow-sm) !important;
+    border-radius: 999px !important; font-weight: 600 !important; letter-spacing: 0 !important;
+    box-shadow: none !important;
 }
 button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
     background: var(--shu) !important; color: var(--on-accent) !important; opacity: 0.9; transform: none !important;
@@ -827,7 +832,7 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
 /* ---------- ログイン ---------- */
 .st-key-login_card {
     background: var(--surface-2); border: 1px solid var(--border-hairline);
-    border-radius: 20px; padding: 22px 24px 8px; box-shadow: var(--shadow-md);
+    border-radius: 20px; padding: 22px 24px 8px; box-shadow: var(--shadow-sm);
     margin-bottom: 14px;
 }
 .st-key-goto_register button, .st-key-goto_login button, .st-key-guest_login button {
@@ -844,7 +849,7 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; margin-bottom: 20px;
 }
-.login-title { font-family: var(--font-serif); font-size: 34px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink-primary); }
+.login-title { font-size: 30px; font-weight: 600; letter-spacing: 0; color: var(--ink-primary); }
 .login-subtitle { margin-top: 10px; font-size: 13.5px; line-height: 1.9; color: var(--ink-muted); }
 
 /* ---------- レスポンシブ ---------- */
@@ -1875,11 +1880,11 @@ _CTX_MENU_JS = r"""
   var st = document.createElement('style');
   st.textContent = [
     '#kyudo-ctx{position:fixed;z-index:2147483647;display:none;min-width:190px;padding:6px;',
-    'background:var(--surface-2,#fff);color:var(--ink-primary,#1c1917);border:1px solid var(--border-subtle,rgba(0,0,0,.12));',
+    'background:var(--surface-2,#fff);color:var(--ink-primary,#0d0d0d);border:1px solid var(--border-subtle,rgba(0,0,0,.12));',
     'border-radius:12px;box-shadow:var(--shadow-lg,0 18px 48px -14px rgba(0,0,0,.25));font-family:var(--font-sans,sans-serif);font-size:13.5px;}',
     '#kyudo-ctx button{display:block;width:100%;text-align:left;padding:8px 12px;border:0;border-radius:8px;background:transparent;',
     'color:inherit;font:inherit;cursor:pointer;}',
-    '#kyudo-ctx button:hover{background:var(--surface-3,#eeebe5);}'
+    '#kyudo-ctx button:hover{background:var(--surface-3,#ececec);}'
   ].join('');
   document.head.appendChild(st);
 
@@ -2693,7 +2698,7 @@ else:
 
 # 弓道AI道場 フッター注釈
 st.markdown("""
-<div style="text-align: center; font-size: 11px; color: var(--ink-dim); margin-top: 8px; letter-spacing: 0.02em;">
+<div style="text-align: center; font-size: 12px; color: var(--ink-muted); margin-top: 8px;">
     弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。
 </div>
 """, unsafe_allow_html=True)
