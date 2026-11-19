@@ -1476,7 +1476,7 @@ def guest_consume_one():
         json.dump(data, fp, ensure_ascii=False, indent=2)
     os.replace(tmp, GUEST_USAGE_FILE)
 
-# ---- ログイン状態の保持（Cookie + サーバー側トークン。リロードしてもログイン画面を出さない） ----
+# ---- ログイン状態の保持（URLクエリパラメータ + サーバー側トークン + Cookie/localStorage） ----
 LOGIN_COOKIE = "kyudo_auth"
 LOGIN_TOKEN_DAYS = 30
 LOGIN_TOKENS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "login_tokens.json")
@@ -1499,21 +1499,37 @@ def _save_login_tokens(d: dict):
 def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
-def issue_login_token(username: str) -> str:
+def issue_login_token(username: str, is_guest: bool = False) -> str:
     token = secrets.token_urlsafe(32)
     now = time.time()
     tokens = {k: v for k, v in _load_login_tokens().items() if v.get("exp", 0) > now}
-    tokens[_hash_token(token)] = {"user": username, "exp": now + LOGIN_TOKEN_DAYS * 86400}
+    exp_days = 1 if is_guest else LOGIN_TOKEN_DAYS
+    tokens[_hash_token(token)] = {
+        "user": username,
+        "is_guest": is_guest,
+        "exp": now + exp_days * 86400
+    }
     _save_login_tokens(tokens)
     return token
 
-def username_from_token(token: str):
+def verify_login_token(token: str):
+    """トークンを検証し、(username, is_guest) を返す。無効なら (None, False)"""
     if not token:
-        return None
+        return None, False
     entry = _load_login_tokens().get(_hash_token(token))
     if not entry or entry.get("exp", 0) <= time.time():
-        return None
-    return entry.get("user") if entry.get("user") in load_users() else None
+        return None, False
+    u = entry.get("user")
+    is_guest = bool(entry.get("is_guest", False))
+    if is_guest and u:
+        return u, True
+    if u and u in load_users():
+        return u, False
+    return None, False
+
+def username_from_token(token: str):
+    user, _ = verify_login_token(token)
+    return user
 
 def revoke_login_token(token: str):
     if not token:
@@ -1549,30 +1565,26 @@ def _flush_cookie_js():
 def _restore_login_js():
     """リロード直後：localStorage にトークンがあれば、URLに一時的に付けて再読み込みし自動ログインさせる。"""
     js = (f"try{{var P=window.parent;var t=P.localStorage.getItem('{LOGIN_COOKIE}');"
-          "if(t){var u=new URL(P.location.href);u.searchParams.set('_kt',t);P.location.replace(u.toString());}}catch(e){}")
+          "if(t){var u=new URL(P.location.href);if(!u.searchParams.get('auth')){u.searchParams.set('auth',t);P.location.replace(u.toString());}}}catch(e){}")
     components.html(f"<script>{js}</script>", height=0)
 
 def _query_login_token() -> str:
     try:
-        v = st.query_params.get("_kt", "")
+        v = st.query_params.get("auth", "") or st.query_params.get("_kt", "")
         return v if isinstance(v, str) else (v[0] if v else "")
     except Exception:
         return ""
 
-def _drop_query_token():
-    try:
-        if "_kt" in st.query_params:
-            del st.query_params["_kt"]
-    except Exception:
-        pass
-
 def _complete_login(username: str, guest: bool = False, issue_token: bool = True):
-    """ログイン成功時の共通処理。ユーザー専用の履歴・テーマ設定を読み直す。"""
-    if not guest and issue_token:
-        st.session_state["_cookie_set"] = issue_login_token(username.strip().lower())
+    """ログイン成功時の共通処理。URLパラメータにトークンを保持しリロード時も維持。"""
+    user_clean = username.strip().lower()
+    if issue_token:
+        tok = issue_login_token(user_clean, is_guest=guest)
+        st.session_state["_cookie_set"] = tok
+        st.query_params["auth"] = tok
     st.session_state.authenticated = True
     st.session_state.is_guest = guest
-    st.session_state.logged_in_user = username.strip().lower()
+    st.session_state.logged_in_user = user_clean
     st.session_state.ui_theme = load_ui_theme()
     for k in ("current_session_id", "messages", "auth_mode"):
         st.session_state.pop(k, None)
@@ -1637,16 +1649,22 @@ def render_login_screen():
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
-    # リロード等で新しいセッションになった場合：Cookie または URL の一時トークンが有効なら自動ログイン
-    _kt = _query_login_token()
-    _auto_user = username_from_token(_browser_login_cookie()) or username_from_token(_kt)
-    _drop_query_token()
+    # リロード等で新しいセッションになった場合：URLパラメータまたはCookieからトークンを検証して即座にログイン復元
+    _tok = _query_login_token() or _browser_login_cookie()
+    _auto_user, _auto_guest = verify_login_token(_tok)
     if _auto_user:
-        _complete_login(_auto_user, issue_token=False)
-    if _kt:
-        st.session_state["_cookie_clear"] = True  # 無効なトークンはブラウザから消す
-    elif not _browser_login_cookie():
-        st.session_state["_restore_pending"] = True  # localStorage から復元を試みる
+        st.session_state.authenticated = True
+        st.session_state.is_guest = _auto_guest
+        st.session_state.logged_in_user = _auto_user
+        st.session_state.ui_theme = load_ui_theme()
+        st.query_params["auth"] = _tok
+    else:
+        if "auth" in st.query_params or "_kt" in st.query_params:
+            st.query_params.clear()
+            st.session_state["_cookie_clear"] = True
+        elif not _browser_login_cookie():
+            st.session_state["_restore_pending"] = True  # localStorage から復元を試みる
+
 _flush_cookie_js()
 if st.session_state.pop("_restore_pending", False):
     _restore_login_js()
@@ -1977,7 +1995,12 @@ with st.sidebar:
             
             st.divider()
             if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
-                revoke_login_token(_browser_login_cookie())
+                cur_tok = _query_login_token() or _browser_login_cookie()
+                revoke_login_token(cur_tok)
+                if "auth" in st.query_params:
+                    del st.query_params["auth"]
+                if "_kt" in st.query_params:
+                    del st.query_params["_kt"]
                 st.session_state["_cookie_clear"] = True
                 st.session_state.authenticated = False
                 st.session_state.is_guest = False
