@@ -2411,12 +2411,7 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
                 )
                 for chunk in response:
                     if chunk.text:
-                        # まとまって届いたテキストをChatGPTのように滑らかなタイピング速度で流す
-                        chunk_str = chunk.text
-                        step = 2
-                        for i in range(0, len(chunk_str), step):
-                            yield chunk_str[i:i+step]
-                            time.sleep(0.012)  # 心地よい等速タイピング速度（ドカンと一気に出るのを防止）
+                        yield chunk.text
                 return
             except Exception:
                 continue
