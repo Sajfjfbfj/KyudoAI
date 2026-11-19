@@ -5,6 +5,7 @@ import re
 import tempfile
 import hashlib
 import secrets
+from concurrent.futures import ThreadPoolExecutor
 import base64
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
 import streamlit as st
@@ -1533,6 +1534,19 @@ def save_sidebar_items(kind: str, items: list):
     with open(path, "w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
 
+def _use_sidebar_item(it: dict):
+    """ピン留め項目を押したときの処理（コールバック。追加の再実行なしで即座に質問が走る）。"""
+    if it.get("session_id"):
+        loaded = load_session_messages(it["session_id"])
+        if loaded is not None:
+            st.session_state.current_session_id = it["session_id"]
+            st.session_state.messages = loaded
+    else:
+        st.session_state["sidebar_prompt"] = it.get("prompt") or it["label"]
+
+def _set_quick_prompt(text: str):
+    st.session_state["sidebar_prompt"] = text
+
 def _toggle_session_pin(sess: dict, is_pinned: bool):
     pins = load_sidebar_items("pins")
     if is_pinned:
@@ -1548,15 +1562,8 @@ def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
     for it in items:
         c_use, c_opt = st.columns([0.82, 0.18])
         with c_use:
-            if st.button(it["label"], key=f"{kind}_use_{it['id']}", icon=item_icon, use_container_width=True):
-                if it.get("session_id"):
-                    loaded = load_session_messages(it["session_id"])
-                    if loaded is not None:
-                        st.session_state.current_session_id = it["session_id"]
-                        st.session_state.messages = loaded
-                else:
-                    st.session_state["sidebar_prompt"] = it.get("prompt") or it["label"]
-                st.rerun()
+            st.button(it["label"], key=f"{kind}_use_{it['id']}", icon=item_icon, use_container_width=True,
+                      on_click=_use_sidebar_item, args=(it,))
         with c_opt:
             with st.popover("···", use_container_width=True):
                 new_label = st.text_input("名前", value=it["label"], key=f"{kind}_ren_{it['id']}")
@@ -2416,8 +2423,11 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 # ユーザーメッセージがまだない場合はChatGPTモバイル（2024-10）風のウェルカム画面を表示
 quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバーのピン留め／プロジェクトからの質問
 
-if not st.session_state.messages:
-    # ===== ChatGPT公式完全一致：ウェルカム画面（今日は何をしましょうか？） =====
+welcome_slot = None
+if not st.session_state.messages and not quick_prompt:
+  welcome_slot = st.empty()
+  with welcome_slot.container():
+    # ===== ウェルカム画面（送信と同時に welcome_slot ごと消す） =====
     st.markdown("""
     <div class="hero">
         <h1 class="hero-title">今日の稽古は、<br><em>何</em>から始めますか。</h1>
@@ -2432,12 +2442,12 @@ if not st.session_state.messages:
         <div style="max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px;">
         """, unsafe_allow_html=True)
         
-        if st.button("射形を3Dで解析する　射形動画・写真", key="quick_act_1", use_container_width=True):
-            quick_prompt = "射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。"
-        if st.button("早気・射癖の悩みを相談する", key="quick_act_2", use_container_width=True):
-            quick_prompt = "最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？"
-        if st.button("射法八節の要点を学び直す", key="quick_act_3", use_container_width=True):
-            quick_prompt = "射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。"
+        st.button("射形を3Dで解析する　射形動画・写真", key="quick_act_1", use_container_width=True,
+                  on_click=_set_quick_prompt, args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",))
+        st.button("早気・射癖の悩みを相談する", key="quick_act_2", use_container_width=True,
+                  on_click=_set_quick_prompt, args=("最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？",))
+        st.button("射法八節の要点を学び直す", key="quick_act_3", use_container_width=True,
+                  on_click=_set_quick_prompt, args=("射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。",))
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -2682,22 +2692,22 @@ if text_to_send or files_to_send:
     else:
         st.session_state.messages.append({"role": "user", "content": text_to_send})
 
-        # ChatGPT風：ユーザー発言から個人情報（弓力・段位・悩み・弓具など）を自動学習して射手カルテに保存
-        new_mem_items = []
-        if active_api_key:
-            cur_user = st.session_state.get("logged_in_user", "default")
-            new_mem_items = auto_extract_and_save_memory(cur_user, text_to_send, active_api_key)
-
-        # 画面にリアルタイムでストリーミング描画（ChatGPT完全再現）
+        # 1) ウェルカム画面を消し、ユーザー発言を最初に即描画（API待ちの間に何も出ない時間をなくす）
+        if welcome_slot is not None:
+            welcome_slot.empty()
         with st.chat_message("user"):
             st.markdown(text_to_send)
+
+        # 2) 射手カルテの自動学習・タイトル生成は、回答のストリーミングと並行して裏で実行
+        _cur_user = st.session_state.get("logged_in_user", "default")
+        _is_first_q = sum(1 for m in st.session_state.messages if m["role"] == "user") == 1
+        _pool = ThreadPoolExecutor(max_workers=2)
+        mem_future = _pool.submit(auto_extract_and_save_memory, _cur_user, text_to_send, active_api_key) if active_api_key else None
+        title_future = _pool.submit(generate_smart_title, text_to_send, active_api_key) if (_is_first_q and active_api_key) else None
 
         avatar_img_stream = os.path.join(ASSETS_DIR, char_info.get("avatar_file", "")) if char_info.get("avatar_file") and os.path.exists(os.path.join(ASSETS_DIR, char_info.get("avatar_file", ""))) else char_info["icon"]
         with st.chat_message("assistant", avatar=avatar_img_stream):
             st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
-            if new_mem_items:
-                mem_tags = "、".join(new_mem_items)
-                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
 
             try:
                 stream_gen = generate_response_stream(text_to_send, selected_char, active_api_key)
@@ -2706,10 +2716,19 @@ if text_to_send or files_to_send:
                 full_reply = f"⚠️ エラーが発生しました: {str(e)}"
                 st.markdown(full_reply)
 
-            # ChatGPT風：アクションツールバー（コピー・読み上げ・停止）
+            # 並行実行していたメモリ更新の結果（終わっていなければ最大数秒だけ待つ）
+            new_mem_items = []
+            if mem_future is not None:
+                try:
+                    new_mem_items = mem_future.result(timeout=8) or []
+                except Exception:
+                    new_mem_items = []
+            if new_mem_items:
+                mem_tags = "、".join(new_mem_items)
+                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+
+            # アクションツールバー（コピー・読み上げ）
             render_chatgpt_toolbar(full_reply)
-
-
 
         asst_msg = {
             "role": "assistant",
@@ -2720,12 +2739,15 @@ if text_to_send or files_to_send:
             asst_msg["memory_items"] = new_mem_items
         st.session_state.messages.append(asst_msg)
 
-        # 会話を即時自動保存（最初の質問ならAIが12文字前後のスマート要約タイトルを自動生成）
+        # 会話を即時自動保存（最初の質問なら、裏で生成していたスマートタイトルを使う）
         if "current_session_id" in st.session_state:
-            user_msg_count = sum(1 for m in st.session_state.messages if m["role"] == "user")
             smart_title = None
-            if user_msg_count == 1 and active_api_key:
-                smart_title = generate_smart_title(text_to_send, active_api_key)
+            if title_future is not None:
+                try:
+                    smart_title = title_future.result(timeout=8)
+                except Exception:
+                    smart_title = None
             save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
+        _pool.shutdown(wait=False)
 
         st.rerun()
