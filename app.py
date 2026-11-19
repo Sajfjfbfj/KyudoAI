@@ -1344,9 +1344,59 @@ LOCAL_RESPONSES = {
 }
 
 # ==================== ログイン画面・新規登録画面 ====================
-def _complete_login(username: str):
+GUEST_CHAT_LIMIT = 3  # ゲストが送れるチャット回数（ファイル添付は不可）
+GUEST_USAGE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "guest_usage.json")
+
+def _client_ip() -> str:
+    """接続元IP。プロキシ経由なら X-Forwarded-For の先頭を使う。取得できなければ共通の枠 'unknown'。"""
+    try:
+        h = st.context.headers
+        fwd = h.get("X-Forwarded-For") or h.get("X-Real-Ip")
+        if fwd:
+            return fwd.split(",")[0].strip()
+    except Exception:
+        pass
+    try:
+        ip = st.context.ip_address
+        if ip:
+            return str(ip)
+    except Exception:
+        pass
+    return "unknown"
+
+def _guest_key() -> str:
+    # IPそのものは保存せず、ハッシュだけを保存する
+    return hashlib.sha256(("kyudo-guest:" + _client_ip()).encode("utf-8")).hexdigest()
+
+def _load_guest_usage() -> dict:
+    try:
+        with open(GUEST_USAGE_FILE, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+def guest_used_count() -> int:
+    """この接続元がゲストとして既に送ったチャット回数（サーバー側に保存。再読み込みでは戻らない）。"""
+    return int(_load_guest_usage().get(_guest_key(), {}).get("count", 0))
+
+def guest_consume_one():
+    data = _load_guest_usage()
+    key = _guest_key()
+    entry = data.get(key, {"count": 0, "first_at": time.strftime("%Y-%m-%d %H:%M")})
+    entry["count"] = int(entry.get("count", 0)) + 1
+    entry["last_at"] = time.strftime("%Y-%m-%d %H:%M")
+    data[key] = entry
+    os.makedirs(os.path.dirname(GUEST_USAGE_FILE), exist_ok=True)
+    tmp = GUEST_USAGE_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fp:
+        json.dump(data, fp, ensure_ascii=False, indent=2)
+    os.replace(tmp, GUEST_USAGE_FILE)
+
+def _complete_login(username: str, guest: bool = False):
     """ログイン成功時の共通処理。ユーザー専用の履歴・テーマ設定を読み直す。"""
     st.session_state.authenticated = True
+    st.session_state.is_guest = guest
     st.session_state.logged_in_user = username.strip().lower()
     st.session_state.ui_theme = load_ui_theme()
     for k in ("current_session_id", "messages", "auth_mode"):
@@ -1406,8 +1456,8 @@ def render_login_screen():
             if st.button("すでにアカウントをお持ちの方は ログイン", key="goto_login", use_container_width=True):
                 st.session_state.auth_mode = "login"
                 st.rerun()
-        if st.button("ログインせずに使う", key="guest_login", use_container_width=True):
-            _complete_login("archer")
+        if st.button(f"ログインせずに使う（チャット{GUEST_CHAT_LIMIT}回まで・ファイル送信不可）", key="guest_login", use_container_width=True):
+            _complete_login(f"guest_{secrets.token_hex(4)}", guest=True)
 
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
@@ -1660,7 +1710,7 @@ with st.sidebar:
     # ── 最下部：ユーザープロフィール ────────────────────────────
     users_db = load_users()
     cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
-    disp_name = cur_uinfo.get("display_name", "runtyoma")
+    disp_name = "ゲスト" if st.session_state.get("is_guest") else cur_uinfo.get("display_name", "runtyoma")
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
@@ -1700,6 +1750,7 @@ with st.sidebar:
             st.divider()
             if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
                 st.session_state.authenticated = False
+                st.session_state.is_guest = False
                 st.session_state.logged_in_user = ""
                 st.session_state.messages = []
                 if "current_session_id" in st.session_state:
@@ -2482,6 +2533,13 @@ for idx, msg in enumerate(st.session_state.messages):
                 render_chatgpt_toolbar(msg.get("content", ""))
 
 # ==================== ChatGPT完全再現：再生成リアルタイム・ストリーミング描画 ====================
+# ゲストは「再生成」も1回として数える（上限に達していれば実行しない）
+if "pending_regen" in st.session_state and st.session_state.get("is_guest"):
+    if guest_used_count() >= GUEST_CHAT_LIMIT:
+        st.session_state.pop("pending_regen")
+    else:
+        guest_consume_one()
+
 if "pending_regen" in st.session_state:
     p_info = st.session_state.pop("pending_regen")
     target_text = p_info["text"]
@@ -2511,11 +2569,32 @@ if "pending_regen" in st.session_state:
 
 
 # チャット入力欄（ChatGPT Web公式完全一致：プレースホルダー「ChatGPT に聞く」）
-chat_submission = st.chat_input(
-    placeholder="弓道AIに聞く",
-    accept_file=True,
-    file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
-)
+_is_guest = bool(st.session_state.get("is_guest"))
+_guest_left = max(0, GUEST_CHAT_LIMIT - guest_used_count()) if _is_guest else None
+_guest_locked = _is_guest and _guest_left == 0
+
+if _is_guest:
+    if _guest_locked:
+        st.info(f"ゲストのチャットは{GUEST_CHAT_LIMIT}回までです。続けるには、ログインまたは新規登録をしてください。")
+        if st.button("ログイン・新規登録へ", key="guest_to_login", type="primary"):
+            st.session_state.authenticated = False
+            st.session_state.is_guest = False
+            st.session_state.auth_mode = "register"
+            st.rerun()
+    else:
+        st.caption(f"ゲスト利用中：あと{_guest_left}回チャットできます（ファイルの送信はログイン後に使えます）")
+
+if _is_guest:
+    chat_submission = st.chat_input(
+        placeholder="ログインするとチャットを続けられます" if _guest_locked else "弓道AIに聞く",
+        disabled=_guest_locked,
+    )
+else:
+    chat_submission = st.chat_input(
+        placeholder="弓道AIに聞く",
+        accept_file=True,
+        file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
+    )
 
 # 弓道AI道場 フッター注釈
 st.markdown("""
@@ -2547,6 +2626,13 @@ elif chat_submission is not None:
         except Exception:
             raw_files = []
         files_to_send = list(raw_files) if raw_files else []
+
+if st.session_state.get("is_guest") and (text_to_send or files_to_send):
+    files_to_send = []  # ゲストはファイル送信不可（念のためここでも遮断）
+    if not text_to_send or guest_used_count() >= GUEST_CHAT_LIMIT:
+        text_to_send = None
+    else:
+        guest_consume_one()
 
 if text_to_send or files_to_send:
     # A. 動画・写真が添付されている場合
