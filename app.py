@@ -518,6 +518,11 @@ section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
         overflow: visible !important; opacity: 0 !important; pointer-events: none !important;
     }
 }
+/* streamlit.app（Streamlit Cloud）の右下バッジが送信ボタンに重なるのを避けるため、
+   JS が html に付ける kyudo-lift クラスがあるときだけ入力欄を持ち上げる */
+html.kyudo-lift div[data-testid="stBottom"] { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
+html.kyudo-lift [data-testid="stMainBlockContainer"] { padding-bottom: 210px !important; }
+
 /* 履歴の検索欄 */
 section[data-testid="stSidebar"] .st-key-sidebar_search_chats [data-baseweb="input"] {
     border-radius: 10px !important; min-height: 36px !important; background: var(--surface-2) !important;
@@ -736,6 +741,10 @@ div[data-testid="stChatInput"] [data-baseweb="textarea"],
 div[data-testid="stChatInput"] [data-baseweb="base-input"],
 div[data-testid="stChatInput"] [data-baseweb="textarea"] > div {
     border: 0 !important; background: transparent !important; box-shadow: none !important; border-radius: 0 !important;
+}
+div[data-testid="stChatInput"] div,
+div[data-testid="stChatInput"] [data-baseweb] {
+    background: transparent !important; background-color: transparent !important; box-shadow: none !important;
 }
 div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
@@ -1860,8 +1869,8 @@ with st.sidebar:
 # 右クリックされた行の「ピン」ボタン／「···」ボタンを代わりに押す方式で実現する。
 _CTX_MENU_JS = r"""
 (function () {
-  if (document.getElementById('kyudo-ctx-script-v2')) return;
-  var marker = document.createElement('meta'); marker.id = 'kyudo-ctx-script-v2'; document.head.appendChild(marker);
+  if (document.getElementById('kyudo-ctx-script-v3')) return;
+  var marker = document.createElement('meta'); marker.id = 'kyudo-ctx-script-v3'; document.head.appendChild(marker);
 
   var st = document.createElement('style');
   st.textContent = [
@@ -1939,6 +1948,15 @@ _CTX_MENU_JS = r"""
   if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     setTimeout(focusInput, 700);
   }
+
+  /* streamlit.app の右下バッジ回避：ホスト名が streamlit.app で、幅が狭い（スマホ）ときだけ入力欄を持ち上げる */
+  function updateLift() {
+    var onCloud = /\.streamlit\.app$/.test(window.location.hostname);
+    var narrow = window.innerWidth <= 700;
+    document.documentElement.classList.toggle('kyudo-lift', onCloud && narrow);
+  }
+  updateLift();
+  window.addEventListener('resize', updateLift);
 
   document.addEventListener('click', hide, true);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
