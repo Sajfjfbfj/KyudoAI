@@ -526,6 +526,39 @@ section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
         overflow: visible !important; opacity: 0 !important; pointer-events: none !important;
     }
 }
+/* スマホ（タッチ操作）: ···ボタンをタイトルボタンに重ねて右端に配置。
+   タイトルテキストは右端へフェードアウト。行全体は相対配置のコンテナとして扱う */
+@media (hover: none), (pointer: coarse) {
+    /* 行全体を relative コンテナに */
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) {
+        position: relative !important;
+        overflow: visible !important;
+    }
+    /* タイトル列（左）: 全幅に広げてフェードマスクを付ける */
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) > div:first-child {
+        flex: 1 1 auto !important; width: 100% !important; min-width: 0 !important;
+    }
+    /* タイトルボタン自体にフェードマスク（右端→透明）*/
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) > div:first-child button {
+        -webkit-mask-image: linear-gradient(to right, black 60%, transparent 92%) !important;
+        mask-image: linear-gradient(to right, black 60%, transparent 92%) !important;
+        overflow: hidden !important;
+    }
+    /* ···列（右）: absolute で右端に重ねる。幅は必要最小限 */
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) > div:last-child {
+        position: absolute !important; right: 0 !important; top: 50% !important;
+        transform: translateY(-50%) !important;
+        flex: 0 0 auto !important; width: auto !important; min-width: 0 !important;
+        z-index: 10 !important;
+        background: transparent !important;
+    }
+    /* ···ボタン自体のスタイル調整 */
+    section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"], [class*="st-key-pins_use_"]) > div:last-child button {
+        min-width: 32px !important; padding: 2px 4px !important;
+        background: transparent !important; border: none !important;
+        font-size: 15px !important; color: var(--ink-muted) !important;
+    }
+}
 /* streamlit.app（Streamlit Cloud）の右下バッジが送信ボタンに重なるのを避けるため、
    JS が html に付ける kyudo-lift クラスがあるときだけ入力欄を持ち上げる */
 html.kyudo-lift div[data-testid="stBottom"] { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
