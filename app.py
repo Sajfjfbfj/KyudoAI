@@ -518,6 +518,15 @@ section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
         overflow: visible !important; opacity: 0 !important; pointer-events: none !important;
     }
 }
+/* 履歴の検索欄 */
+section[data-testid="stSidebar"] .st-key-sidebar_search_chats [data-baseweb="input"] {
+    border-radius: 10px !important; min-height: 36px !important; background: var(--surface-2) !important;
+}
+section[data-testid="stSidebar"] .st-key-sidebar_search_chats input { font-size: 13px !important; padding: 6px 10px !important; }
+/* キーボード操作時だけ見えるフォーカスリング */
+button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
+    outline: 2px solid var(--shu) !important; outline-offset: 2px !important;
+}
 /* サイドバーの縦の間隔を詰めて整頓 */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: 0.2rem !important; }
 section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 1.2rem !important; }
@@ -1613,11 +1622,23 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     # ── 新規チャットボタン ──────────────────────────────────────
-    if st.button("新しいチャット", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True):
+    if st.button("新しいチャット", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True, help="Ctrl+Shift+O"):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
         st.rerun()
+
+    # ── 指導陣（AIモデル）の選択：新しいチャットのすぐ下 ──────────
+    _sel_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+    _sel_info = CHARACTERS.get(_sel_char, list(CHARACTERS.values())[0])
+    with st.popover(f"{_sel_info['icon']} {_sel_char.split('（')[0]}", use_container_width=True):
+        st.caption("指導陣（AIモデル）を選択")
+        for cname, c_info_item in CHARACTERS.items():
+            st.button(
+                f"{'✓ ' if cname == _sel_char else '　 '}{c_info_item['icon']} {cname}",
+                key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"],
+                on_click=switch_ai_character, args=(cname,),
+            )
 
     # ── ツール（解析・稽古目標・射法八節・生体力学を1つに集約） ──────
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
@@ -1659,7 +1680,15 @@ with st.sidebar:
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
         pinned_ids = {x.get("session_id") for x in load_sidebar_items("pins") if x.get("session_id")}
 
-        for group_name, group_items in group_sessions_by_date(all_sess[:30]).items():
+        _q = st.text_input("チャットを検索", key="sidebar_search_chats", placeholder="チャットを検索（Ctrl+K）", label_visibility="collapsed")
+        if _q.strip():
+            _shown = [x for x in all_sess if _q.strip().lower() in x["title"].lower()]
+            if not _shown:
+                st.caption("一致するチャットがありません")
+        else:
+            _shown = all_sess[:30]
+
+        for group_name, group_items in group_sessions_by_date(_shown).items():
             st.markdown(f"<div class='sb-section-label'>{group_name}</div>", unsafe_allow_html=True)
 
             for sess in group_items:
@@ -1831,8 +1860,8 @@ with st.sidebar:
 # 右クリックされた行の「ピン」ボタン／「···」ボタンを代わりに押す方式で実現する。
 _CTX_MENU_JS = r"""
 (function () {
-  if (document.getElementById('kyudo-ctx-script-v1')) return;
-  var marker = document.createElement('meta'); marker.id = 'kyudo-ctx-script-v1'; document.head.appendChild(marker);
+  if (document.getElementById('kyudo-ctx-script-v2')) return;
+  var marker = document.createElement('meta'); marker.id = 'kyudo-ctx-script-v2'; document.head.appendChild(marker);
 
   var st = document.createElement('style');
   st.textContent = [
@@ -1845,6 +1874,7 @@ _CTX_MENU_JS = r"""
   ].join('');
   document.head.appendChild(st);
 
+  var old = document.getElementById('kyudo-ctx'); if (old) old.remove();
   var menu = document.createElement('div'); menu.id = 'kyudo-ctx'; document.body.appendChild(menu);
   function hide() { menu.style.display = 'none'; menu.innerHTML = ''; }
   function addItem(label, fn) {
@@ -1878,12 +1908,55 @@ _CTX_MENU_JS = r"""
     menu.style.left = Math.max(8, x) + 'px'; menu.style.top = Math.max(8, y) + 'px';
   }, true);
 
+  /* ---- キーボードショートカット（ChatGPT / Claude と同じ操作感） ---- */
+  function focusInput() {
+    var t = document.querySelector('[data-testid="stChatInput"] textarea');
+    if (t) t.focus();
+  }
+  function isTyping(el) {
+    if (!el) return false;
+    var tag = (el.tagName || '').toLowerCase();
+    return tag === 'input' || tag === 'textarea' || el.isContentEditable;
+  }
+  document.addEventListener('keydown', function (ev) {
+    var mod = ev.ctrlKey || ev.metaKey;
+    var k = (ev.key || '').toLowerCase();
+    if (mod && ev.shiftKey && k === 'o') {            /* 新しいチャット */
+      ev.preventDefault();
+      var nb = document.querySelector('.st-key-sidebar_new_chat_btn button');
+      if (nb) nb.click();
+      setTimeout(focusInput, 500);
+    } else if (mod && !ev.shiftKey && k === 'k') {   /* チャット検索 */
+      var si = document.querySelector('.st-key-sidebar_search_chats input');
+      if (si) { ev.preventDefault(); si.focus(); si.select(); }
+    } else if (ev.shiftKey && k === 'escape') {      /* 入力欄へ戻る */
+      ev.preventDefault(); focusInput();
+    } else if (k === '/' && !mod && !ev.altKey && !isTyping(ev.target)) {
+      ev.preventDefault(); focusInput();
+    }
+  });
+  /* PC（マウス操作）のときだけ、開いた直後に入力欄へフォーカス（スマホではキーボードが勝手に出ないように） */
+  if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    setTimeout(focusInput, 700);
+  }
+
   document.addEventListener('click', hide, true);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
   window.addEventListener('scroll', hide, true);
   window.addEventListener('resize', hide);
 })();
 """
+
+def _with_thinking(gen, slot):
+    """最初のチャンクが届くまで「考え中…」を出し、届いたら消す。"""
+    first = True
+    for chunk in gen:
+        if first:
+            slot.empty()
+            first = False
+        yield chunk
+    if first:
+        slot.empty()
 
 def render_sidebar_context_menu():
     loader = (
@@ -1924,20 +1997,9 @@ if not env_api_key:
             pass
 active_api_key = env_api_key
 
-# ==================== 弓道AI道場 トップナビゲーション（フローティング・グラスバー） ====================
+# ==================== 現在の指導陣（選択UIはサイドバーの「新しいチャット」の下） ====================
 cur_char_val = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 short_char_name = cur_char_val.split("（")[0]
-
-with st.container(key="topbar"):
-    with st.popover(f"{short_char_name}", icon=":material/expand_more:", use_container_width=False):
-        st.caption("指導陣（AIモデル）を選択")
-        for cname in CHARACTERS.keys():
-            c_info_item = CHARACTERS[cname]
-            is_active = (cname == cur_char_val)
-            btn_prefix = "✓ " if is_active else "　 "
-            if st.button(f"{btn_prefix}{c_info_item['icon']} {cname}", key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"]):
-                switch_ai_character(cname)
-                st.rerun()
 
 selected_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
 char_info = CHARACTERS[selected_char]
@@ -2562,7 +2624,9 @@ if "pending_regen" in st.session_state:
     with st.chat_message("assistant", avatar=t_info["icon"]):
         st.markdown(f'<span class="char-badge {t_info["badge_class"]}">{t_info["icon"]} {target_char}</span>', unsafe_allow_html=True)
         try:
-            stream_gen = generate_response_stream(target_text, target_char, active_api_key, is_regenerate=True)
+            _think = st.empty()
+            _think.caption("考え中…")
+            stream_gen = _with_thinking(generate_response_stream(target_text, target_char, active_api_key, is_regenerate=True), _think)
             full_reply = st.write_stream(stream_gen)
         except Exception as e:
             full_reply = f"⚠️ エラーが発生しました: {str(e)}"
@@ -2710,7 +2774,9 @@ if text_to_send or files_to_send:
             st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
 
             try:
-                stream_gen = generate_response_stream(text_to_send, selected_char, active_api_key)
+                _think = st.empty()
+                _think.caption("考え中…")
+                stream_gen = _with_thinking(generate_response_stream(text_to_send, selected_char, active_api_key), _think)
                 full_reply = st.write_stream(stream_gen)
             except Exception as e:
                 full_reply = f"⚠️ エラーが発生しました: {str(e)}"
