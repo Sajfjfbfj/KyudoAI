@@ -822,6 +822,19 @@ div[data-baseweb="input"]:focus-within, div[data-baseweb="textarea"]:focus-withi
 }
 input, textarea, [data-baseweb="select"] * { color: var(--ink-primary) !important; background-color: transparent !important; }
 input::placeholder, textarea::placeholder { color: var(--ink-dim) !important; }
+/* 入力欄の内側ラッパー（Streamlit/BaseWeb既定の背景＝OSダーク時は黒）も面の色に揃える。ログイン画面のライト時に黒く見える問題の対策 */
+div[data-baseweb="base-input"], div[data-testid="stTextInputRootElement"], div[data-testid="stNumberInputContainer"],
+div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div {
+    background: transparent !important; background-color: transparent !important; color: var(--ink-primary) !important;
+}
+input, textarea { caret-color: var(--ink-primary) !important; -webkit-text-fill-color: var(--ink-primary) !important; }
+input::placeholder, textarea::placeholder { -webkit-text-fill-color: var(--ink-dim) !important; }
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--ink-primary) !important;
+    box-shadow: 0 0 0 1000px var(--surface-2) inset !important; -webkit-box-shadow: 0 0 0 1000px var(--surface-2) inset !important;
+    transition: background-color 9999s ease-out 0s;
+}
+div[data-testid="stTextInput"] button { background: transparent !important; color: var(--ink-muted) !important; }
 [data-testid="stWidgetLabel"] p, label { color: var(--ink-secondary) !important; font-size: 13px !important; }
 div[role="radiogroup"] label p { color: var(--ink-secondary) !important; }
 
