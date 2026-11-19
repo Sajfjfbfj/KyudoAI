@@ -2792,90 +2792,91 @@ if not st.session_state.messages and not quick_prompt:
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
-    if msg["role"] == "user":
-        with st.chat_message("user"):
-            # 添付ファイルがある場合、ChatGPT風のコンパクトな保護カードで表示
-            if "file_name" in msg:
-                f_name = msg.get("file_name", "射形動画.mp4")
-                f_size = msg.get("file_size", "")
-                icon = "🎬" if any(f_name.lower().endswith(ext) for ext in [".mp4", ".mov", ".avi", ".webm"]) else "🖼️"
+    with st.container(key=f"chat_msg_{idx}_{msg['role']}"):
+        if msg["role"] == "user":
+            with st.chat_message("user"):
+                # 添付ファイルがある場合、ChatGPT風のコンパクトな保護カードで表示
+                if "file_name" in msg:
+                    f_name = msg.get("file_name", "射形動画.mp4")
+                    f_size = msg.get("file_size", "")
+                    icon = "🎬" if any(f_name.lower().endswith(ext) for ext in [".mp4", ".mov", ".avi", ".webm"]) else "🖼️"
                 
-                st.markdown(f"""
-                <div class="file-attachment-card">
-                    <span class="file-attachment-icon">{icon}</span>
-                    <div class="file-attachment-details">
-                        <span class="file-attachment-name">{f_name}</span>
-                        <span class="file-attachment-meta" style="font-weight: 500;">
-                            🛡️ 個人情報保護：分析完了後に完全抹消済（{f_size}）
-                        </span>
+                    st.markdown(f"""
+                    <div class="file-attachment-card">
+                        <span class="file-attachment-icon">{icon}</span>
+                        <div class="file-attachment-details">
+                            <span class="file-attachment-name">{f_name}</span>
+                            <span class="file-attachment-meta" style="font-weight: 500;">
+                                🛡️ 個人情報保護：分析完了後に完全抹消済（{f_size}）
+                            </span>
+                        </div>
                     </div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
 
-            st.markdown(msg["content"])
-    else:
-        msg_char = msg.get("char", selected_char)
-        c_info = CHARACTERS.get(msg_char, char_info)
-        avatar_img = os.path.join(ASSETS_DIR, c_info.get("avatar_file", "")) if c_info.get("avatar_file") and os.path.exists(os.path.join(ASSETS_DIR, c_info.get("avatar_file", ""))) else c_info["icon"]
-        with st.chat_message("assistant", avatar=avatar_img):
-            st.markdown(f'<span class="char-badge {c_info["badge_class"]}">{c_info["icon"]} {msg_char}</span>', unsafe_allow_html=True)
+                st.markdown(msg["content"])
+        else:
+            msg_char = msg.get("char", selected_char)
+            c_info = CHARACTERS.get(msg_char, char_info)
+            avatar_img = os.path.join(ASSETS_DIR, c_info.get("avatar_file", "")) if c_info.get("avatar_file") and os.path.exists(os.path.join(ASSETS_DIR, c_info.get("avatar_file", ""))) else c_info["icon"]
+            with st.chat_message("assistant", avatar=avatar_img):
+                st.markdown(f'<span class="char-badge {c_info["badge_class"]}">{c_info["icon"]} {msg_char}</span>', unsafe_allow_html=True)
 
-            # ChatGPT風：メモリ更新バッジ通知
-            if msg.get("memory_items"):
-                mem_tags = "、".join(msg["memory_items"])
-                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+                # ChatGPT風：メモリ更新バッジ通知
+                if msg.get("memory_items"):
+                    mem_tags = "、".join(msg["memory_items"])
+                    st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
 
-            # 3D立体骨格 ＆ 筋活動レーダーチャートがメッセージに含まれる場合
-            if "muscle_data" in msg and "posture_data" in msg:
-                st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
-                col_g1, col_g2 = st.columns([1, 1])
-                with col_g1:
-                    st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
-                    radar_fig = create_muscle_radar_chart(msg["muscle_data"])
-                    st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{idx}")
-                with col_g2:
-                    st.markdown("**🧍‍♂️ 3D立体骨格（マウスで360°回転可能）**")
-                    skeleton_fig = create_3d_kyudo_skeleton(msg["posture_data"])
-                    st.plotly_chart(skeleton_fig, use_container_width=True, key=f"skeleton_chart_{idx}")
-                st.divider()
+                # 3D立体骨格 ＆ 筋活動レーダーチャートがメッセージに含まれる場合
+                if "muscle_data" in msg and "posture_data" in msg:
+                    st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
+                    col_g1, col_g2 = st.columns([1, 1])
+                    with col_g1:
+                        st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
+                        radar_fig = create_muscle_radar_chart(msg["muscle_data"])
+                        st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{idx}")
+                    with col_g2:
+                        st.markdown("**🧍‍♂️ 3D立体骨格（マウスで360°回転可能）**")
+                        skeleton_fig = create_3d_kyudo_skeleton(msg["posture_data"])
+                        st.plotly_chart(skeleton_fig, use_container_width=True, key=f"skeleton_chart_{idx}")
+                    st.divider()
 
-            st.markdown(msg["content"])
+                st.markdown(msg["content"])
 
-            # ChatGPT風：アイコンのみのアクションバー（コピー／読み上げ）＋ 最新回答のみ再生成
-            is_last_msg = (idx == len(st.session_state.messages) - 1)
-            has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
-            if is_last_msg and has_user_prompt:
-                current_msg_char = msg.get("char", selected_char)
-                bar_cols = st.columns([0.12, 0.10, 0.78])
-                with bar_cols[0]:
-                    render_chatgpt_toolbar(msg.get("content", ""))
-                with bar_cols[1]:
-                    # 縦3点メニュー：再生成／別のキャラで再生成
-                    with st.popover("", icon=":material/more_vert:", key=f"msg_more_{idx}"):
-                        last_u_text = None
-                        for prev_m in reversed(st.session_state.messages[:idx]):
-                            if prev_m["role"] == "user":
-                                last_u_text = prev_m["content"]
-                                break
-                        if st.button("再生成", key=f"btn_regen_{idx}", icon=":material/refresh:",
-                                     help=f"{current_msg_char}の別の視点から回答を再生成", use_container_width=True):
-                            if last_u_text:
-                                st.session_state.messages.pop()
-                                st.session_state.pending_regen = {"text": last_u_text, "char": current_msg_char}
-                                st.rerun()
-                        other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
-                        if other_chars:
-                            st.caption("別のキャラで再生成")
-                            for oc in other_chars:
-                                oc_info = CHARACTERS[oc]
-                                _do_regen = st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True)
-                                st.caption(oc_info["desc"])
-                                if _do_regen and last_u_text:
+                # ChatGPT風：アイコンのみのアクションバー（コピー／読み上げ）＋ 最新回答のみ再生成
+                is_last_msg = (idx == len(st.session_state.messages) - 1)
+                has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
+                if is_last_msg and has_user_prompt:
+                    current_msg_char = msg.get("char", selected_char)
+                    bar_cols = st.columns([0.12, 0.10, 0.78])
+                    with bar_cols[0]:
+                        render_chatgpt_toolbar(msg.get("content", ""))
+                    with bar_cols[1]:
+                        # 縦3点メニュー：再生成／別のキャラで再生成
+                        with st.popover("", icon=":material/more_vert:", key=f"msg_more_{idx}"):
+                            last_u_text = None
+                            for prev_m in reversed(st.session_state.messages[:idx]):
+                                if prev_m["role"] == "user":
+                                    last_u_text = prev_m["content"]
+                                    break
+                            if st.button("再生成", key=f"btn_regen_{idx}", icon=":material/refresh:",
+                                         help=f"{current_msg_char}の別の視点から回答を再生成", use_container_width=True):
+                                if last_u_text:
                                     st.session_state.messages.pop()
-                                    st.session_state.pending_regen = {"text": last_u_text, "char": oc}
+                                    st.session_state.pending_regen = {"text": last_u_text, "char": current_msg_char}
                                     st.rerun()
-            else:
-                render_chatgpt_toolbar(msg.get("content", ""))
+                            other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
+                            if other_chars:
+                                st.caption("別のキャラで再生成")
+                                for oc in other_chars:
+                                    oc_info = CHARACTERS[oc]
+                                    _do_regen = st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True)
+                                    st.caption(oc_info["desc"])
+                                    if _do_regen and last_u_text:
+                                        st.session_state.messages.pop()
+                                        st.session_state.pending_regen = {"text": last_u_text, "char": oc}
+                                        st.rerun()
+                else:
+                    render_chatgpt_toolbar(msg.get("content", ""))
 
 # ==================== ChatGPT完全再現：再生成リアルタイム・ストリーミング描画 ====================
 # ゲストは「再生成」も1回として数える（上限に達していれば実行しない）
@@ -2891,17 +2892,18 @@ if "pending_regen" in st.session_state:
     target_char = p_info["char"]
     t_info = CHARACTERS.get(target_char, char_info)
 
-    with st.chat_message("assistant", avatar=t_info["icon"]):
-        st.markdown(f'<span class="char-badge {t_info["badge_class"]}">{t_info["icon"]} {target_char}</span>', unsafe_allow_html=True)
-        try:
-            _think = st.empty()
-            _think.caption("考え中…")
-            stream_gen = _with_thinking(generate_response_stream(target_text, target_char, active_api_key, is_regenerate=True), _think)
-            full_reply = st.write_stream(stream_gen)
-        except Exception as e:
-            full_reply = f"⚠️ エラーが発生しました: {str(e)}"
-            st.markdown(full_reply)
-        render_chatgpt_toolbar(full_reply)
+    with st.container(key=f"chat_msg_{len(st.session_state.messages)}_assistant"):
+        with st.chat_message("assistant", avatar=t_info["icon"]):
+            st.markdown(f'<span class="char-badge {t_info["badge_class"]}">{t_info["icon"]} {target_char}</span>', unsafe_allow_html=True)
+            try:
+                _think = st.empty()
+                _think.caption("考え中…")
+                stream_gen = _with_thinking(generate_response_stream(target_text, target_char, active_api_key, is_regenerate=True), _think)
+                full_reply = st.write_stream(stream_gen)
+            except Exception as e:
+                full_reply = f"⚠️ エラーが発生しました: {str(e)}"
+                st.markdown(full_reply)
+            render_chatgpt_toolbar(full_reply)
 
     st.session_state.messages.append({
         "role": "assistant",
@@ -3044,31 +3046,32 @@ if _ps:
 
     _ps_avatar_path = os.path.join(ASSETS_DIR, _ps_info.get("avatar_file", "")) if _ps_info.get("avatar_file") else ""
     avatar_img_stream = _ps_avatar_path if _ps_avatar_path and os.path.exists(_ps_avatar_path) else _ps_info["icon"]
-    with st.chat_message("assistant", avatar=avatar_img_stream):
-        st.markdown(f'<span class="char-badge {_ps_info["badge_class"]}">{_ps_info["icon"]} {_ps_char}</span>', unsafe_allow_html=True)
+    with st.container(key=f"chat_msg_{len(st.session_state.messages)}_assistant"):
+        with st.chat_message("assistant", avatar=avatar_img_stream):
+            st.markdown(f'<span class="char-badge {_ps_info["badge_class"]}">{_ps_info["icon"]} {_ps_char}</span>', unsafe_allow_html=True)
 
-        try:
-            _think = st.empty()
-            _think.caption("考え中…")
-            stream_gen = _with_thinking(generate_response_stream(_ps_text, _ps_char, active_api_key), _think)
-            full_reply = st.write_stream(stream_gen)
-        except Exception as e:
-            full_reply = f"⚠️ エラーが発生しました: {str(e)}"
-            st.markdown(full_reply)
-
-        # 並行実行していたメモリ更新の結果（終わっていなければ最大数秒だけ待つ）
-        new_mem_items = []
-        if mem_future is not None:
             try:
-                new_mem_items = mem_future.result(timeout=8) or []
-            except Exception:
-                new_mem_items = []
-        if new_mem_items:
-            mem_tags = "、".join(new_mem_items)
-            st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+                _think = st.empty()
+                _think.caption("考え中…")
+                stream_gen = _with_thinking(generate_response_stream(_ps_text, _ps_char, active_api_key), _think)
+                full_reply = st.write_stream(stream_gen)
+            except Exception as e:
+                full_reply = f"⚠️ エラーが発生しました: {str(e)}"
+                st.markdown(full_reply)
 
-        # アクションツールバー（コピー・読み上げ）
-        render_chatgpt_toolbar(full_reply)
+            # 並行実行していたメモリ更新の結果（終わっていなければ最大数秒だけ待つ）
+            new_mem_items = []
+            if mem_future is not None:
+                try:
+                    new_mem_items = mem_future.result(timeout=8) or []
+                except Exception:
+                    new_mem_items = []
+            if new_mem_items:
+                mem_tags = "、".join(new_mem_items)
+                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+
+            # アクションツールバー（コピー・読み上げ）
+            render_chatgpt_toolbar(full_reply)
 
     asst_msg = {
         "role": "assistant",
