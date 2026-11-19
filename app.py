@@ -1926,11 +1926,11 @@ with st.sidebar:
             )
             st.caption(c_info_item["desc"])
 
-    # ── ツール（解析・稽古目標・射法八節・生体力学を1つに集約） ──────
+    # ── できること（解析・稽古目標・射法八節・生体力学を1つに集約） ──────
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
-    with st.popover("ツール", icon=":material/apps:", use_container_width=True):
-        t_an, t_goal, t_lib, t_bio = st.tabs(["解析", "稽古目標", "射法八節", "生体力学"])
+    with st.popover("このAIでできること", icon=":material/auto_awesome:", use_container_width=True):
+        t_an, t_goal, t_lib, t_bio = st.tabs(["📹 射形解析", "🎯 稽古目標", "📖 射法八節", "🔬 生体力学"])
         with t_an:
             st.markdown("**射形動画・写真の3D解析**")
             st.caption("画面下の入力欄の「＋」から動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
