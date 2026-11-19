@@ -1564,10 +1564,37 @@ if "current_session_id" not in st.session_state:
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
 
+# 選択キャラの保存・復元（ユーザーが変えるまで同じキャラを維持。リロードや新規チャットでも保持）
+def _char_pref_path() -> str:
+    user = st.session_state.get("logged_in_user", "default")
+    user_safe = "".join(c for c in user if c.isalnum() or c in ("-", "_")) or "default"
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sidebar_items")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, f"{user_safe}_char.json")
+
+def _load_saved_char():
+    try:
+        with open(_char_pref_path(), "r", encoding="utf-8") as fp:
+            name = json.load(fp).get("char")
+        return name if name in CHARACTERS else None
+    except Exception:
+        return None
+
+def _save_char(name: str):
+    try:
+        with open(_char_pref_path(), "w", encoding="utf-8") as fp:
+            json.dump({"char": name}, fp, ensure_ascii=False)
+    except Exception:
+        pass
+
+if st.session_state.get("current_selected_char") not in CHARACTERS:
+    st.session_state.current_selected_char = _load_saved_char() or list(CHARACTERS.keys())[0]
+
 # キャラクター安全切り替え関数（競合・巻き戻り防止）
 def switch_ai_character(new_char: str):
     if new_char in CHARACTERS:
         st.session_state.current_selected_char = new_char
+        _save_char(new_char)
         # 会話が未開始または初期挨拶のみの場合は、新キャラのウェルカムに即時切り替え
         if not st.session_state.messages or (len(st.session_state.messages) == 1 and st.session_state.messages[0].get("role") == "assistant"):
             st.session_state.messages = [{
@@ -1638,8 +1665,12 @@ def _toggle_session_pin(sess: dict, is_pinned: bool):
     save_sidebar_items("pins", pins)
 
 def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
+    all_items = load_sidebar_items(kind)
+    # 履歴からのピン留め（session_idあり）のみ表示。項目が無ければ欄ごと非表示
+    items = [x for x in all_items if x.get("session_id")]
+    if not items:
+        return
     st.markdown(f"<div class='sb-section-label'>{title}</div>", unsafe_allow_html=True)
-    items = load_sidebar_items(kind)
 
     for it in items:
         c_use, c_opt = st.columns([0.82, 0.18])
@@ -1656,23 +1687,11 @@ def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
                 if st.button("保存", key=f"{kind}_save_{it['id']}", use_container_width=True):
                     it["label"] = new_label.strip() or it["label"]
                     it["prompt"] = new_prompt.strip()
-                    save_sidebar_items(kind, items)
+                    save_sidebar_items(kind, all_items)
                     st.rerun()
                 if st.button("削除", key=f"{kind}_del_{it['id']}", icon=":material/delete:", use_container_width=True):
-                    save_sidebar_items(kind, [x for x in items if x["id"] != it["id"]])
+                    save_sidebar_items(kind, [x for x in all_items if x["id"] != it["id"]])
                     st.rerun()
-
-    with st.popover("追加", icon=":material/add:", use_container_width=True):
-        add_label = st.text_input("名前", key=f"{kind}_new_label", placeholder="例: 会の伸び合い")
-        add_prompt = st.text_area("送信する質問（任意）", key=f"{kind}_new_prompt", height=90,
-                                  placeholder="空なら名前をそのまま送信します")
-        if st.button("追加する", key=f"{kind}_add_btn", use_container_width=True, type="primary"):
-            if add_label.strip():
-                items.append({"id": f"{int(time.time() * 1000)}", "label": add_label.strip(), "prompt": add_prompt.strip()})
-                save_sidebar_items(kind, items)
-                st.session_state.pop(f"{kind}_new_label", None)
-                st.session_state.pop(f"{kind}_new_prompt", None)
-                st.rerun()
 
 # ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
@@ -1709,9 +1728,10 @@ with st.sidebar:
         for cname, c_info_item in CHARACTERS.items():
             st.button(
                 f"{'✓ ' if cname == _sel_char else '　 '}{c_info_item['icon']} {cname}",
-                key=f"top_sel_{cname}", use_container_width=True, help=c_info_item["desc"],
+                key=f"top_sel_{cname}", use_container_width=True,
                 on_click=switch_ai_character, args=(cname,),
             )
+            st.caption(c_info_item["desc"])
 
     # ── ツール（解析・稽古目標・射法八節・生体力学を1つに集約） ──────
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
@@ -1744,7 +1764,7 @@ with st.sidebar:
             st.markdown("**弓道生体力学プラグイン**")
             st.caption("筑波大・日本武道学会等の筋電図（EMG）・重心動揺・角見トルク力学知見エンジンが常時有効化されています。")
 
-    # ── ピン留め・プロジェクト（初期は空。自由に追加・編集・削除） ──
+    # ── ピン留め：履歴からピン留めしたチャットがある時だけ表示 ──
     render_custom_sidebar_section("pins", "ピン留め", ":material/push_pin:")
 
     # ── 履歴（今日／昨日／過去7日間／それ以前）：各行にピン留めボタン ──────
@@ -2669,11 +2689,12 @@ for idx, msg in enumerate(st.session_state.messages):
                             st.caption("別のキャラで再生成")
                             for oc in other_chars:
                                 oc_info = CHARACTERS[oc]
-                                if st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True, help=oc_info["desc"]):
-                                    if last_u_text:
-                                        st.session_state.messages.pop()
-                                        st.session_state.pending_regen = {"text": last_u_text, "char": oc}
-                                        st.rerun()
+                                _do_regen = st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True)
+                                st.caption(oc_info["desc"])
+                                if _do_regen and last_u_text:
+                                    st.session_state.messages.pop()
+                                    st.session_state.pending_regen = {"text": last_u_text, "char": oc}
+                                    st.rerun()
             else:
                 render_chatgpt_toolbar(msg.get("content", ""))
 
