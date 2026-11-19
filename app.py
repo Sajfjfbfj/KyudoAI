@@ -943,6 +943,17 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
     }
     .st-key-topbar { padding-left: 44px !important; }
 }
+@media (max-width: 640px) {
+    /* 回答末尾のバー（コピー・読み上げ・⋮）：スマホでも縦積みにせず1行に並べる */
+    div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) {
+        flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 4px !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) > div[data-testid="stColumn"] {
+        min-width: 0 !important; width: auto !important; flex: 0 0 auto !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) > div[data-testid="stColumn"]:nth-child(1) { flex: 0 0 76px !important; width: 76px !important; }
+    div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) > div[data-testid="stColumn"]:nth-child(3) { flex: 1 1 0 !important; }
+}
 @media (max-width: 600px) {
     [data-testid="stMainBlockContainer"] { padding: 14px 12px var(--kyudo-main-pad, 24px) !important; }
     div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { max-width: 90% !important; padding: 10px 16px !important; }
