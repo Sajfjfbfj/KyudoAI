@@ -28,9 +28,9 @@ def get_asset_base64(filename: str) -> str:
 def _toolbar_theme_css() -> str:
     t = st.session_state.get("ui_theme", "自動")
     if t == "ライト":
-        return ":root{color-scheme:light}.btn{color:#6f6f6f}.btn:hover{background:rgba(0,0,0,.06);color:#0d0d0d}"
+        return ":root{color-scheme:light}html,body{background:#ffffff}.btn{color:#6f6f6f}.btn:hover{background:rgba(0,0,0,.06);color:#0d0d0d}"
     if t == "ダーク":
-        return ":root{color-scheme:dark}.btn{color:#9b9b9b}.btn:hover{background:rgba(255,255,255,.10);color:#ececec}"
+        return ":root{color-scheme:dark}html,body{background:#212121}.btn{color:#9b9b9b}.btn:hover{background:rgba(255,255,255,.10);color:#ececec}"
     return ""
 
 def render_chatgpt_toolbar(text_content: str):
@@ -43,10 +43,11 @@ def render_chatgpt_toolbar(text_content: str):
         <meta charset="utf-8">
         <style>
             :root { color-scheme: light dark; }
+            /* iframeは配色が食い違うと不透明な既定色(#121212)で塗られるため、ページ背景(--canvas)と同じ色で明示的に塗る */
+            html, body { background: #ffffff; }
             body {
                 margin: 0;
                 padding: 0;
-                background: transparent;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             }
             .bar { display: flex; align-items: center; gap: 2px; padding-top: 4px; }
@@ -60,6 +61,7 @@ def render_chatgpt_toolbar(text_content: str):
             .btn:active { transform: scale(0.94); }
             .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
             @media (prefers-color-scheme: dark) {
+                html, body { background: #212121; }
                 .btn { color: #9b9b9b; }
                 .btn:hover { background: rgba(255, 255, 255, 0.10); color: #ececec; }
             }
@@ -373,7 +375,7 @@ html, body, [class*="css"], .stApp {
 
 [data-testid="stMainBlockContainer"] {
     max-width: 768px !important;
-    padding: 10px 24px 150px !important;
+    padding: 10px 24px var(--kyudo-main-pad, 24px) !important;
     margin: 0 auto !important;
 }
 
@@ -527,7 +529,6 @@ section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
 /* streamlit.app（Streamlit Cloud）の右下バッジが送信ボタンに重なるのを避けるため、
    JS が html に付ける kyudo-lift クラスがあるときだけ入力欄を持ち上げる */
 html.kyudo-lift div[data-testid="stBottom"] { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
-html.kyudo-lift [data-testid="stMainBlockContainer"] { padding-bottom: 210px !important; }
 
 /* 履歴の検索欄 */
 section[data-testid="stSidebar"] .st-key-sidebar_search_chats [data-baseweb="input"] {
@@ -932,7 +933,7 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
 
 /* ---------- レスポンシブ ---------- */
 @media (max-width: 900px) {
-    [data-testid="stMainBlockContainer"] { padding: 20px 16px 150px !important; }
+    [data-testid="stMainBlockContainer"] { padding: 20px 16px var(--kyudo-main-pad, 24px) !important; }
     .hero { margin-top: 0; }
     /* ウェルカム画面：画面に固定して縦中央に表示（スクロール位置・余白に影響されない）。送信するとコンテナごと消える */
     .st-key-welcome_wrap {
@@ -943,7 +944,7 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
     .st-key-topbar { padding-left: 44px !important; }
 }
 @media (max-width: 600px) {
-    [data-testid="stMainBlockContainer"] { padding: 14px 12px 140px !important; }
+    [data-testid="stMainBlockContainer"] { padding: 14px 12px var(--kyudo-main-pad, 24px) !important; }
     div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { max-width: 90% !important; padding: 10px 16px !important; }
     div[data-testid="stBottom"] > div { padding: 0 9px !important; }
     [data-testid="stMain"] [class*="st-key-quick_act_"] button { font-size: 14.5px !important; }
@@ -2190,6 +2191,18 @@ _CTX_MENU_JS = r"""
   }
   updateLift();
   window.addEventListener('resize', updateLift);
+
+  /* 最後の行が入力欄の真上に来るように、本文の下余白を入力欄の実測の高さに合わせる */
+  function updateBottomPad() {
+    var b = document.querySelector('[data-testid="stBottom"]');
+    if (!b) return;
+    var pos = getComputedStyle(b).position;
+    var pad = (pos === 'fixed' || pos === 'absolute') ? Math.ceil(b.getBoundingClientRect().height) + 16 : 16;
+    document.documentElement.style.setProperty('--kyudo-main-pad', pad + 'px');
+  }
+  updateBottomPad();
+  window.addEventListener('resize', updateBottomPad);
+  setInterval(updateBottomPad, 800);
 
   document.addEventListener('click', hide, true);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
