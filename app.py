@@ -934,15 +934,12 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
 @media (max-width: 900px) {
     [data-testid="stMainBlockContainer"] { padding: 20px 16px 150px !important; }
     .hero { margin-top: 0; }
-    /* ウェルカム画面を、ヘッダーと入力欄の間の縦中央に表示 */
+    /* ウェルカム画面：画面に固定して縦中央に表示（スクロール位置・余白に影響されない）。送信するとコンテナごと消える */
     .st-key-welcome_wrap {
-        min-height: calc(100vh - 300px); min-height: calc(100dvh - 300px);
-        display: flex !important; flex-direction: column; justify-content: center;
+        position: fixed !important; top: 46%; left: 50%; transform: translate(-50%, -50%);
+        width: calc(100% - 32px); max-width: 720px; z-index: 1;
+        max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); overflow-y: auto;
     }
-    /* 最初の送信前（ウェルカム表示中）は画面をスクロールさせない。送信するとウェルカムが消えて通常のスクロールに戻る */
-    [data-testid="stMain"]:has(.st-key-welcome_wrap),
-    [data-testid="stAppViewContainer"]:has(.st-key-welcome_wrap) { overflow-y: hidden !important; overscroll-behavior: none; }
-    [data-testid="stMainBlockContainer"]:has(.st-key-welcome_wrap) { padding-bottom: 0 !important; }
     .st-key-topbar { padding-left: 44px !important; }
 }
 @media (max-width: 600px) {
