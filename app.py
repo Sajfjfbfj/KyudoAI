@@ -746,6 +746,12 @@ div[data-testid="stBottom"] {
 div[data-testid="stBottomBlockContainer"] {
     max-width: 768px !important; padding: 0 24px !important; margin: 0 auto !important;
 }
+/* 注意書きを入力欄のすぐ上に固定（入力欄が複数行に伸びても追従） */
+div[data-testid="stBottomBlockContainer"]::before {
+    content: "弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。";
+    display: block; text-align: center; font-size: 12px; line-height: 1.4;
+    color: var(--ink-muted); padding: 0 0 8px;
+}
 div[data-testid="stChatInput"] {
     background: var(--composer) !important;
     border: 1px solid var(--border-hairline) !important;
@@ -2907,12 +2913,7 @@ else:
         file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
     )
 
-# 弓道AI道場 フッター注釈
-st.markdown("""
-<div style="text-align: center; font-size: 12px; color: var(--ink-muted); margin-top: 8px;">
-    弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。
-</div>
-""", unsafe_allow_html=True)
+# 注意書きは CSS（stBottomBlockContainer::before）で入力欄の直上に固定表示
 
 # クイック質問チップまたは入力欄からの入力を判定（ChatInputValue対応・型安全抽出）
 text_to_send = None
