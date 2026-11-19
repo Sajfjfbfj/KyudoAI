@@ -1529,18 +1529,42 @@ def _browser_login_cookie() -> str:
         return ""
 
 def _flush_cookie_js():
-    """ブラウザのCookieを設定／削除する（ログイン・ログアウト直後の次の再実行で1回だけ出力）。"""
+    """ブラウザにトークンを保存／削除する（ログイン・ログアウト直後の次の再実行で1回だけ出力）。
+    localStorage と Cookie の両方を使う（どちらかが使えない環境でも動くように）。"""
     set_tok = st.session_state.pop("_cookie_set", None)
     clear = st.session_state.pop("_cookie_clear", False)
     if not (set_tok or clear):
         return
     if set_tok:
-        js = (f"var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_TOKEN_DAYS * 86400}; SameSite=Lax';"
-              "if(window.parent.location.protocol==='https:'){c+='; Secure';}"
-              "window.parent.document.cookie=c;")
+        js = (f"var P=window.parent;"
+              f"try{{P.localStorage.setItem('{LOGIN_COOKIE}','{set_tok}');}}catch(e){{}}"
+              f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_TOKEN_DAYS * 86400}; SameSite=Lax';"
+              "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}")
     else:
-        js = f"window.parent.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';"
-    components.html(f"<script>try{{{js}}}catch(e){{}}</script>", height=0)
+        js = (f"var P=window.parent;"
+              f"try{{P.localStorage.removeItem('{LOGIN_COOKIE}');}}catch(e){{}}"
+              f"try{{P.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';}}catch(e){{}}")
+    components.html(f"<script>{js}</script>", height=0)
+
+def _restore_login_js():
+    """リロード直後：localStorage にトークンがあれば、URLに一時的に付けて再読み込みし自動ログインさせる。"""
+    js = (f"try{{var P=window.parent;var t=P.localStorage.getItem('{LOGIN_COOKIE}');"
+          "if(t){var u=new URL(P.location.href);u.searchParams.set('_kt',t);P.location.replace(u.toString());}}catch(e){}")
+    components.html(f"<script>{js}</script>", height=0)
+
+def _query_login_token() -> str:
+    try:
+        v = st.query_params.get("_kt", "")
+        return v if isinstance(v, str) else (v[0] if v else "")
+    except Exception:
+        return ""
+
+def _drop_query_token():
+    try:
+        if "_kt" in st.query_params:
+            del st.query_params["_kt"]
+    except Exception:
+        pass
 
 def _complete_login(username: str, guest: bool = False, issue_token: bool = True):
     """ログイン成功時の共通処理。ユーザー専用の履歴・テーマ設定を読み直す。"""
@@ -1613,11 +1637,19 @@ def render_login_screen():
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
-    # リロード等で新しいセッションになった場合：Cookieのトークンが有効なら自動ログイン
-    _auto_user = username_from_token(_browser_login_cookie())
+    # リロード等で新しいセッションになった場合：Cookie または URL の一時トークンが有効なら自動ログイン
+    _kt = _query_login_token()
+    _auto_user = username_from_token(_browser_login_cookie()) or username_from_token(_kt)
+    _drop_query_token()
     if _auto_user:
         _complete_login(_auto_user, issue_token=False)
+    if _kt:
+        st.session_state["_cookie_clear"] = True  # 無効なトークンはブラウザから消す
+    elif not _browser_login_cookie():
+        st.session_state["_restore_pending"] = True  # localStorage から復元を試みる
 _flush_cookie_js()
+if st.session_state.pop("_restore_pending", False):
+    _restore_login_js()
 if not st.session_state.authenticated:
     render_login_screen()
     st.stop()
