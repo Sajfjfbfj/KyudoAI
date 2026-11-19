@@ -941,11 +941,36 @@ section[data-testid="stSidebar"] .st-key-sb_account {
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] { min-height: 44px !important; font-weight: 600 !important; }
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; }
 
+/* 不可視スクリプト・iframe（Cookie/localStorage保存用）の余白・高さを完全ゼロにして押し下げを防止 */
+iframe[height="0"], iframe[height="1"],
+div[data-testid="stCustomComponentV1"]:has(iframe[height="0"]),
+div[data-testid="stCustomComponentV1"]:has(iframe[height="1"]),
+div[data-testid="stVerticalBlock"] > div:has(iframe[height="0"]),
+div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
+.element-container:has(iframe[height="0"]),
+.element-container:has(iframe[height="1"]) {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    line-height: 0 !important;
+}
+
 /* ---------- ログイン ---------- */
 .st-key-login_card {
     background: var(--surface-2); border: 1px solid var(--border-hairline);
     border-radius: 20px; padding: 22px 24px 8px; box-shadow: var(--shadow-sm);
     margin-bottom: 14px;
+    transition: none !important;
 }
 .st-key-goto_register button, .st-key-goto_login button, .st-key-guest_login button {
     background: transparent !important; border: 0 !important; box-shadow: none !important;
@@ -954,7 +979,7 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
 .st-key-goto_register button:hover, .st-key-goto_login button:hover, .st-key-guest_login button:hover {
     background: transparent !important; color: var(--shu) !important;
 }
-.login-wrap { margin: 7vh auto 22px; text-align: center; }
+.login-wrap { margin: clamp(24px, 5vh, 48px) auto 20px; text-align: center; transition: none !important; }
 .login-logo { margin-left: auto; margin-right: auto; }
 .login-logo {
     width: 48px; height: 48px; border-radius: 14px; background: var(--shu); color: var(--on-accent);
