@@ -718,6 +718,22 @@ div[data-testid="stChatMessage"] [data-testid="stPopover"] > button:hover {
     color: var(--ink-primary) !important; border-color: transparent !important; background: var(--surface-3) !important;
 }
 
+/* 回答下の「⋮」メニュー：アイコンだけの小さなボタン */
+[class*="st-key-msg_more_"] [data-testid="stPopoverButton"] {
+    min-width: 32px !important; width: 32px !important; height: 32px !important; min-height: 32px !important;
+    padding: 0 !important; border-radius: 8px !important; color: var(--ink-muted) !important;
+}
+[class*="st-key-msg_more_"] [data-testid="stPopoverButton"] > div > div[aria-hidden="true"] { display: none !important; }
+/* ⋮メニューの中身：枠なしのメニュー行（ChatGPT のメニューと同じ見た目） */
+[class*="st-key-btn_regen_"] button[kind], [class*="st-key-regen_char_"] button[kind] {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    border-radius: 8px !important; justify-content: flex-start !important;
+    min-height: 38px !important; padding: 6px 12px !important;
+    color: var(--ink-primary) !important; font-size: 14px !important;
+}
+[class*="st-key-btn_regen_"] button[kind] > div, [class*="st-key-regen_char_"] button[kind] > div { justify-content: flex-start !important; }
+[class*="st-key-btn_regen_"] button[kind]:hover, [class*="st-key-regen_char_"] button[kind]:hover { background: var(--surface-3) !important; }
+
 /* ---------- 入力欄 ---------- */
 div[data-testid="stBottom"], div[data-testid="stBottom"] > div {
     background: transparent !important; border-top: 0 !important;
@@ -828,6 +844,40 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
     background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
     border-radius: var(--radius-xl) !important; padding: 10px; box-shadow: var(--shadow-sm) !important;
 }
+
+/* 黒（ダークでは白）の塗りボタン内の文字は、背景と逆の色にする */
+button[kind="primary"] p, button[kind="primary"] span, button[kind="primary"] div,
+.stFormSubmitButton > button p, .stFormSubmitButton > button span, .stFormSubmitButton > button div,
+div[data-testid="stChatInputSubmitButton"] button svg {
+    color: var(--on-accent) !important;
+}
+/* 文字だけのリンク風ボタンは、狭い幅でも途中で省略せず折り返す */
+[class*="st-key-goto_"] button p, .st-key-guest_login button p { white-space: normal !important; text-overflow: clip !important; overflow: visible !important; }
+
+/* 入力欄の内側にもう一枚ある枠線（フォーカス時は赤）を消す */
+div[data-testid="stChatInput"] > div, div[data-testid="stChatInput"] > div > div {
+    border: 0 !important; box-shadow: none !important; outline: none !important;
+}
+div[data-testid="stChatInput"] textarea:focus { outline: none !important; box-shadow: none !important; }
+
+/* ポップオーバーのボタン（Streamlit 新版では stPopover の直下ではないため、専用のセレクタで指定） */
+section[data-testid="stSidebar"] [data-testid="stPopoverButton"],
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    border-radius: var(--radius-md) !important; min-height: 36px !important; padding: 6px 10px !important;
+    color: var(--ink-primary) !important; font-weight: 500 !important; font-size: 14px !important;
+}
+section[data-testid="stSidebar"] [data-testid="stPopoverButton"]:hover,
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover { background: var(--surface-3) !important; }
+section[data-testid="stSidebar"] [data-testid="stPopoverButton"] > div,
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button > div { justify-content: flex-start !important; width: 100%; }
+[class*="st-key-msg_more_"] [data-testid="stPopoverButton"] {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+}
+[class*="st-key-msg_more_"] [data-testid="stPopoverButton"]:hover { background: var(--surface-3) !important; color: var(--ink-primary) !important; }
+
+/* キャプション（補足文）は控えめな大きさに */
+[data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] { font-size: 13px !important; color: var(--ink-muted) !important; line-height: 1.6 !important; }
 
 /* ---------- ログイン ---------- */
 .st-key-login_card {
@@ -2594,35 +2644,29 @@ for idx, msg in enumerate(st.session_state.messages):
             has_user_prompt = any(m["role"] == "user" for m in st.session_state.messages)
             if is_last_msg and has_user_prompt:
                 current_msg_char = msg.get("char", selected_char)
-                bar_cols = st.columns([0.12, 0.20, 0.28, 0.40])
+                bar_cols = st.columns([0.12, 0.10, 0.78])
                 with bar_cols[0]:
                     render_chatgpt_toolbar(msg.get("content", ""))
                 with bar_cols[1]:
-                    if st.button("再生成", key=f"btn_regen_{idx}", icon=":material/refresh:",
-                                 help=f"{current_msg_char}の別の視点から回答を再生成", use_container_width=True):
+                    # 縦3点メニュー：再生成／別のキャラで再生成
+                    with st.popover("", icon=":material/more_vert:", key=f"msg_more_{idx}"):
                         last_u_text = None
                         for prev_m in reversed(st.session_state.messages[:idx]):
                             if prev_m["role"] == "user":
                                 last_u_text = prev_m["content"]
                                 break
-                        if last_u_text:
-                            st.session_state.messages.pop()
-                            st.session_state.pending_regen = {"text": last_u_text, "char": current_msg_char}
-                            st.rerun()
-                with bar_cols[2]:
-                    # 別キャラで再生成：現在の回答キャラを除外した選択肢
-                    other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
-                    if other_chars:
-                        with st.popover("別のキャラで", icon=":material/switch_account:", use_container_width=True):
-                            st.caption("別のAIキャラクターの視点から回答し直します")
+                        if st.button("再生成", key=f"btn_regen_{idx}", icon=":material/refresh:",
+                                     help=f"{current_msg_char}の別の視点から回答を再生成", use_container_width=True):
+                            if last_u_text:
+                                st.session_state.messages.pop()
+                                st.session_state.pending_regen = {"text": last_u_text, "char": current_msg_char}
+                                st.rerun()
+                        other_chars = [c for c in CHARACTERS.keys() if c != current_msg_char]
+                        if other_chars:
+                            st.caption("別のキャラで再生成")
                             for oc in other_chars:
                                 oc_info = CHARACTERS[oc]
                                 if st.button(f"{oc_info['icon']} {oc}", key=f"regen_char_{idx}_{oc}", use_container_width=True, help=oc_info["desc"]):
-                                    last_u_text = None
-                                    for prev_m in reversed(st.session_state.messages[:idx]):
-                                        if prev_m["role"] == "user":
-                                            last_u_text = prev_m["content"]
-                                            break
                                     if last_u_text:
                                         st.session_state.messages.pop()
                                         st.session_state.pending_regen = {"text": last_u_text, "char": oc}
