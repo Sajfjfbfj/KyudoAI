@@ -2335,12 +2335,30 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
             client = genai.Client(api_key=api_key)
             system_instruction = current_char["prompt"]
             
-            # 会話履歴をコンテキストとして構築
+            # 会話履歴をコンテキストとして構築（別キャラの発言は口調を引き継がせない）
             contents = []
             for m in st.session_state.messages[-6:]:
-                role = "user" if m["role"] == "user" else "model"
-                contents.append(f"{role}: {m['content']}")
+                if m["role"] == "user":
+                    contents.append(f"user: {m['content']}")
+                else:
+                    past_char = m.get("char", char_name)
+                    if past_char != char_name:
+                        contents.append(f"model: （参考：{past_char}による過去の回答）{m['content']}")
+                    else:
+                        contents.append(f"model: {m['content']}")
             contents.append(f"user: {user_input}")
+
+            # キャラクター切替の明示
+            char_switch_note = ""
+            last_asst = next((m for m in reversed(st.session_state.messages) if m["role"] == "assistant"), None)
+            if last_asst and last_asst.get("char", char_name) != char_name:
+                char_switch_note = (
+                    f"\n\n【⚠️ キャラクター切替】\n"
+                    f"先ほどまでは「{last_asst.get('char')}」が対応していましたが、"
+                    f"今からあなた「{char_name}」が担当します。\n"
+                    f"あなた自身のキャラクター設定・口調・視点で必ず回答してください。"
+                    f"前のキャラクターの話し方や表現を引き継がないこと。\n"
+                )
 
             memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
             custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
@@ -2359,6 +2377,7 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
                 f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
                 f"{memory_section}"
                 f"{custom_instructions}"
+                f"{char_switch_note}"
                 f"{regen_instruction}"
                 f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
                 f"{system_instruction}\n\n"
@@ -2414,12 +2433,33 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
         client = genai.Client(api_key=api_key)
         system_instruction = current_char["prompt"]
         
+        # 会話履歴をコンテキストとして構築
+        # ※ 異なるキャラクターが発言した過去の履歴はそのキャラの口調が混入しないよう
+        #   「（別のキャラクター名）が答えた内容:」として渡す
         contents = []
         for m in st.session_state.messages[-6:]:
-            role = "user" if m["role"] == "user" else "model"
-            contents.append(f"{role}: {m['content']}")
+            if m["role"] == "user":
+                contents.append(f"user: {m['content']}")
+            else:
+                past_char = m.get("char", char_name)
+                if past_char != char_name:
+                    # 別キャラの発言 → 参考情報として渡すが口調は引き継がせない
+                    contents.append(f"model: （参考：{past_char}による過去の回答）{m['content']}")
+                else:
+                    contents.append(f"model: {m['content']}")
         contents.append(f"user: {user_input}")
 
+        # キャラクター切替の明示（直前の発言が別キャラなら強調）
+        char_switch_note = ""
+        last_asst = next((m for m in reversed(st.session_state.messages) if m["role"] == "assistant"), None)
+        if last_asst and last_asst.get("char", char_name) != char_name:
+            char_switch_note = (
+                f"\n\n【⚠️ キャラクター切替】\n"
+                f"先ほどまでは「{last_asst.get('char')}」が対応していましたが、"
+                f"今からあなた「{char_name}」が担当します。\n"
+                f"あなた自身のキャラクター設定・口調・視点で必ず回答してください。"
+                f"前のキャラクターの話し方や表現を引き継がないこと。\n"
+            )
         memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
         custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
         
@@ -2437,6 +2477,7 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
             f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
             f"{memory_section}"
             f"{custom_instructions}"
+            f"{char_switch_note}"
             f"{regen_instruction}"
             f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、初心者にも直感的に伝わるよう日常の身体言語に噛み砕いて回答してください）】\n"
             f"{system_instruction}\n\n"
