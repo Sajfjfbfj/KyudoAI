@@ -1352,14 +1352,14 @@ def _client_ip() -> str:
     try:
         h = st.context.headers
         fwd = h.get("X-Forwarded-For") or h.get("X-Real-Ip")
-        if fwd:
+        if isinstance(fwd, str) and fwd:
             return fwd.split(",")[0].strip()
     except Exception:
         pass
     try:
         ip = st.context.ip_address
-        if ip:
-            return str(ip)
+        if isinstance(ip, str) and ip:
+            return ip
     except Exception:
         pass
     return "unknown"
@@ -1884,11 +1884,14 @@ def render_sidebar_context_menu():
         "var s=d.createElement('script');s.textContent=" + json.dumps(_CTX_MENU_JS).replace("</", "<\\/") + ";"
         "d.head.appendChild(s);}catch(e){console.warn('context menu unavailable',e);}})();</script>"
     )
+    # components.html は非推奨のため、st.iframe があればそちらを優先（旧バージョンはフォールバック）
     try:
-        components.html(loader, height=0)
-    except Exception:
         if hasattr(st, "iframe"):
             st.iframe(loader, height=1)
+        else:
+            components.html(loader, height=0)
+    except Exception:
+        pass
 
 with st.sidebar:
     render_sidebar_context_menu()
