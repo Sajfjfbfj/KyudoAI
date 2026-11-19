@@ -1935,11 +1935,23 @@ with st.sidebar:
             st.markdown("**射形動画・写真の3D解析**")
             st.caption("画面下の入力欄の「＋」から動画や写真（MP4/PNG等）を添付して送信すると、AIが3D骨格アライメントと筋肉活動バランスを立体解析します。")
         with t_goal:
-            st.markdown("**稽古スケジュール＆課題**")
-            st.caption("日々の稽古計画や昇段審査までの課題管理を行えます。")
-            st.text_input("今日の稽古目標", placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
-            if st.button("目標を保存", key="sb_save_sched", use_container_width=True):
-                st.success("稽古目標を記録しました！")
+            st.markdown("**稽古目標**")
+            st.caption("目標を保存すると、AIがそれを把握した上で指導してくれます。")
+            _goal_user = st.session_state.get("logged_in_user", "default")
+            # 既存の稽古目標メモリを取得して初期値に表示
+            _existing_goals = [n for n in load_user_memory(_goal_user) if n.startswith("稽古目標:")]
+            _current_goal = _existing_goals[0].replace("稽古目標:", "").strip() if _existing_goals else ""
+            _new_goal = st.text_input("今日の稽古目標", value=_current_goal, placeholder="例: 会で3秒伸び合う", key="sb_sched_goal")
+            if st.button("目標を保存してAIに記憶させる", key="sb_save_sched", use_container_width=True, type="primary"):
+                if _new_goal.strip():
+                    # 既存の稽古目標エントリを削除してから新しいものを追加（上書き）
+                    _notes = load_user_memory(_goal_user)
+                    _notes = [n for n in _notes if not n.startswith("稽古目標:")]
+                    _notes.append(f"稽古目標: {_new_goal.strip()}")
+                    save_user_memory(_goal_user, _notes)
+                    st.success(f"「{_new_goal.strip()}」をAIの記憶に保存しました！次のチャットから反映されます。")
+                else:
+                    st.warning("目標を入力してください。")
         with t_lib:
             st.markdown("""
             <div style='font-size: 12.5px; color: var(--ink-secondary); line-height: 1.9;'>
