@@ -3022,66 +3022,72 @@ if text_to_send or files_to_send:
     # B. 通常のテキスト質問の場合（ChatGPT風リアルタイム・ストリーミング）
 
     else:
+        # ユーザー発言は履歴に追加してすぐ再実行する。履歴ループ側で描画されるため、
+        # 「ライブ描画 → st.rerun で描き直し」による表示の消え・ちらつきが起きない（再生成と同じ方式）
         st.session_state.messages.append({"role": "user", "content": text_to_send})
-
-        # 1) ウェルカム画面を消し、ユーザー発言を最初に即描画（API待ちの間に何も出ない時間をなくす）
-        if welcome_slot is not None:
-            welcome_slot.empty()
-        with st.chat_message("user"):
-            st.markdown(text_to_send)
-
-        # 2) 射手カルテの自動学習・タイトル生成は、回答のストリーミングと並行して裏で実行
-        _cur_user = st.session_state.get("logged_in_user", "default")
-        _is_first_q = sum(1 for m in st.session_state.messages if m["role"] == "user") == 1
-        _pool = ThreadPoolExecutor(max_workers=2)
-        mem_future = _pool.submit(auto_extract_and_save_memory, _cur_user, text_to_send, active_api_key) if active_api_key else None
-        title_future = _pool.submit(generate_smart_title, text_to_send, active_api_key) if (_is_first_q and active_api_key) else None
-
-        avatar_img_stream = os.path.join(ASSETS_DIR, char_info.get("avatar_file", "")) if char_info.get("avatar_file") and os.path.exists(os.path.join(ASSETS_DIR, char_info.get("avatar_file", ""))) else char_info["icon"]
-        with st.chat_message("assistant", avatar=avatar_img_stream):
-            st.markdown(f'<span class="char-badge {char_info["badge_class"]}">{char_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
-
-            try:
-                _think = st.empty()
-                _think.caption("考え中…")
-                stream_gen = _with_thinking(generate_response_stream(text_to_send, selected_char, active_api_key), _think)
-                full_reply = st.write_stream(stream_gen)
-            except Exception as e:
-                full_reply = f"⚠️ エラーが発生しました: {str(e)}"
-                st.markdown(full_reply)
-
-            # 並行実行していたメモリ更新の結果（終わっていなければ最大数秒だけ待つ）
-            new_mem_items = []
-            if mem_future is not None:
-                try:
-                    new_mem_items = mem_future.result(timeout=8) or []
-                except Exception:
-                    new_mem_items = []
-            if new_mem_items:
-                mem_tags = "、".join(new_mem_items)
-                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
-
-            # アクションツールバー（コピー・読み上げ）
-            render_chatgpt_toolbar(full_reply)
-
-        asst_msg = {
-            "role": "assistant",
-            "char": selected_char,
-            "content": full_reply
-        }
-        if new_mem_items:
-            asst_msg["memory_items"] = new_mem_items
-        st.session_state.messages.append(asst_msg)
-
-        # 会話を即時自動保存（最初の質問なら、裏で生成していたスマートタイトルを使う）
-        if "current_session_id" in st.session_state:
-            smart_title = None
-            if title_future is not None:
-                try:
-                    smart_title = title_future.result(timeout=8)
-                except Exception:
-                    smart_title = None
-            save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
-        _pool.shutdown(wait=False)
-
+        st.session_state.pending_stream = {"text": text_to_send, "char": selected_char}
         st.rerun()
+
+# 送信済みの質問に対する回答のストリーミング（質問の吹き出しは上の履歴ループで描画済み）
+_ps = st.session_state.pop("pending_stream", None)
+if _ps:
+    _ps_text = _ps["text"]
+    _ps_char = _ps["char"]
+    _ps_info = CHARACTERS.get(_ps_char, char_info)
+
+    # 射手カルテの自動学習・タイトル生成は、回答のストリーミングと並行して裏で実行
+    _cur_user = st.session_state.get("logged_in_user", "default")
+    _is_first_q = sum(1 for m in st.session_state.messages if m["role"] == "user") == 1
+    _pool = ThreadPoolExecutor(max_workers=2)
+    mem_future = _pool.submit(auto_extract_and_save_memory, _cur_user, _ps_text, active_api_key) if active_api_key else None
+    title_future = _pool.submit(generate_smart_title, _ps_text, active_api_key) if (_is_first_q and active_api_key) else None
+
+    _ps_avatar_path = os.path.join(ASSETS_DIR, _ps_info.get("avatar_file", "")) if _ps_info.get("avatar_file") else ""
+    avatar_img_stream = _ps_avatar_path if _ps_avatar_path and os.path.exists(_ps_avatar_path) else _ps_info["icon"]
+    with st.chat_message("assistant", avatar=avatar_img_stream):
+        st.markdown(f'<span class="char-badge {_ps_info["badge_class"]}">{_ps_info["icon"]} {_ps_char}</span>', unsafe_allow_html=True)
+
+        try:
+            _think = st.empty()
+            _think.caption("考え中…")
+            stream_gen = _with_thinking(generate_response_stream(_ps_text, _ps_char, active_api_key), _think)
+            full_reply = st.write_stream(stream_gen)
+        except Exception as e:
+            full_reply = f"⚠️ エラーが発生しました: {str(e)}"
+            st.markdown(full_reply)
+
+        # 並行実行していたメモリ更新の結果（終わっていなければ最大数秒だけ待つ）
+        new_mem_items = []
+        if mem_future is not None:
+            try:
+                new_mem_items = mem_future.result(timeout=8) or []
+            except Exception:
+                new_mem_items = []
+        if new_mem_items:
+            mem_tags = "、".join(new_mem_items)
+            st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+
+        # アクションツールバー（コピー・読み上げ）
+        render_chatgpt_toolbar(full_reply)
+
+    asst_msg = {
+        "role": "assistant",
+        "char": _ps_char,
+        "content": full_reply
+    }
+    if new_mem_items:
+        asst_msg["memory_items"] = new_mem_items
+    st.session_state.messages.append(asst_msg)
+
+    # 会話を即時自動保存（最初の質問なら、裏で生成していたスマートタイトルを使う）
+    if "current_session_id" in st.session_state:
+        smart_title = None
+        if title_future is not None:
+            try:
+                smart_title = title_future.result(timeout=8)
+            except Exception:
+                smart_title = None
+        save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
+    _pool.shutdown(wait=False)
+
+    st.rerun()
