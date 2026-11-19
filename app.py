@@ -936,9 +936,13 @@ section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButto
     .hero { margin-top: 0; }
     /* ウェルカム画面を、ヘッダーと入力欄の間の縦中央に表示 */
     .st-key-welcome_wrap {
-        min-height: calc(100vh - 250px); min-height: calc(100dvh - 250px);
+        min-height: calc(100vh - 300px); min-height: calc(100dvh - 300px);
         display: flex !important; flex-direction: column; justify-content: center;
     }
+    /* 最初の送信前（ウェルカム表示中）は画面をスクロールさせない。送信するとウェルカムが消えて通常のスクロールに戻る */
+    [data-testid="stMain"]:has(.st-key-welcome_wrap),
+    [data-testid="stAppViewContainer"]:has(.st-key-welcome_wrap) { overflow-y: hidden !important; overscroll-behavior: none; }
+    [data-testid="stMainBlockContainer"]:has(.st-key-welcome_wrap) { padding-bottom: 0 !important; }
     .st-key-topbar { padding-left: 44px !important; }
 }
 @media (max-width: 600px) {
