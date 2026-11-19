@@ -879,6 +879,15 @@ section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button > div { jus
 /* キャプション（補足文）は控えめな大きさに */
 [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] { font-size: 13px !important; color: var(--ink-muted) !important; line-height: 1.6 !important; }
 
+/* サイドバー最下部のアカウントボタン（アカウント＋設定・射手カルテを統合） */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] { min-height: calc(100vh - 2.6rem); }
+section[data-testid="stSidebar"] .st-key-sb_account {
+    margin-top: auto; position: sticky; bottom: 0; z-index: 5;
+    background: var(--surface-1); padding: 8px 0 4px !important; border-top: 1px solid var(--border-hairline);
+}
+section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] { min-height: 44px !important; font-weight: 600 !important; }
+section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; }
+
 /* ---------- ログイン ---------- */
 .st-key-login_card {
     background: var(--surface-2); border: 1px solid var(--border-hairline);
@@ -1814,14 +1823,8 @@ with st.sidebar:
     cur_user = st.session_state.get("logged_in_user", "default")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
-    st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 4px 4px; border-top: 1px solid var(--border-hairline);">
-        <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--shu); color: var(--on-accent); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700;">{(disp_name or "R")[:1].upper()}</div>
-        <div style="font-size: 13.5px; font-weight: 600; color: var(--ink-primary);">{disp_name}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    with st.popover("アカウント設定・射手カルテ", icon=":material/settings:", use_container_width=True):
+    # アカウントと設定・射手カルテを1つのボタンに統合（サイドバーの最下部に固定）
+    with st.popover(disp_name or "アカウント", icon=":material/account_circle:", use_container_width=True, key="sb_account"):
         st.markdown(f"""
         <div style="border: 1px solid var(--border-hairline); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface-2);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
