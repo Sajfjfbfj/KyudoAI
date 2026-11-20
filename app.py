@@ -842,13 +842,30 @@ div[data-testid="stChatInput"] button:disabled { background: transparent !import
     color: var(--ink-primary) !important; transform: none !important;
 }
 .stButton > button:active { transform: scale(0.985) !important; }
-button[kind="primary"], .stFormSubmitButton > button {
-    background: var(--shu) !important; color: var(--on-accent) !important; border: 0 !important;
-    border-radius: 999px !important; font-weight: 600 !important; letter-spacing: 0 !important;
+button[kind="primary"], .stFormSubmitButton > button,
+button[kind="primary"]:hover, .stFormSubmitButton > button:hover,
+button[kind="primary"]:focus, .stFormSubmitButton > button:focus,
+button[kind="primary"]:active, .stFormSubmitButton > button:active,
+button[kind="primary"]:focus-visible, .stFormSubmitButton > button:focus-visible,
+button[kind="primary"]:disabled, .stFormSubmitButton > button:disabled,
+button[kind="primary"][disabled], .stFormSubmitButton > button[disabled] {
+    background: var(--shu) !important;
+    background-color: var(--shu) !important;
+    color: var(--on-accent) !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
     box-shadow: none !important;
+    outline: none !important;
 }
 button[kind="primary"]:hover, .stFormSubmitButton > button:hover {
-    background: var(--shu) !important; color: var(--on-accent) !important; opacity: 0.9; transform: none !important;
+    opacity: 0.9 !important;
+    transform: none !important;
+}
+button[kind="primary"]:active, .stFormSubmitButton > button:active {
+    opacity: 0.8 !important;
+    transform: scale(0.985) !important;
 }
 
 div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
@@ -899,8 +916,10 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
 }
 
 /* 黒（ダークでは白）の塗りボタン内の文字は、背景と逆の色にする */
-button[kind="primary"] p, button[kind="primary"] span, button[kind="primary"] div,
-.stFormSubmitButton > button p, .stFormSubmitButton > button span, .stFormSubmitButton > button div,
+button[kind="primary"] *, .stFormSubmitButton > button *,
+button[kind="primary"]:focus *, .stFormSubmitButton > button:focus *,
+button[kind="primary"]:active *, .stFormSubmitButton > button:active *,
+button[kind="primary"]:disabled *, .stFormSubmitButton > button:disabled *,
 div[data-testid="stChatInputSubmitButton"] button svg {
     color: var(--on-accent) !important;
 }
@@ -1574,9 +1593,9 @@ def guest_consume_one():
         json.dump(data, fp, ensure_ascii=False, indent=2)
     os.replace(tmp, GUEST_USAGE_FILE)
 
-# ---- ログイン状態の保持（URLクエリパラメータ + サーバー側トークン + Cookie/localStorage） ----
+# ---- ログイン状態の保持（URLクエリパラメータ + サーバー側トークン + Cookie/localStorage：ログアウトするまで永久維持） ----
 LOGIN_COOKIE = "kyudo_auth"
-LOGIN_TOKEN_DAYS = 30
+LOGIN_COOKIE_MAX_AGE = 3153600000  # 100年（実質永久）
 LOGIN_TOKENS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "login_tokens.json")
 
 def _load_login_tokens() -> dict:
@@ -1600,12 +1619,14 @@ def _hash_token(token: str) -> str:
 def issue_login_token(username: str, is_guest: bool = False) -> str:
     token = secrets.token_urlsafe(32)
     now = time.time()
-    tokens = {k: v for k, v in _load_login_tokens().items() if v.get("exp", 0) > now}
-    exp_days = 1 if is_guest else LOGIN_TOKEN_DAYS
+    # 期限切れの古いゲストトークン等を掃除（exp==0 は永久有効なので残す）
+    tokens = {k: v for k, v in _load_login_tokens().items() if v.get("exp", 0) == 0 or v.get("exp", 0) > now}
+    # 通常ユーザーは exp=0（無期限・永久維持）。ゲストは1日のみ。
+    exp_time = (now + 86400) if is_guest else 0
     tokens[_hash_token(token)] = {
         "user": username,
         "is_guest": is_guest,
-        "exp": now + exp_days * 86400
+        "exp": exp_time
     }
     _save_login_tokens(tokens)
     return token
@@ -1615,7 +1636,11 @@ def verify_login_token(token: str):
     if not token:
         return None, False
     entry = _load_login_tokens().get(_hash_token(token))
-    if not entry or entry.get("exp", 0) <= time.time():
+    if not entry:
+        return None, False
+    exp = entry.get("exp", 0)
+    # exp > 0 かつ現在時刻を過ぎていたら失効（exp == 0 は無期限・永久有効）
+    if exp > 0 and exp <= time.time():
         return None, False
     u = entry.get("user")
     is_guest = bool(entry.get("is_guest", False))
@@ -1652,7 +1677,7 @@ def _flush_cookie_js():
     if set_tok:
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.setItem('{LOGIN_COOKIE}','{set_tok}');}}catch(e){{}}"
-              f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_TOKEN_DAYS * 86400}; SameSite=Lax';"
+              f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
               "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}")
     else:
         js = (f"var P=window.parent;"
