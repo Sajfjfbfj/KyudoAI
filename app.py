@@ -219,32 +219,49 @@ st.markdown("""
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
 (function() {
-    function injectHead() {
-        if (window.parent.document.getElementById('pwa-injected')) return;
+    function setupPWA() {
         var pDoc = window.parent.document;
-        var marker = pDoc.createElement('meta');
-        marker.id = 'pwa-injected';
-        pDoc.head.appendChild(marker);
+        if (!pDoc || !pDoc.head) return;
 
-        var manifestLink = pDoc.createElement('link');
-        manifestLink.rel = 'manifest';
-        manifestLink.href = '/app/static/manifest.json';
-        pDoc.head.appendChild(manifestLink);
+        // 既存の Streamlit 公式 manifest やアイコンを削除して上書き
+        var oldEls = pDoc.querySelectorAll('link[rel="manifest"], link[rel="apple-touch-icon"], link[rel*="icon"]');
+        oldEls.forEach(function(el) {
+            try { el.parentNode.removeChild(el); } catch(e) {}
+        });
+
+        // 射心アプリアイコン・ファビコン
+        var iconUrl = '/app/static/icon-192.png?v=2';
+        var fav = pDoc.createElement('link');
+        fav.rel = 'icon';
+        fav.type = 'image/png';
+        fav.href = iconUrl;
+        pDoc.head.appendChild(fav);
 
         var appleIcon = pDoc.createElement('link');
         appleIcon.rel = 'apple-touch-icon';
-        appleIcon.href = '/app/static/icon-192.png';
+        appleIcon.href = iconUrl;
         pDoc.head.appendChild(appleIcon);
+
+        // 新しい Manifest を <head> の先頭に挿入
+        var manifestLink = pDoc.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = '/app/static/manifest.json?v=2';
+        pDoc.head.insertBefore(manifestLink, pDoc.head.firstChild);
+
+        pDoc.title = '射心 Kyudo AI';
 
         var metaTags = [
             { name: 'mobile-web-app-capable', content: 'yes' },
             { name: 'apple-mobile-web-app-capable', content: 'yes' },
             { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
             { name: 'apple-mobile-web-app-title', content: '射心' },
+            { name: 'application-name', content: '射心' },
             { name: 'theme-color', content: '#1B365D' }
         ];
 
         metaTags.forEach(function(tag) {
+            var existing = pDoc.querySelector('meta[name="' + tag.name + '"]');
+            if (existing) { try { existing.parentNode.removeChild(existing); } catch(e) {} }
             var m = pDoc.createElement('meta');
             m.name = tag.name;
             m.content = tag.content;
@@ -252,30 +269,54 @@ st.markdown("""
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/app/static/sw.js').catch(function(err) {
-                console.log('SW registration optional:', err);
-            });
+            navigator.serviceWorker.register('/app/static/sw.js?v=2').catch(function(e){});
         }
     }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectHead);
-    } else {
-        injectHead();
-    }
+    setupPWA();
+    setTimeout(setupPWA, 500);
+    setTimeout(setupPWA, 1500);
 })();
 </script>
 """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# セッション状態での文字サイズ管理
-if "font_size_choice" not in st.session_state:
-    st.session_state.font_size_choice = "大きめ (18px)"
+# ── 文字サイズ設定定義（アカウントと紐付け対応） ──────────────────
+FONT_SIZE_OPTIONS = ["標準 (16px)", "大きめ (18px)", "特大 (22px)"]
 
-# サイドバーで文字サイズを設定できるように先行取得
-font_sizes = {
-    "標準 (16px)": {"body": "16px", "line": "1.7", "chat": "16px"},
-    "大きめ (18px)": {"body": "18px", "line": "1.8", "chat": "18px"},
-    "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
+FONT_SIZE_MAP = {
+    "標準 (16px)": {
+        "base": "16px",
+        "chat": "16px",
+        "chat_line": "1.75",
+        "h1": "26px",
+        "h2": "20px",
+        "h3": "17px",
+        "h4": "16px",
+        "input": "15px",
+        "sidebar": "13.5px",
+    },
+    "大きめ (18px)": {
+        "base": "18px",
+        "chat": "18px",
+        "chat_line": "1.8",
+        "h1": "29px",
+        "h2": "22px",
+        "h3": "19px",
+        "h4": "18px",
+        "input": "16.5px",
+        "sidebar": "14.5px",
+    },
+    "特大 (22px)": {
+        "base": "22px",
+        "chat": "22px",
+        "chat_line": "1.85",
+        "h1": "33px",
+        "h2": "25px",
+        "h3": "22px",
+        "h4": "20px",
+        "input": "18.5px",
+        "sidebar": "16px",
+    },
 }
 
 def get_mato_svg(size: int = 28, center_color: str = "#B83B2A") -> str:
@@ -392,8 +433,36 @@ def save_ui_theme():
     except Exception:
         pass
 
+def _user_font_size_path(user: str = None) -> str:
+    target_user = user or st.session_state.get("logged_in_user") or "archer"
+    user_safe = "".join(c for c in target_user if c.isalnum() or c in ("-", "_")) or "archer"
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sidebar_items")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, f"{user_safe}_font.json")
+
+def load_user_font_size(user: str = None) -> str:
+    try:
+        with open(_user_font_size_path(user), "r", encoding="utf-8") as fp:
+            v = json.load(fp).get("font_size", "大きめ (18px)")
+        return v if v in FONT_SIZE_OPTIONS else "大きめ (18px)"
+    except Exception:
+        return "大きめ (18px)"
+
+def save_user_font_size():
+    try:
+        val = st.session_state.get("sb_font_size_choice", "大きめ (18px)")
+        st.session_state.font_size_choice = val
+        with open(_user_font_size_path(), "w", encoding="utf-8") as fp:
+            json.dump({"font_size": val}, fp, ensure_ascii=False)
+    except Exception:
+        pass
+
 if "ui_theme" not in st.session_state:
     st.session_state.ui_theme = load_ui_theme()
+
+if "sb_font_size_choice" not in st.session_state:
+    st.session_state.sb_font_size_choice = load_user_font_size()
+st.session_state.font_size_choice = st.session_state.sb_font_size_choice
 
 # ==================== UI：弓道AI「射心」モダン和風デザイン ====================
 st.markdown("""
@@ -1654,6 +1723,73 @@ if st.session_state.get("ui_theme") == "ライト":
 elif st.session_state.get("ui_theme") == "ダーク":
     st.markdown(f"<style>:root {{ color-scheme: dark; {_THEME_DARK_VARS} }}</style>", unsafe_allow_html=True)
 
+# 選択された文字サイズをアプリ全体に適用（アカウント連動）
+_cur_fs_choice = st.session_state.get("sb_font_size_choice") or load_user_font_size()
+if _cur_fs_choice not in FONT_SIZE_MAP:
+    _cur_fs_choice = "大きめ (18px)"
+_fs = FONT_SIZE_MAP[_cur_fs_choice]
+
+st.markdown(f"""
+<style>
+:root {{
+    --font-size-base: {_fs['base']};
+    --font-size-chat: {_fs['chat']};
+    --line-height-chat: {_fs['chat_line']};
+    --font-size-h1: {_fs['h1']};
+    --font-size-h2: {_fs['h2']};
+    --font-size-h3: {_fs['h3']};
+    --font-size-h4: {_fs['h4']};
+    --font-size-input: {_fs['input']};
+    --font-size-sidebar: {_fs['sidebar']};
+}}
+
+/* チャット本文全体（ユーザー・AI・リスト・強調すべて） */
+div[data-testid="stChatMessage"] p,
+div[data-testid="stChatMessage"] li,
+div[data-testid="stChatMessage"] span,
+div[data-testid="stChatMessage"] div,
+div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
+div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li {{
+    font-size: var(--font-size-chat) !important;
+    line-height: var(--line-height-chat) !important;
+}}
+
+/* マークダウン・段落・本文全般 */
+.stMarkdown, .stMarkdown p, .stMarkdown li,
+[data-testid="stMarkdownContainer"], [data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li {{
+    font-size: var(--font-size-base) !important;
+}}
+
+/* 見出し */
+h1, div[data-testid="stChatMessage"] h1 {{ font-size: var(--font-size-h1) !important; }}
+h2, div[data-testid="stChatMessage"] h2 {{ font-size: var(--font-size-h2) !important; }}
+h3, div[data-testid="stChatMessage"] h3 {{ font-size: var(--font-size-h3) !important; }}
+h4, div[data-testid="stChatMessage"] h4 {{ font-size: var(--font-size-h4) !important; }}
+
+/* チャット入力欄 */
+[data-testid="stChatInput"] textarea,
+[data-testid="stChatInput"] textarea::placeholder {{
+    font-size: var(--font-size-input) !important;
+}}
+
+/* 表・コード */
+div[data-testid="stMarkdownContainer"] table {{
+    font-size: var(--font-size-base) !important;
+}}
+div[data-testid="stMarkdownContainer"] code {{
+    font-size: 0.9em !important;
+}}
+
+/* サイドバーの文字サイズ */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] p,
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] span,
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] button {{
+    font-size: var(--font-size-sidebar) !important;
+}}
+</style>
+""", unsafe_allow_html=True)
+
 # ==================== 弓道に関する科学的論文・生体力学（バイオメカニクス）研究データベース ====================
 KYUDO_SCIENTIFIC_EVIDENCE = """
 【弓道の科学的論文・生体力学（バイオメカニクス）研究知見データベース】
@@ -2502,6 +2638,8 @@ def _complete_login(username: str, guest: bool = False, issue_token: bool = True
     st.session_state.is_guest = guest
     st.session_state.logged_in_user = user_clean
     st.session_state.ui_theme = load_ui_theme()
+    st.session_state.sb_font_size_choice = load_user_font_size(user_clean)
+    st.session_state.font_size_choice = st.session_state.sb_font_size_choice
     for k in ("current_session_id", "messages", "auth_mode"):
         st.session_state.pop(k, None)
     st.rerun()
@@ -2581,6 +2719,8 @@ if "authenticated" not in st.session_state:
         st.session_state.is_guest = _auto_guest
         st.session_state.logged_in_user = _auto_user
         st.session_state.ui_theme = load_ui_theme()
+        st.session_state.sb_font_size_choice = load_user_font_size(_auto_user)
+        st.session_state.font_size_choice = st.session_state.sb_font_size_choice
         st.query_params["auth"] = _tok
     else:
         if "auth" in st.query_params or "_kt" in st.query_params:
@@ -2977,15 +3117,15 @@ with st.sidebar:
         with tab_profile:
             st.markdown("**表示**")
             st.radio("表示テーマ", THEME_CHOICES, key="ui_theme", horizontal=True, on_change=save_ui_theme)
-            font_size_choice = st.radio(
+            _saved_fs = st.session_state.get("sb_font_size_choice") or load_user_font_size(cur_user)
+            _fs_idx = FONT_SIZE_OPTIONS.index(_saved_fs) if _saved_fs in FONT_SIZE_OPTIONS else 1
+            st.radio(
                 "文字の大きさ:",
-                options=["標準 (16px)", "大きめ (18px)", "特大 (22px)"],
-                index=0,
-                key="sb_font_size_choice"
+                options=FONT_SIZE_OPTIONS,
+                index=_fs_idx,
+                key="sb_font_size_choice",
+                on_change=save_user_font_size
             )
-            size_map = {"標準 (16px)": "16px", "大きめ (18px)": "18px", "特大 (22px)": "22px"}
-            cur_size = size_map[font_size_choice]
-            st.markdown(f"<style>.stMarkdown p, div[data-testid='stChatMessage'] p {{ font-size: {cur_size} !important; }}</style>", unsafe_allow_html=True)
             
             # ── 詳細設定（あなた専用。メモリーのON/OFFなど） ──
             st.divider()
@@ -3098,6 +3238,8 @@ with st.sidebar:
             st.session_state.authenticated = False
             st.session_state.is_guest = False
             st.session_state.logged_in_user = ""
+            st.session_state.sb_font_size_choice = "大きめ (18px)"
+            st.session_state.font_size_choice = "大きめ (18px)"
             st.session_state.messages = []
             if "current_session_id" in st.session_state:
                 del st.session_state["current_session_id"]
