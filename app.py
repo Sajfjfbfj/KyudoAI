@@ -2419,6 +2419,14 @@ def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
                     save_sidebar_items(kind, [x for x in all_items if x["id"] != it["id"]])
                     st.rerun()
 
+_HIST_PAGE = 10  # 履歴を一度に表示する件数
+
+def _hist_show_more():
+    st.session_state.hist_show_n = int(st.session_state.get("hist_show_n", _HIST_PAGE)) + _HIST_PAGE
+
+def _hist_show_less():
+    st.session_state.hist_show_n = _HIST_PAGE
+
 # ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
 
@@ -2556,7 +2564,9 @@ with st.sidebar:
             if not _shown:
                 st.caption("一致するチャットがありません")
         else:
-            _shown = all_sess[:30]
+            # 履歴が増えすぎないよう、最初は10件だけ表示し「もっと見る」で10件ずつ追加表示する
+            _hist_n = max(_HIST_PAGE, int(st.session_state.get("hist_show_n", _HIST_PAGE)))
+            _shown = all_sess[:_hist_n]
 
         for group_name, group_items in group_sessions_by_date(_shown).items():
             st.markdown(f"<div class='sb-section-label'>{group_name}</div>", unsafe_allow_html=True)
@@ -2609,6 +2619,16 @@ with st.sidebar:
                                     st.session_state.messages = []
                             st.rerun()
 
+
+        # ── 「もっと見る」／「表示を減らす」（検索中は全件表示なので出さない） ──
+        if not _q.strip():
+            _remaining = len(all_sess) - len(_shown)
+            if _remaining > 0:
+                st.button(f"もっと見る（残り{_remaining}件）", key="hist_show_more", icon=":material/expand_more:",
+                          use_container_width=True, on_click=_hist_show_more)
+            elif len(all_sess) > _HIST_PAGE:
+                st.button("表示を減らす", key="hist_show_less", icon=":material/expand_less:",
+                          use_container_width=True, on_click=_hist_show_less)
 
     # ── スペーサー ──────────────────────────────────────────────
     st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
