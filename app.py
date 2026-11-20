@@ -208,14 +208,16 @@ st.set_page_config(
 )
 
 # ── PWA メタタグ＆ServiceWorker注入（ホーム画面追加・スプラッシュ対応） ──
-st.markdown("""
-<link rel="manifest" href="/app/static/manifest.json">
+st.html("""
+<link rel="manifest" href="/app/static/manifest.json?v=2">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="射心">
+<meta name="application-name" content="射心">
 <meta name="theme-color" content="#1B365D">
-<link rel="apple-touch-icon" href="/app/static/icon-192.png">
+<link rel="icon" type="image/png" href="/app/static/icon-192.png?v=2">
+<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=2">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
 (function() {
@@ -277,7 +279,7 @@ st.markdown("""
     setTimeout(setupPWA, 1500);
 })();
 </script>
-""", unsafe_allow_html=True)
+""")
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── 文字サイズ設定定義（アカウントと紐付け対応） ──────────────────
