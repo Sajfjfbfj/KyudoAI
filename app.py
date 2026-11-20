@@ -1856,6 +1856,42 @@ def set_user_title(username: str, title: str):
         notes.insert(1 if notes and notes[0].startswith(RANK_PREFIXES) else 0, f"称号: {title}")
     save_user_memory(username, notes)
 
+# ==================== ユーザー別の詳細設定（メモリーのON/OFFなど） ====================
+USER_SETTINGS_DIR = os.path.join(os.path.dirname(__file__), "data", "user_settings")
+ANSWER_STYLES = ["簡潔", "標準", "詳しく"]
+_DEFAULT_USER_SETTINGS = {"memory_enabled": True, "auto_learn": True, "ref_history": False, "answer_style": "標準"}
+
+def load_user_settings(username: str) -> dict:
+    """そのユーザーだけの詳細設定を読み込む（未設定の項目は初期値）"""
+    data = dict(_DEFAULT_USER_SETTINGS)
+    try:
+        with open(user_data_file(USER_SETTINGS_DIR, username), "r", encoding="utf-8") as fp:
+            saved = json.load(fp)
+        for k in data:
+            if k in saved:
+                data[k] = saved[k]
+    except Exception:
+        pass
+    if data["answer_style"] not in ANSWER_STYLES:
+        data["answer_style"] = "標準"
+    return data
+
+def save_user_settings(username: str, data: dict):
+    try:
+        with open(user_data_file(USER_SETTINGS_DIR, username), "w", encoding="utf-8") as fp:
+            json.dump(data, fp, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def _on_user_setting_change():
+    user = st.session_state.get("logged_in_user", "default")
+    save_user_settings(user, {
+        "memory_enabled": bool(st.session_state.get("sb_set_mem", True)),
+        "auto_learn": bool(st.session_state.get("sb_set_auto", True)),
+        "ref_history": bool(st.session_state.get("sb_set_ref", False)),
+        "answer_style": st.session_state.get("sb_set_style") or "標準",
+    })
+
 def _pick_one(label: str, options: list, key: str, on_change, help_text: str = ""):
     """プルダウンはポップアップ内で開けないことがあるため、タップで選べるボタン形式にする"""
     if hasattr(st, "pills"):
@@ -1913,7 +1949,7 @@ def clear_all_user_memory(username: str):
     """すべての記憶を完全消去"""
     save_user_memory(username, [])
 
-def build_memory_prompt_section(username: str) -> str:
+def _build_card_section(username: str) -> str:
     """プロンプトに注入する射手カルテ形式のテキストを生成"""
     notes = load_user_memory(username)
     if not notes:
@@ -1928,9 +1964,30 @@ def build_memory_prompt_section(username: str) -> str:
         + "\n"
     )
 
+def build_memory_prompt_section(username: str) -> str:
+    """AIに渡すカルテ・過去の相談テーマ。そのユーザー本人の設定（メモリーON/OFF、過去の会話の参照）に従う"""
+    cfg = load_user_settings(username)
+    out = ""
+    if cfg["memory_enabled"]:
+        out += _build_card_section(username)
+    if cfg["ref_history"]:
+        try:
+            cur_id = st.session_state.get("current_session_id")
+            titles = [x["title"] for x in get_all_sessions() if x.get("id") != cur_id and x.get("title")][:8]
+        except Exception:
+            titles = []
+        if titles:
+            out += ("【この射手の最近の相談テーマ（過去の会話・参考情報）】\n"
+                    + "\n".join(f"・{t}" for t in titles)
+                    + "\n※これまでの相談の流れを踏まえて回答してよいですが、無関係なら触れなくて構いません。\n\n")
+    return out
+
 def auto_extract_and_save_memory(username: str, user_text: str, api_key: str) -> list[str]:
     """ユーザーの発言から弓道に関する自己情報（弓力・段位・悩みなど）をAIが自動抽出し記憶に追加。抽出した項目一覧を返す。"""
     if not api_key or not user_text or len(user_text.strip()) < 4:
+        return []
+    _cfg = load_user_settings(username)
+    if not (_cfg["memory_enabled"] and _cfg["auto_learn"]):
         return []
     trigger_words = ["弓力", "kg", "キロ", "段", "級", "高校", "大学", "部活", "矢尺", "cm", "流派", "直心", "肥後", "グラス", "カーボン", "早気", "もたれ", "手の内", "審査", "大会", "歴", "年目", "錬士", "教士", "範士", "称号"]
     if not any(w in user_text for w in trigger_words):
@@ -2006,9 +2063,16 @@ def build_custom_instructions_prompt(username: str) -> str:
     inst = load_custom_instructions(username)
     profile = inst.get("profile", "").strip()
     resp_pref = inst.get("response_pref", "").strip()
-    if not profile and not resp_pref:
+    _style = load_user_settings(username)["answer_style"]
+    _style_txt = {
+        "簡潔": "回答は要点だけを短く（目安300字以内）まとめ、長い前置きや繰り返しは省いてください。",
+        "詳しく": "回答は丁寧に詳しく、理由・体の使い方・道場でできる練習方法まで具体的に説明してください。",
+    }.get(_style, "")
+    if not profile and not resp_pref and not _style_txt:
         return ""
     parts = []
+    if _style_txt:
+        parts.append(f"【回答の長さ・詳しさ（射手の設定）】\n{_style_txt}")
     if profile:
         parts.append(f"【射手自身について知っておくべき追加事項】\n{profile}")
     if resp_pref:
@@ -2862,6 +2926,24 @@ with st.sidebar:
             cur_size = size_map[font_size_choice]
             st.markdown(f"<style>.stMarkdown p, div[data-testid='stChatMessage'] p {{ font-size: {cur_size} !important; }}</style>", unsafe_allow_html=True)
             
+            # ── 詳細設定（あなた専用。メモリーのON/OFFなど） ──
+            st.divider()
+            st.markdown("**詳細設定**")
+            _us = load_user_settings(cur_user)
+            st.session_state["sb_set_mem"] = _us["memory_enabled"]
+            st.session_state["sb_set_auto"] = _us["auto_learn"]
+            st.session_state["sb_set_ref"] = _us["ref_history"]
+            st.session_state["sb_set_style"] = _us["answer_style"]
+            st.toggle("メモリーを使う", key="sb_set_mem", on_change=_on_user_setting_change,
+                      help="OFFにすると、AIはカルテ（段位・称号を含む）を参照しません。記録は消えません")
+            st.toggle("会話から自動で覚える", key="sb_set_auto", on_change=_on_user_setting_change,
+                      disabled=not _us["memory_enabled"],
+                      help="ONにすると、弓力や段位などをチャットから自動でカルテに追加します")
+            st.toggle("過去の会話を参照する", key="sb_set_ref", on_change=_on_user_setting_change,
+                      help="最近の相談テーマをAIに伝えて、これまでの流れを踏まえた回答にします")
+            st.radio("回答の長さ", ANSWER_STYLES, key="sb_set_style", on_change=_on_user_setting_change, horizontal=True)
+            st.caption("これらの設定と、AIが覚えた内容は、あなたのアカウントだけに保存されます。")
+            
             st.divider()
             if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
                 cur_tok = _query_login_token() or _browser_login_cookie()
@@ -2881,6 +2963,8 @@ with st.sidebar:
 
         with tab_memory:
             st.caption("AIが対話から覚えた情報です。")
+            if not load_user_settings(cur_user)["memory_enabled"]:
+                st.warning("メモリーがOFFです。AIはカルテを参照しません（⚙️ 設定タブの「詳細設定」で変更できます）。")
             # 段位：選ぶとカルテに保存され、AIが毎回の回答で覚えている情報として使う
             _cur_rank = get_user_rank(cur_user)
             _rank_opts = [c for c in RANK_CHOICES if c != RANK_UNSET]
