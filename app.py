@@ -207,7 +207,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── PWA メタタグ注入（ホーム画面追加・スプラッシュ対応） ──────────────────
+# ── PWA メタタグ＆ServiceWorker注入（ホーム画面追加・スプラッシュ対応） ──
 st.markdown("""
 <link rel="manifest" href="/app/static/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
@@ -217,6 +217,53 @@ st.markdown("""
 <meta name="theme-color" content="#1B365D">
 <link rel="apple-touch-icon" href="/app/static/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+(function() {
+    function injectHead() {
+        if (window.parent.document.getElementById('pwa-injected')) return;
+        var pDoc = window.parent.document;
+        var marker = pDoc.createElement('meta');
+        marker.id = 'pwa-injected';
+        pDoc.head.appendChild(marker);
+
+        var manifestLink = pDoc.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = '/app/static/manifest.json';
+        pDoc.head.appendChild(manifestLink);
+
+        var appleIcon = pDoc.createElement('link');
+        appleIcon.rel = 'apple-touch-icon';
+        appleIcon.href = '/app/static/icon-192.png';
+        pDoc.head.appendChild(appleIcon);
+
+        var metaTags = [
+            { name: 'mobile-web-app-capable', content: 'yes' },
+            { name: 'apple-mobile-web-app-capable', content: 'yes' },
+            { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+            { name: 'apple-mobile-web-app-title', content: '射心' },
+            { name: 'theme-color', content: '#1B365D' }
+        ];
+
+        metaTags.forEach(function(tag) {
+            var m = pDoc.createElement('meta');
+            m.name = tag.name;
+            m.content = tag.content;
+            pDoc.head.appendChild(m);
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/app/static/sw.js').catch(function(err) {
+                console.log('SW registration optional:', err);
+            });
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectHead);
+    } else {
+        injectHead();
+    }
+})();
+</script>
 """, unsafe_allow_html=True)
 # ─────────────────────────────────────────────────────────────────────────────
 
