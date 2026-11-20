@@ -207,6 +207,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ── PWA メタタグ注入（ホーム画面追加・スプラッシュ対応） ──────────────────
+st.markdown("""
+<link rel="manifest" href="/app/static/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="射心">
+<meta name="theme-color" content="#1B365D">
+<link rel="apple-touch-icon" href="/app/static/icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+""", unsafe_allow_html=True)
+# ─────────────────────────────────────────────────────────────────────────────
+
 # セッション状態での文字サイズ管理
 if "font_size_choice" not in st.session_state:
     st.session_state.font_size_choice = "大きめ (18px)"

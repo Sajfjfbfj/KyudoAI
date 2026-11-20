@@ -1,6 +1,7 @@
 [server]
 headless = true
 runOnSave = false
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false
