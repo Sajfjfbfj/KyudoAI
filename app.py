@@ -840,6 +840,31 @@ div[data-testid="stPopoverBody"] span,
 div[data-testid="stPopoverBody"] label { color: var(--ink-secondary) !important; }
 div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; }
 
+/* ツールチップ（ボタンにカーソルを合わせたときの「⌘K / Ctrl+Shift+O」など）：ダークモードで白地に白文字にならないよう、テーマ色で塗る */
+div[data-baseweb="tooltip"],
+div[data-baseweb="tooltip"] > div,
+[data-testid="stTooltipContent"],
+[data-testid="stTooltipContent"] > div {
+    background: var(--surface-2) !important;
+    color: var(--ink-primary) !important;
+    border-radius: 8px !important;
+}
+[data-testid="stTooltipContent"] {
+    border: 1px solid var(--border-subtle) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+[data-testid="stTooltipContent"] *,
+div[data-baseweb="tooltip"] p,
+div[data-baseweb="tooltip"] span {
+    color: var(--ink-primary) !important;
+    font-size: 12.5px !important;
+    line-height: 1.5 !important;
+}
+div[data-baseweb="tooltip"] [data-baseweb="popover-arrow"],
+div[data-baseweb="popover"] [data-baseweb="popover-arrow"] {
+    background: var(--surface-2) !important;
+}
+
 /* ---------- 上部バー（コンテナ key="topbar"） ---------- */
 .st-key-topbar {
     position: sticky; top: 0; z-index: 90;
