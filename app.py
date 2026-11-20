@@ -552,11 +552,11 @@ section[data-testid="stSidebar"] strong { color: var(--ink-primary) !important; 
     margin-top: 3px; display: block;
 }
 .sb-section-label {
-    color: var(--ink-muted) !important;
-    font-size: 11px !important;
+    color: var(--ink-secondary) !important;
+    font-size: 11.5px !important;
     font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
-    padding: 18px 10px 6px !important;
+    letter-spacing: 0.05em !important;
+    padding: 14px 10px 4px !important;
     margin-top: 4px;
 }
 
@@ -587,18 +587,42 @@ section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
     background: var(--surface-3) !important;
     font-weight: 600 !important;
 }
-/* 新しいチャット：ChatGPT と同じく、枠なしのメニュー行 */
+/* 新しい相談：モックアップ準拠のカードボタンスタイル＋⌘Kバッジ */
 section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
     color: var(--ink-primary) !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+    padding: 8px 14px !important;
+    min-height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
     justify-content: flex-start !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    transition: all 0.16s ease !important;
 }
 section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
     background: var(--surface-3) !important;
+    border-color: var(--border-strong) !important;
     color: var(--ink-primary) !important;
+}
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button [data-testid="stIconMaterial"] {
+    color: var(--primary-indigo) !important;
+    font-size: 19px !important;
+    margin-right: 6px !important;
+}
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button::after {
+    content: "⌘K";
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    padding: 2px 6px;
+    background: var(--surface-3);
+    border-radius: 4px;
+    margin-left: auto;
 }
 
 [class*="st-key-hist_pin_"] { display: none !important; }
@@ -686,82 +710,136 @@ div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; 
     background: var(--surface-glass);
     -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
     border-bottom: 1px solid var(--border-hairline);
-    padding: 8px 0 8px !important;
-    margin-bottom: 14px;
-    gap: 0 !important;
+    padding: 10px 24px !important;
+    margin-left: -24px !important;
+    margin-right: -24px !important;
+    margin-top: -10px !important;
+    margin-bottom: 24px !important;
 }
-.st-key-topbar [data-testid="stHorizontalBlock"] { align-items: center !important; gap: 8px !important; }
+.st-key-topbar [data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+}
+.st-key-topbar [data-testid="stHorizontalBlock"] > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+}
+.st-key-topbar [data-testid="stHorizontalBlock"] > div:last-child {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+}
 .st-key-topbar [data-testid="stPopover"] > button,
 [data-testid="stMain"] [data-testid="stPopover"] > button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
     background: transparent !important;
     border: 1px solid transparent !important;
     box-shadow: none !important;
     color: var(--ink-primary) !important;
-    font-weight: 600 !important; border-radius: 999px !important;
-    font-size: 13.5px !important; letter-spacing: 0.01em !important;
-    padding: 4px 14px !important; min-height: 34px !important;
-    transition: background 0.18s var(--ease), border-color 0.18s var(--ease) !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    letter-spacing: -0.2px !important;
+    padding: 6px 12px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    transition: background 0.16s ease !important;
 }
 [data-testid="stMain"] [data-testid="stPopover"] > button:hover {
     background: var(--surface-3) !important; transform: none !important;
 }
-.pulse-dot {
-    width: 6px; height: 6px; background: var(--shu); border-radius: 50%;
-    display: inline-block; animation: aiPulse 2.6s ease-in-out infinite;
+.st-key-tb_chip_video {
+    display: flex !important;
+    justify-content: flex-end !important;
 }
-@keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-.top-chip {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 5px 12px; border-radius: 999px;
-    background: var(--surface-2);
-    border: 1px solid var(--border-hairline);
-    color: var(--ink-muted); font-size: 12px; font-weight: 500;
+.st-key-tb_chip_video button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    border-radius: 9999px !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    color: var(--ink-primary) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 5px 14px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+    white-space: nowrap !important;
+    transition: all 0.15s ease !important;
 }
-.top-avatar {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--shu); color: var(--on-accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12.5px; font-weight: 700;
+.st-key-tb_chip_video button:hover {
+    background: var(--surface-3) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--ink-primary) !important;
 }
 
 /* ---------- ウェルカム ---------- */
 .mato-emblem {
-    width: 52px; height: 52px; border-radius: 50%;
+    width: 56px; height: 56px; border-radius: 50%;
     background: var(--surface-2); border: 1px solid var(--border-hairline);
     display: flex; align-items: center; justify-content: center;
     color: var(--primary-indigo); margin: 0 auto 16px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
-.welcome-hero { text-align: center; margin: 2vh auto 20px; max-width: 680px; }
+.welcome-hero { text-align: center; margin: 2vh auto 24px; max-width: 680px; }
 .welcome-title {
     font-family: var(--font-serif) !important;
-    font-size: clamp(22px, 3.2vw, 30px) !important;
-    font-weight: 600 !important; line-height: 1.4 !important;
+    font-size: clamp(24px, 3.2vw, 32px) !important;
+    font-weight: 600 !important; line-height: 1.35 !important;
     letter-spacing: -0.25px !important; color: var(--ink-primary) !important;
-    margin: 0 0 10px !important;
+    margin: 0 0 12px !important;
 }
 .welcome-sub {
-    font-size: 14px !important; line-height: 1.7 !important;
-    color: var(--ink-secondary) !important; max-width: 520px; margin: 0 auto 20px !important;
+    font-size: 14.5px !important; line-height: 1.65 !important;
+    color: var(--ink-secondary) !important; max-width: 540px; margin: 0 auto 24px !important;
 }
 
 /* 4つのスターターカード */
-.welcome-cards-grid { width: 100%; margin-bottom: 12px; }
-.welcome-cards-grid [data-testid="stHorizontalBlock"] { gap: 10px !important; }
-[class*="st-key-welcome_card_"] { margin-bottom: 10px !important; }
-[class*="st-key-welcome_card_"] button {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: 14px !important;
-    padding: 14px 16px !important;
-    min-height: 86px !important;
-    box-shadow: var(--shadow-sm) !important;
+.welcome-cards-grid { width: 100%; margin-bottom: 8px; }
+.welcome-cards-grid [data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+}
+.welcome-cards-grid [data-testid="stColumn"] {
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important;
+}
+.welcome-cards-grid [data-testid="stColumn"] > div {
+    height: 100% !important;
+}
+[class*="st-key-welcome_card_"] {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+[class*="st-key-welcome_card_"] .stButton {
+    height: 100% !important;
+    display: flex !important;
+}
+[class*="st-key-welcome_card_"] button {
+    height: 100% !important;
+    min-height: 92px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
     align-items: flex-start !important;
     text-align: left !important;
-    white-space: pre-line !important;
+    padding: 16px 18px !important;
+    border-radius: 12px !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+    gap: 12px !important;
     transition: all 0.16s ease !important;
     cursor: pointer !important;
 }
@@ -769,49 +847,80 @@ div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; 
     background: var(--canvas-subtle) !important;
     border-color: var(--border-strong) !important;
     transform: translateY(-1px) !important;
-    box-shadow: var(--shadow-md) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
 }
-[class*="st-key-welcome_card_"] button p {
-    font-size: 12.5px !important;
-    color: var(--ink-secondary) !important;
-    line-height: 1.45 !important;
-    margin: 0 !important;
+[class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
     text-align: left !important;
-    width: 100% !important;
 }
-[class*="st-key-welcome_card_"] button p::first-line {
+[class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] strong {
+    display: block !important;
+    font-family: var(--font-sans) !important;
     font-size: 15px !important;
     font-weight: 600 !important;
     color: var(--ink-primary) !important;
-    line-height: 2.0 !important;
+    line-height: 1.4 !important;
+    margin-bottom: 4px !important;
 }
-[class*="st-key-welcome_card_"] button span[data-testid="stIconMaterial"] {
-    font-size: 18px !important;
+[class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] p {
+    font-size: 13px !important;
+    color: var(--ink-secondary) !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+[class*="st-key-welcome_card_"] button [data-testid="stIconMaterial"] {
+    flex: 0 0 auto !important;
+    font-size: 20px !important;
     color: var(--primary-indigo) !important;
+    margin-top: 1px !important;
 }
-.st-key-welcome_card_1 button span[data-testid="stIconMaterial"] {
+.st-key-welcome_card_1 button [data-testid="stIconMaterial"] {
     color: var(--accent-red) !important;
 }
 
 /* トピックチップ */
-.quick-chip-row { width: 100%; margin-bottom: 20px; }
-.quick-chip-row [data-testid="stHorizontalBlock"] { gap: 8px !important; }
+.quick-chip-row {
+    width: 100%;
+    max-width: 680px;
+    margin: 14px auto 30px;
+}
+.quick-chip-row [data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+.quick-chip-row [data-testid="stColumn"] {
+    flex: 0 1 auto !important;
+    min-width: 110px !important;
+    max-width: 150px !important;
+    width: auto !important;
+}
 [class*="st-key-chip_"] button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 9999px !important;
     background: var(--surface-2) !important;
     border: 1px solid var(--border-hairline) !important;
-    border-radius: 9999px !important;
     color: var(--ink-primary) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    min-height: 34px !important;
-    padding: 5px 14px !important;
-    box-shadow: none !important;
+    padding: 6px 18px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
     transition: all 0.15s ease !important;
+    white-space: nowrap !important;
 }
 [class*="st-key-chip_"] button:hover {
     background: var(--surface-3) !important;
     border-color: var(--border-strong) !important;
     color: var(--ink-primary) !important;
+    transform: translateY(-1px) !important;
 }
 
 /* ---------- 会話 ---------- */
@@ -823,7 +932,14 @@ div[data-testid="stChatMessage"] {
 
 /* あなた：右寄せのやわらかい吹き出し */
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    max-width: 75% !important; width: fit-content !important;
+    max-width: 76% !important; width: fit-content !important;
+    margin-left: auto !important; margin-right: 0 !important;
+    background: var(--user-bubble) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 18px 18px 4px 18px !important;
+    padding: 12px 18px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+}
     margin-left: auto !important; margin-right: 0 !important;
     background: var(--user-bubble) !important;
     border: 1px solid var(--border-hairline) !important;
@@ -919,29 +1035,29 @@ div[data-testid="stBottom"], div[data-testid="stBottom"] > div {
 }
 div[data-testid="stBottom"] {
     background: linear-gradient(180deg, transparent 0%, var(--canvas) 42%) !important;
-    padding: 18px 0 calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 16px 0 calc(12px + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 9999 !important;
 }
 div[data-testid="stBottomBlockContainer"] {
     max-width: 768px !important; padding: 0 24px !important; margin: 0 auto !important;
 }
-/* 注意書きを入力欄のすぐ上に固定（入力欄が複数行に伸びても追従） */
-div[data-testid="stBottomBlockContainer"]::before {
+/* 注意書きを入力欄のすぐ下に配置 */
+div[data-testid="stBottomBlockContainer"]::after {
     content: "射心AIの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
-    display: block; text-align: center; font-size: 12px; line-height: 1.5;
-    color: var(--ink-secondary); padding: 0 0 8px;
+    display: block; text-align: center; font-size: 11.5px; line-height: 1.5;
+    color: var(--ink-secondary); padding: 8px 0 2px;
 }
 div[data-testid="stChatInput"] {
     background: var(--composer) !important;
     border: 1px solid var(--border-hairline) !important;
-    border-radius: 28px !important;
+    border-radius: 24px !important;
     box-shadow: var(--shadow-float) !important;
     padding: 4px 10px !important;
     transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    border-color: var(--border-subtle) !important;
-    box-shadow: var(--shadow-float) !important;
+    border-color: var(--primary-indigo) !important;
+    box-shadow: 0 0 0 1px var(--primary-indigo), var(--shadow-float) !important;
 }
 div[data-testid="stChatInput"] [data-baseweb="textarea"],
 div[data-testid="stChatInput"] [data-baseweb="base-input"],
@@ -954,7 +1070,7 @@ div[data-testid="stChatInput"] [data-baseweb] {
 }
 div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
-    font-size: 16px !important; line-height: 1.6 !important;
+    font-size: 15px !important; line-height: 1.6 !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
 div[data-testid="stChatInput"] button {
@@ -962,12 +1078,12 @@ div[data-testid="stChatInput"] button {
     border: 0 !important; border-radius: 999px !important; transition: all 0.15s ease !important;
 }
 div[data-testid="stChatInput"] button:hover { background: var(--surface-3) !important; color: var(--ink-primary) !important; }
-/* 送信ボタンだけ塗り */
+/* 送信ボタン：プライマリインディゴ（#1B365D） */
 div[data-testid="stChatInputSubmitButton"] button, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
-    background: var(--shu) !important; color: var(--on-accent) !important;
+    background: var(--primary-indigo) !important; color: #ffffff !important;
 }
 div[data-testid="stChatInputSubmitButton"] button:hover, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {
-    background: var(--shu) !important; color: var(--on-accent) !important; opacity: 0.88;
+    background: var(--primary-indigo) !important; color: #ffffff !important; opacity: 0.9 !important;
 }
 div[data-testid="stChatInput"] button:disabled { background: transparent !important; color: var(--ink-dim) !important; }
 
@@ -1086,24 +1202,6 @@ section[data-testid="stSidebar"] [data-testid="stPopoverButton"] {
 section[data-testid="stSidebar"] [data-testid="stPopoverButton"]:hover { background: var(--surface-3) !important; }
 section[data-testid="stSidebar"] [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; width: 100%; }
 
-/* 新しい相談ボタン：白いカードスタイル */
-section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: 10px !important;
-    box-shadow: var(--shadow-sm) !important;
-    color: var(--ink-primary) !important;
-    font-weight: 500 !important;
-    font-size: 14px !important;
-    min-height: 40px !important;
-    padding: 8px 14px !important;
-    justify-content: flex-start !important;
-    transition: all 0.15s ease !important;
-}
-section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
-    background: var(--surface-3) !important;
-    border-color: var(--border-strong) !important;
-}
 
 [class*="st-key-msg_more_"] [data-testid="stPopoverButton"] {
     background: transparent !important; border: 0 !important; box-shadow: none !important;
@@ -1179,29 +1277,31 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
 
 /* ---------- レスポンシブ ---------- */
 @media (max-width: 900px) {
-    [data-testid="stMainBlockContainer"] { padding: 12px 16px var(--kyudo-main-pad, 24px) !important; }
-    .st-key-topbar { padding-left: 44px !important; }
+    [data-testid="stMainBlockContainer"] { padding: 10px 16px var(--kyudo-main-pad, 24px) !important; }
+    .st-key-topbar { padding: 10px 16px 10px 52px !important; margin-left: -16px !important; margin-right: -16px !important; }
+}
+[data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stMain"] .st-key-topbar {
+    padding-left: 52px !important;
 }
 @media (max-width: 640px) {
     .welcome-cards-grid [data-testid="stHorizontalBlock"] {
         flex-direction: column !important;
+        gap: 10px !important;
+        margin-bottom: 10px !important;
     }
-    .welcome-cards-grid [data-testid="stHorizontalBlock"] > div {
+    .welcome-cards-grid [data-testid="stColumn"] {
         width: 100% !important;
         max-width: 100% !important;
     }
     .quick-chip-row [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
-        gap: 6px !important;
+        gap: 8px !important;
     }
-    .quick-chip-row [data-testid="stHorizontalBlock"] > div {
-        flex: 1 1 calc(50% - 6px) !important;
+    .quick-chip-row [data-testid="stColumn"] {
+        flex: 1 1 calc(50% - 8px) !important;
         min-width: 120px !important;
+        max-width: none !important;
     }
-}
-    .st-key-topbar { padding-left: 44px !important; }
-}
-@media (max-width: 640px) {
     /* 回答末尾のバー（コピー・読み上げ・⋮）：スマホでも縦積みにせず1行に並べる */
     div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) {
         flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 4px !important;
@@ -1213,7 +1313,7 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
     div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) > div[data-testid="stColumn"]:nth-child(3) { flex: 1 1 0 !important; }
 }
 @media (max-width: 600px) {
-    [data-testid="stMainBlockContainer"] { padding: 14px 12px var(--kyudo-main-pad, 24px) !important; }
+    [data-testid="stMainBlockContainer"] { padding: 10px 12px var(--kyudo-main-pad, 24px) !important; }
     div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { max-width: 90% !important; padding: 10px 16px !important; }
     div[data-testid="stBottom"] > div { padding: 0 9px !important; }
     [data-testid="stMain"] [class*="st-key-quick_act_"] button { font-size: 14.5px !important; }
@@ -3083,7 +3183,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 # トップ固定ヘッダーバー（射心・ChatGPTスタイル：指導陣モデル切替＋動画診断）
 with st.container(key="topbar"):
-    col_tb1, col_tb2 = st.columns([0.72, 0.28])
+    col_tb1, col_tb2 = st.columns([0.75, 0.25])
     with col_tb1:
         _cur_c_tb = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
         _cur_inf_tb = CHARACTERS.get(_cur_c_tb, list(CHARACTERS.values())[0])
@@ -3100,7 +3200,7 @@ with st.container(key="topbar"):
         st.button(
             "📹 動画診断",
             key="tb_chip_video",
-            use_container_width=True,
+            use_container_width=False,
             on_click=_set_quick_prompt,
             args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",)
         )
@@ -3125,33 +3225,37 @@ if not st.session_state.messages and not quick_prompt:
 
     # 4つのスターターカード（PCは2×2グリッド、スマホは1カラム縦積み）
     st.markdown('<div class="welcome-cards-grid">', unsafe_allow_html=True)
-    col_c1, col_c2 = st.columns(2)
-    with col_c1:
+    col_r1_1, col_r1_2 = st.columns(2)
+    with col_r1_1:
         with st.container(key="welcome_card_1"):
             st.button(
-                "早気を克服したい\n会を3秒以上保つための呼吸法と、角見の意識の置き方を聞く",
+                "**早気を克服したい**  \n会を3秒以上保つための呼吸法と、角見の意識の置き方を聞く",
                 key="act_hayake", icon=":material/north_east:", icon_position="right",
                 use_container_width=True, on_click=_set_quick_prompt,
                 args=("早気を克服したいです。会を3秒以上保つための呼吸法と、角見の意識の置き方を教えてください。",)
             )
-        with st.container(key="welcome_card_3"):
-            st.button(
-                "会での肩の収まり\n肩根が上がる癖を直し、左右の伸び合いを安定させるコツ",
-                key="act_shoulder", icon=":material/accessibility_new:", icon_position="right",
-                use_container_width=True, on_click=_set_quick_prompt,
-                args=("引分けから会にかけて左肩が上がってしまいます。肩根を沈めて胸を開くコツを教えてください。",)
-            )
-    with col_c2:
+    with col_r1_2:
         with st.container(key="welcome_card_2"):
             st.button(
-                "離れで矢が右に外れる\n押手・勝手どちらの原因が多いか、セルフチェック方法を確認",
+                "**離れで矢が右に外れる**  \n押手・勝手どちらの原因が多いか、セルフチェック方法を確認",
                 key="act_right", icon=":material/adjust:", icon_position="right",
                 use_container_width=True, on_click=_set_quick_prompt,
                 args=("離れで矢が右に抜けることが多いです。押手と勝手どちらの原因が多いか、セルフチェック方法を教えてください。",)
             )
+
+    col_r2_1, col_r2_2 = st.columns(2)
+    with col_r2_1:
+        with st.container(key="welcome_card_3"):
+            st.button(
+                "**会での肩の収まり**  \n肩根が上がる癖を直し、左右の伸び合いを安定させるコツ",
+                key="act_shoulder", icon=":material/accessibility_new:", icon_position="right",
+                use_container_width=True, on_click=_set_quick_prompt,
+                args=("引分けから会にかけて左肩が上がってしまいます。肩根を沈めて胸を開くコツを教えてください。",)
+            )
+    with col_r2_2:
         with st.container(key="welcome_card_4"):
             st.button(
-                "射形動画をチェック\n正面・側面の動画を添付して、射法八節ごとの改善点を整理",
+                "**射形動画をチェック**  \n正面・側面の動画を添付して、射法八節ごとの改善点を整理",
                 key="act_video", icon=":material/videocam:", icon_position="right",
                 use_container_width=True, on_click=_set_quick_prompt,
                 args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",)
