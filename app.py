@@ -656,6 +656,43 @@ section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="
     position: relative !important;
     z-index: 1 !important;
 }
+/* 履歴タイトルを全行で同じ高さ・同じ位置に揃える（長いタイトルは1行で省略表示） */
+section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"]) {
+    margin: 0 !important;
+    min-height: 36px !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+}
+section[data-testid="stSidebar"] [class*="st-key-sess_btn_"],
+section[data-testid="stSidebar"] [class*="st-key-sess_active_"] {
+    margin: 0 !important;
+}
+section[data-testid="stSidebar"] [class*="st-key-sess_btn_"] button,
+section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+section[data-testid="stSidebar"] [class*="st-key-sess_btn_"] button > div,
+section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button > div {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+section[data-testid="stSidebar"] [class*="st-key-sess_btn_"] button p,
+section[data-testid="stSidebar"] [class*="st-key-sess_active_"] button p {
+    margin: 0 !important;
+    font-size: 13.5px !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: left !important;
+}
 
 section[data-testid="stSidebar"] .stButton > button,
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button {
