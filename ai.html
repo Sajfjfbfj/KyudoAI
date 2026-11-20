@@ -1,0 +1,428 @@
+<!DOCTYPE html><html lang="ja"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>弓道AI「射心」 — スマホ版 新規チャット</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#B83B2A',
+        'on-accent': '#FFFFFF',
+        'success': '#2E6F40',
+        'warning': '#9A6700',
+        'error': '#BA1A1A',
+        'light-primary': '#1B365D',
+        'light-on-primary': '#FFFFFF',
+        'light-primary-container': '#E2E8F4',
+        'light-on-primary-container': '#11233E',
+        'light-secondary': '#4A5568',
+        'light-on-secondary': '#FFFFFF',
+        'light-surface': '#FAF9F6',
+        'light-on-surface': '#1C1B18',
+        'light-surface-container-low': '#F3F1EC',
+        'light-surface-container': '#FFFFFF',
+        'light-surface-container-high': '#EAE7DF',
+        'light-on-surface-variant': '#57534E',
+        'light-outline': '#78716C',
+        'light-outline-variant': '#E2DED5',
+        'dark-primary': '#A8C7FA',
+        'dark-on-primary': '#0B2545',
+        'dark-primary-container': '#1E3A5F',
+        'dark-on-primary-container': '#D6E3FF',
+        'dark-secondary': '#CBD5E1',
+        'dark-on-secondary': '#1E293B',
+        'dark-surface': '#141413',
+        'dark-on-surface': '#F2F0EC',
+        'dark-surface-container-low': '#1C1B1A',
+        'dark-surface-container': '#242321',
+        'dark-surface-container-high': '#2E2C29',
+        'dark-on-surface-variant': '#B8B4AC',
+        'dark-outline': '#8C8880',
+        'dark-outline-variant': '#383633',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Crimson Pro"', 'sans-serif'],
+        'headline': ['"Crimson Pro"', 'sans-serif'],
+        'title': ['"Commissioner"', 'sans-serif'],
+        'body': ['"Commissioner"', 'sans-serif'],
+        'label': ['"Commissioner"', 'sans-serif'],
+        'mono': ['"Source Code Pro"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '44px', letterSpacing: '-0.5px', fontWeight: '600' }],
+        'display-lg-mobile': ['28px', { lineHeight: '36px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-lg': ['28px', { lineHeight: '36px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-md': ['22px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-lg': ['18px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-md': ['15px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.25px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.25px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '100ms',
+        'surface-enter': '220ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+        'surface-exit': 'cubic-bezier(0.3, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600&amp;family=Crimson+Pro:wght@600&amp;family=Noto+Sans+JP:wght@400;500;600&amp;family=Source+Code+Pro:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    body {
+      font-family: "Commissioner", "Noto Sans JP", sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-light-surface text-light-on-surface font-body antialiased">
+
+  <div class="min-h-[884px] flex flex-col justify-between bg-light-surface relative overflow-x-hidden" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Mobile Slide-Over History Drawer (Hidden by default) -->
+    <div id="mobile-drawer-backdrop" onclick="closeMobileDrawer()" class="hidden fixed inset-0 z-30 bg-light-on-surface/30"></div>
+    <aside id="mobile-drawer" class="hidden fixed top-0 left-0 z-40 w-72 min-h-[884px] bg-light-surface-container-low border-r border-light-outline-variant flex-col justify-between p-gutter-md" data-stitch-vh="min-h-[884px]===min-h-screen">
+      <div class="flex flex-col gap-gutter-md">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-gutter-sm">
+            <div class="w-8 h-8 rounded-full bg-light-primary text-light-on-primary flex items-center justify-center" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="5"></circle>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+              </svg>
+            </div>
+            <span data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">射心 Kyudo AI</span>
+          </div>
+          <button type="button" onclick="closeMobileDrawer()" aria-label="メニューを閉じる" class="inline-flex items-center justify-center w-9 h-9 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <label data-component-id="input-field-icon" data-component-type="input-field" data-component-variant="with-icon" class="flex flex-col gap-gutter-xs">
+          <span class="sr-only font-label text-label-md" data-design-text-token="label-md">過去の相談を検索</span>
+          <div class="relative flex items-center">
+            <span aria-hidden="true" class="absolute left-gutter-sm text-light-on-surface-variant flex items-center">
+              <span class="material-symbols-outlined text-[18px]">search</span>
+            </span>
+            <input type="search" placeholder="過去の相談を検索..." class="w-full pl-9 pr-gutter-md py-gutter-xs rounded-md bg-light-surface-container border border-light-outline-variant text-light-on-surface placeholder:text-light-on-surface-variant font-body text-body-sm focus:border-light-primary focus:ring-1 focus:ring-light-primary focus:outline-none">
+          </div>
+        </label>
+
+        <nav aria-label="過去の相談履歴" class="flex flex-col gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs">
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant px-gutter-sm">今日</span>
+            <button type="button" onclick="loadMobileSample(&#39;hayake&#39;)" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm">
+              早気を直すための会の保ち方
+            </button>
+            <button type="button" onclick="loadMobileSample(&#39;right&#39;)" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm">
+              離れで矢が右に抜ける原因
+            </button>
+          </div>
+          <div class="flex flex-col gap-gutter-xs">
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant px-gutter-sm">過去7日間</span>
+            <button type="button" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm">
+              大三から引分けでの押手の角見
+            </button>
+            <button type="button" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm">
+              肩根が上がる癖のセルフチェック
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <div class="pt-gutter-md border-t border-light-outline-variant flex items-center justify-between">
+        <div class="flex items-center gap-gutter-sm">
+          <div class="w-8 h-8 rounded-full bg-light-primary-container text-light-on-primary-container flex items-center justify-center font-label text-label-md">
+            佐
+          </div>
+          <div class="flex flex-col">
+            <span data-design-text-token="label-md" class="font-label text-label-md text-light-on-surface">佐藤 健太</span>
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant">弐段・週3回稽古</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile App Top Header (ChatGPT App style) -->
+    <header class="sticky top-0 z-10 bg-light-surface px-gutter-md py-gutter-sm flex items-center justify-between border-b border-light-outline-variant">
+      <!-- COMPONENT: button-icon -->
+      <button data-component-id="button-icon" data-component-type="button" data-component-variant="icon" type="button" onclick="openMobileDrawer()" aria-label="履歴メニューを開く" class="inline-flex items-center justify-center w-10 h-10 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high hover:text-light-on-surface transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+        <span class="material-symbols-outlined text-[22px]" aria-hidden="true">menu</span>
+      </button>
+
+      <!-- Centered Model Selector -->
+      <button type="button" class="inline-flex items-center gap-gutter-xs px-gutter-sm py-gutter-xs rounded-md hover:bg-light-surface-container-low text-light-on-surface transition-colors duration-state-change">
+        <span data-design-text-token="title-md" class="font-title text-title-md">射心 Pro</span>
+        <span class="material-symbols-outlined text-[18px] text-light-on-surface-variant" aria-hidden="true">keyboard_arrow_down</span>
+      </button>
+
+      <!-- New Chat Button -->
+      <!-- COMPONENT: button-icon -->
+      <button data-component-id="button-icon" data-component-type="button" data-component-variant="icon" type="button" onclick="resetMobileToWelcome()" aria-label="新しい相談を始める" class="inline-flex items-center justify-center w-10 h-10 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high hover:text-light-on-surface transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">edit_square</span>
+      </button>
+    </header>
+
+    <!-- Main Mobile Content Area -->
+    <main class="flex-1 flex flex-col justify-center px-page-margin py-gutter-lg max-w-xl w-full mx-auto">
+
+      <!-- Welcome State -->
+      <section id="mobile-welcome-view" class="flex flex-col items-center gap-gutter-lg">
+        <div class="flex flex-col items-center text-center gap-gutter-sm">
+          <!-- Kyudo Mato Emblem -->
+          <div class="w-12 h-12 rounded-full bg-light-surface-container border border-light-outline-variant flex items-center justify-center text-light-primary">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <circle cx="12" cy="12" r="9.5"></circle>
+              <circle cx="12" cy="12" r="5.5"></circle>
+              <circle cx="12" cy="12" r="2" class="text-accent" fill="currentColor" stroke="none"></circle>
+            </svg>
+          </div>
+
+          <!-- COMPONENT: typography-display (mobile token) -->
+          <h1 data-component-id="typography-display" data-component-type="typography" data-component-variant="display" data-design-text-token="display-lg-mobile" class="font-display text-display-lg-mobile text-light-on-surface text-balance">今日の射形を相談する</h1>
+        </div>
+
+        <!-- Quick Action Chips -->
+        <div class="w-full flex flex-wrap items-center justify-center gap-gutter-sm">
+          <!-- COMPONENT: chip-with-icon -->
+          <button data-component-id="chip-with-icon" data-component-type="chip" data-component-variant="with-icon" type="button" onclick="attachMobileSampleVideo()" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <span class="material-symbols-outlined text-[16px] text-light-primary" aria-hidden="true">videocam</span>
+            <span data-design-text-token="label-md" class="font-label text-label-md">動画診断</span>
+          </button>
+
+          <!-- COMPONENT: chip-action -->
+          <button data-component-id="chip-action" data-component-type="chip" data-component-variant="action" type="button" onclick="fillMobileComposer(&#39;射法八節の「会」における伸び合いのポイントを教えてください。&#39;)" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <span data-design-text-token="label-md" class="font-label text-label-md">射法八節</span>
+          </button>
+
+          <!-- COMPONENT: chip-action -->
+          <button data-component-id="chip-action" data-component-type="chip" data-component-variant="action" type="button" onclick="fillMobileComposer(&#39;手の内の作り方（天文筋と虎口）の基本を確認したいです。&#39;)" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <span data-design-text-token="label-md" class="font-label text-label-md">手の内・角見</span>
+          </button>
+        </div>
+
+        <!-- Stacked Prompt Starter Cards (Mobile-first 1 column) -->
+        <div class="w-full grid grid-cols-1 gap-gutter-sm">
+          <!-- COMPONENT: card-interactive-2 -->
+          <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="sendMobilePrompt(&#39;早気を克服したいです。会を3秒以上保つための呼吸法と、角見の意識の置き方を教えてください。&#39;)" class="p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <header class="flex items-center justify-between gap-gutter-sm">
+              <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">早気を克服したい</h3>
+              <span class="material-symbols-outlined text-[18px] text-accent" aria-hidden="true">north_east</span>
+            </header>
+            <div>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant">会を3秒以上保つ呼吸法と、角見の意識を聞く</p>
+            </div>
+          </div>
+
+          <!-- COMPONENT: card-interactive-2 -->
+          <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="sendMobilePrompt(&#39;離れで矢が右に抜けることが多いです。押手と勝手どちらの原因が多いか、セルフチェック方法を教えてください。&#39;)" class="p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <header class="flex items-center justify-between gap-gutter-sm">
+              <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">離れで矢が右に外れる</h3>
+              <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">adjust</span>
+            </header>
+            <div>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant">押手・勝手の原因とセルフチェックを確認</p>
+            </div>
+          </div>
+
+          <!-- COMPONENT: card-interactive-2 -->
+          <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="sendMobilePrompt(&#39;引分けから会にかけて左肩が上がってしまいます。肩根を沈めて胸を開くコツを教えてください。&#39;)" class="p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <header class="flex items-center justify-between gap-gutter-sm">
+              <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">会での肩の収まり</h3>
+              <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">accessibility_new</span>
+            </header>
+            <div>
+              <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant">肩根が上がる癖を直し、左右の伸び合いを作る</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Mobile Chat Thread -->
+      <section id="mobile-chat-thread" class="hidden w-full flex-col gap-gutter-md py-gutter-sm"></section>
+
+    </main>
+
+    <!-- Thumb-Friendly Bottom Composer -->
+    <footer class="sticky bottom-0 bg-light-surface px-page-margin pb-gutter-md pt-gutter-xs max-w-xl w-full mx-auto">
+      <div class="flex flex-col gap-gutter-xs">
+
+        <!-- Attachment Preview -->
+        <div id="mobile-attachment-row" class="hidden items-center gap-gutter-sm">
+          <!-- COMPONENT: chip-input -->
+          <span data-component-id="chip-input" data-component-type="chip" data-component-variant="input" class="inline-flex items-center gap-gutter-xs pl-gutter-md pr-gutter-xs py-gutter-xs rounded-full bg-light-primary-container text-light-on-primary-container">
+            <span class="material-symbols-outlined text-[15px]" aria-hidden="true">videocam</span>
+            <span data-design-text-token="label-md" class="font-label text-label-md">側面射形_稽古.mp4</span>
+            <button type="button" onclick="clearMobileAttachment()" aria-label="添付を削除" class="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-light-surface-container-high">
+              <span class="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
+            </button>
+          </span>
+        </div>
+
+        <form onsubmit="handleMobileSubmit(event)" class="rounded-2xl bg-light-surface-container border border-light-outline-variant shadow-sm p-gutter-xs flex items-end gap-gutter-xs focus-within:border-light-primary transition-colors duration-state-change">
+          <!-- Attach Button -->
+          <!-- COMPONENT: button-icon -->
+          <button data-component-id="button-icon" data-component-type="button" data-component-variant="icon" type="button" onclick="attachMobileSampleVideo()" aria-label="写真や動画を添付" class="inline-flex items-center justify-center w-10 h-10 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high shrink-0">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">add_circle_outline</span>
+          </button>
+
+          <textarea id="mobile-composer-input" rows="1" placeholder="射形の悩みを相談する..." class="flex-1 resize-none border-0 bg-transparent py-gutter-sm text-light-on-surface placeholder:text-light-on-surface-variant font-body text-body-md focus:ring-0 focus:outline-none"></textarea>
+
+          <!-- Voice Button -->
+          <button type="button" aria-label="音声入力" class="inline-flex items-center justify-center w-10 h-10 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high shrink-0">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">mic</span>
+          </button>
+
+          <!-- Send Button -->
+          <!-- COMPONENT: button-icon-send -->
+          <button data-component-id="button-icon-send" data-component-type="button" data-component-variant="icon" type="submit" aria-label="メッセージを送信" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-light-primary text-light-on-primary hover:opacity-90 transition-opacity duration-state-change ease-state-change shrink-0">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_upward</span>
+          </button>
+        </form>
+
+        <p class="text-center font-label text-label-sm text-light-on-surface-variant">
+          射心AIの助言は稽古の参考情報です
+        </p>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    function openMobileDrawer() {
+      document.getElementById('mobile-drawer-backdrop').classList.remove('hidden');
+      const drawer = document.getElementById('mobile-drawer');
+      drawer.classList.remove('hidden');
+      drawer.classList.add('flex');
+    }
+
+    function closeMobileDrawer() {
+      document.getElementById('mobile-drawer-backdrop').classList.add('hidden');
+      const drawer = document.getElementById('mobile-drawer');
+      drawer.classList.add('hidden');
+      drawer.classList.remove('flex');
+    }
+
+    function fillMobileComposer(text) {
+      const input = document.getElementById('mobile-composer-input');
+      input.value = text;
+      input.focus();
+    }
+
+    function attachMobileSampleVideo() {
+      const row = document.getElementById('mobile-attachment-row');
+      row.classList.remove('hidden');
+      row.classList.add('flex');
+      const input = document.getElementById('mobile-composer-input');
+      if (!input.value.trim()) {
+        input.value = '動画の「会」から「離れ」を見てください。';
+      }
+      input.focus();
+    }
+
+    function clearMobileAttachment() {
+      const row = document.getElementById('mobile-attachment-row');
+      row.classList.add('hidden');
+      row.classList.remove('flex');
+    }
+
+    function resetMobileToWelcome() {
+      document.getElementById('mobile-welcome-view').classList.remove('hidden');
+      document.getElementById('mobile-welcome-view').classList.add('flex');
+      document.getElementById('mobile-chat-thread').classList.add('hidden');
+      document.getElementById('mobile-chat-thread').innerHTML = '';
+      document.getElementById('mobile-composer-input').value = '';
+      clearMobileAttachment();
+    }
+
+    function sendMobilePrompt(text) {
+      document.getElementById('mobile-welcome-view').classList.add('hidden');
+      document.getElementById('mobile-welcome-view').classList.remove('flex');
+      const thread = document.getElementById('mobile-chat-thread');
+      thread.classList.remove('hidden');
+      thread.classList.add('flex');
+
+      const userBubble = document.createElement('div');
+      userBubble.className = 'flex justify-end';
+      userBubble.innerHTML = '<div class="max-w-xs px-gutter-md py-gutter-sm rounded-2xl bg-light-surface-container-low text-light-on-surface font-body text-body-md">' + text + '</div>';
+      thread.appendChild(userBubble);
+
+      const aiBubble = document.createElement('div');
+      aiBubble.className = 'flex items-start gap-gutter-sm';
+      aiBubble.innerHTML = '<div class="w-7 h-7 rounded-full bg-light-primary text-light-on-primary flex items-center justify-center shrink-0 mt-1"><span class="material-symbols-outlined text-[15px]" aria-hidden="true">adjust</span></div><div class="flex-1 flex flex-col gap-gutter-xs text-light-on-surface font-body text-body-md text-pretty"><p>ご相談ありがとうございます。射形の安定には<strong>「左右の均等な伸び合い」</strong>と<strong>「呼吸の収まり」</strong>が鍵になります。</p><p>まずは会に入った後、息を静かに詰めながら両肩を水平に保ち、2〜3秒伸び合うところから試してみてください。</p></div>';
+      thread.appendChild(aiBubble);
+    }
+
+    function loadMobileSample(key) {
+      closeMobileDrawer();
+      const prompts = {
+        hayake: '早気を直すための会の保ち方を教えてください。',
+        right: '離れで矢が右に抜ける原因は何が考えられますか？'
+      };
+      document.getElementById('mobile-chat-thread').innerHTML = '';
+      sendMobilePrompt(prompts[key] || prompts.hayake);
+    }
+
+    function handleMobileSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('mobile-composer-input');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      clearMobileAttachment();
+      sendMobilePrompt(val);
+    }
+  </script>
+
+
+</body></html>

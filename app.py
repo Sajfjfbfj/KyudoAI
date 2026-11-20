@@ -216,10 +216,97 @@ font_sizes = {
     "特大 (21px)": {"body": "21px", "line": "1.85", "chat": "21px"}
 }
 
+def get_mato_svg(size: int = 28, center_color: str = "#B83B2A") -> str:
+    return (
+        f'<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">'
+        f'<circle cx="12" cy="12" r="9.5"></circle>'
+        f'<circle cx="12" cy="12" r="5.5"></circle>'
+        f'<circle cx="12" cy="12" r="2" fill="{center_color}" stroke="none"></circle>'
+        f'</svg>'
+    )
+
 # ==================== 表示テーマ（自動／ライト／ダーク） ====================
 THEME_CHOICES = ["自動", "ライト", "ダーク"]
-_THEME_LIGHT_VARS = "--canvas: #ffffff; --canvas-subtle: #f9f9f9; --surface-1: #f9f9f9; --surface-2: #ffffff; --surface-3: #ececec; --surface-glass: rgba(255, 255, 255, 0.85); --composer: #f4f4f4; --user-bubble: #f4f4f4; --border-hairline: rgba(0, 0, 0, 0.06); --border-subtle: rgba(0, 0, 0, 0.10); --border-strong: rgba(0, 0, 0, 0.20); --shu: #0d0d0d; --shu-light: #0d0d0d; --shu-soft: rgba(0, 0, 0, 0.05); --on-accent: #ffffff; --link: #0a66c2; --ink-primary: #0d0d0d; --ink-secondary: #424242; --ink-muted: #6f6f6f; --ink-dim: #8f8f8f; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08); --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.14); --shadow-float: 0 9px 9px 0 rgba(0, 0, 0, 0.01), 0 2px 5px 0 rgba(0, 0, 0, 0.06); --accent-emerald: var(--shu); --accent-emerald-light: var(--shu-light); --accent-emerald-soft: var(--shu-soft); --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0); --accent-blue: var(--shu); --accent-blue-soft: var(--shu-soft); --radius-full: 9999px; --radius-xl: 20px; --radius-lg: 14px; --radius-md: 10px; --radius-sm: 6px; --ease: cubic-bezier(0.22, 1, 0.36, 1); --font-serif: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif; --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif; --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;"
-_THEME_DARK_VARS = "--canvas: #212121; --canvas-subtle: #1a1a1a; --surface-1: #171717; --surface-2: #2a2a2a; --surface-3: #333333; --surface-glass: rgba(33, 33, 33, 0.85); --composer: #303030; --user-bubble: #303030; --border-hairline: rgba(255, 255, 255, 0.08); --border-subtle: rgba(255, 255, 255, 0.15); --border-strong: rgba(255, 255, 255, 0.28); --shu: #ececec; --shu-light: #ffffff; --shu-soft: rgba(255, 255, 255, 0.08); --on-accent: #0d0d0d; --link: #7ab7ff; --ink-primary: #ececec; --ink-secondary: #cdcdcd; --ink-muted: #9b9b9b; --ink-dim: #7a7a7a; --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4); --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6); --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7); --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.25);"
+_THEME_LIGHT_VARS = (
+    "--canvas: #FAF9F6; "
+    "--canvas-subtle: #F3F1EC; "
+    "--surface-1: #F3F1EC; "
+    "--surface-2: #FFFFFF; "
+    "--surface-3: #EAE7DF; "
+    "--surface-glass: rgba(250, 249, 246, 0.90); "
+    "--composer: #FFFFFF; "
+    "--user-bubble: #F3F1EC; "
+    "--border-hairline: #E2DED5; "
+    "--border-subtle: #E2DED5; "
+    "--border-strong: #78716C; "
+    "--primary-indigo: #1B365D; "
+    "--primary-container: #E2E8F4; "
+    "--on-primary-container: #11233E; "
+    "--accent-red: #B83B2A; "
+    "--accent-red-soft: rgba(184, 59, 42, 0.10); "
+    "--shu: #1B365D; "
+    "--shu-light: #244778; "
+    "--shu-soft: rgba(27, 54, 93, 0.08); "
+    "--on-accent: #FFFFFF; "
+    "--link: #1B365D; "
+    "--ink-primary: #1C1B18; "
+    "--ink-secondary: #57534E; "
+    "--ink-muted: #78716C; "
+    "--ink-dim: #A8A29E; "
+    "--shadow-sm: 0 1px 3px rgba(28, 27, 24, 0.05); "
+    "--shadow-md: 0 4px 16px rgba(28, 27, 24, 0.08); "
+    "--shadow-lg: 0 10px 30px rgba(28, 27, 24, 0.12); "
+    "--shadow-float: 0 4px 20px 0 rgba(28, 27, 24, 0.07); "
+    "--radius-full: 9999px; "
+    "--radius-xl: 20px; "
+    "--radius-lg: 14px; "
+    "--radius-md: 10px; "
+    "--radius-sm: 6px; "
+    "--ease: cubic-bezier(0.2, 0, 0, 1); "
+    "--font-serif: 'Crimson Pro', 'Noto Serif JP', 'Yu Mincho', serif; "
+    "--font-sans: 'Commissioner', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif; "
+    "--font-mono: 'Source Code Pro', 'JetBrains Mono', monospace;"
+)
+_THEME_DARK_VARS = (
+    "--canvas: #141413; "
+    "--canvas-subtle: #1C1B1A; "
+    "--surface-1: #1C1B1A; "
+    "--surface-2: #242321; "
+    "--surface-3: #2E2C29; "
+    "--surface-glass: rgba(20, 20, 19, 0.90); "
+    "--composer: #242321; "
+    "--user-bubble: #1C1B1A; "
+    "--border-hairline: #383633; "
+    "--border-subtle: #383633; "
+    "--border-strong: #8C8880; "
+    "--primary-indigo: #A8C7FA; "
+    "--primary-container: #1E3A5F; "
+    "--on-primary-container: #D6E3FF; "
+    "--accent-red: #E0533C; "
+    "--accent-red-soft: rgba(224, 83, 60, 0.15); "
+    "--shu: #A8C7FA; "
+    "--shu-light: #D6E3FF; "
+    "--shu-soft: rgba(168, 199, 250, 0.12); "
+    "--on-accent: #0B2545; "
+    "--link: #A8C7FA; "
+    "--ink-primary: #F2F0EC; "
+    "--ink-secondary: #B8B4AC; "
+    "--ink-muted: #8C8880; "
+    "--ink-dim: #605D57; "
+    "--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4); "
+    "--shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6); "
+    "--shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7); "
+    "--shadow-float: 0 4px 16px rgba(0, 0, 0, 0.35); "
+    "--radius-full: 9999px; "
+    "--radius-xl: 20px; "
+    "--radius-lg: 14px; "
+    "--radius-md: 10px; "
+    "--radius-sm: 6px; "
+    "--ease: cubic-bezier(0.2, 0, 0, 1); "
+    "--font-serif: 'Crimson Pro', 'Noto Serif JP', 'Yu Mincho', serif; "
+    "--font-sans: 'Commissioner', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif; "
+    "--font-mono: 'Source Code Pro', 'JetBrains Mono', monospace;"
+)
 
 def _ui_theme_path() -> str:
     user = st.session_state.get("logged_in_user") or "archer"
@@ -246,87 +333,88 @@ def save_ui_theme():
 if "ui_theme" not in st.session_state:
     st.session_state.ui_theme = load_ui_theme()
 
-# ==================== UI：ChatGPT風（ニュートラル配色・ゴシック体・黒／白のアクセント） ====================
-# 方針：色味を持たせず、ChatGPT のように白／チャコールの面と余白だけで構成する。ライト／ダークは OS 設定に自動追従。
-# 機能ロジックには一切触れず、表示層（CSS と静的HTML）のみを差し替える。
+# ==================== UI：弓道AI「射心」モダン和風デザイン ====================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600&family=Crimson+Pro:wght@600&family=Noto+Sans+JP:wght@400;500;600&family=Source+Code+Pro:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block');
 
 /* =====================================================================
-   弓道AI道場 — ChatGPT風デザイン
-   方針：ニュートラルな面・ゴシック体・黒（ダークは白）の1色アクセント。装飾は使わない。
-   ライト／ダークは OS 設定に自動追従（prefers-color-scheme）。
+   弓道AI「射心」 — 和モダン × ChatGPT UI
    ===================================================================== */
 :root {
     color-scheme: light dark;
 
-    --canvas: #ffffff;
-    --canvas-subtle: #f9f9f9;
-    --surface-1: #f9f9f9;
-    --surface-2: #ffffff;
-    --surface-3: #ececec;
-    --surface-glass: rgba(255, 255, 255, 0.85);
-    --composer: #f4f4f4;
-    --user-bubble: #f4f4f4;
-    --border-hairline: rgba(0, 0, 0, 0.06);
-    --border-subtle: rgba(0, 0, 0, 0.10);
-    --border-strong: rgba(0, 0, 0, 0.20);
-    --shu: #0d0d0d;
-    --shu-light: #0d0d0d;
-    --shu-soft: rgba(0, 0, 0, 0.05);
-    --on-accent: #ffffff;
-    --link: #0a66c2;
-    --ink-primary: #0d0d0d;
-    --ink-secondary: #424242;
-    --ink-muted: #6f6f6f;
-    --ink-dim: #8f8f8f;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.14);
-    --shadow-float: 0 9px 9px 0 rgba(0, 0, 0, 0.01), 0 2px 5px 0 rgba(0, 0, 0, 0.06);
-    --accent-emerald: var(--shu);
-    --accent-emerald-light: var(--shu-light);
-    --accent-emerald-soft: var(--shu-soft);
-    --accent-emerald-glow: 0 0 0 rgba(0, 0, 0, 0);
-    --accent-blue: var(--shu);
-    --accent-blue-soft: var(--shu-soft);
+    --canvas: #FAF9F6;
+    --canvas-subtle: #F3F1EC;
+    --surface-1: #F3F1EC;
+    --surface-2: #FFFFFF;
+    --surface-3: #EAE7DF;
+    --surface-glass: rgba(250, 249, 246, 0.90);
+    --composer: #FFFFFF;
+    --user-bubble: #F3F1EC;
+    --border-hairline: #E2DED5;
+    --border-subtle: #E2DED5;
+    --border-strong: #78716C;
+    --primary-indigo: #1B365D;
+    --primary-container: #E2E8F4;
+    --on-primary-container: #11233E;
+    --accent-red: #B83B2A;
+    --accent-red-soft: rgba(184, 59, 42, 0.10);
+    --shu: #1B365D;
+    --shu-light: #244778;
+    --shu-soft: rgba(27, 54, 93, 0.08);
+    --on-accent: #FFFFFF;
+    --link: #1B365D;
+    --ink-primary: #1C1B18;
+    --ink-secondary: #57534E;
+    --ink-muted: #78716C;
+    --ink-dim: #A8A29E;
+    --shadow-sm: 0 1px 3px rgba(28, 27, 24, 0.05);
+    --shadow-md: 0 4px 16px rgba(28, 27, 24, 0.08);
+    --shadow-lg: 0 10px 30px rgba(28, 27, 24, 0.12);
+    --shadow-float: 0 4px 20px 0 rgba(28, 27, 24, 0.07);
     --radius-full: 9999px;
     --radius-xl: 20px;
     --radius-lg: 14px;
     --radius-md: 10px;
     --radius-sm: 6px;
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --font-serif: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif;
-    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease: cubic-bezier(0.2, 0, 0, 1);
+    --font-serif: 'Crimson Pro', 'Noto Serif JP', 'Yu Mincho', serif;
+    --font-sans: 'Commissioner', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Source Code Pro', 'JetBrains Mono', monospace;
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --canvas: #212121;
-        --canvas-subtle: #1a1a1a;
-        --surface-1: #171717;
-        --surface-2: #2a2a2a;
-        --surface-3: #333333;
-        --surface-glass: rgba(33, 33, 33, 0.85);
-        --composer: #303030;
-        --user-bubble: #303030;
-        --border-hairline: rgba(255, 255, 255, 0.08);
-        --border-subtle: rgba(255, 255, 255, 0.15);
-        --border-strong: rgba(255, 255, 255, 0.28);
-        --shu: #ececec;
-        --shu-light: #ffffff;
-        --shu-soft: rgba(255, 255, 255, 0.08);
-        --on-accent: #0d0d0d;
-        --link: #7ab7ff;
-        --ink-primary: #ececec;
-        --ink-secondary: #cdcdcd;
-        --ink-muted: #9b9b9b;
-        --ink-dim: #7a7a7a;
+        --canvas: #141413;
+        --canvas-subtle: #1C1B1A;
+        --surface-1: #1C1B1A;
+        --surface-2: #242321;
+        --surface-3: #2E2C29;
+        --surface-glass: rgba(20, 20, 19, 0.90);
+        --composer: #242321;
+        --user-bubble: #1C1B1A;
+        --border-hairline: #383633;
+        --border-subtle: #383633;
+        --border-strong: #8C8880;
+        --primary-indigo: #A8C7FA;
+        --primary-container: #1E3A5F;
+        --on-primary-container: #D6E3FF;
+        --accent-red: #E0533C;
+        --accent-red-soft: rgba(224, 83, 60, 0.15);
+        --shu: #A8C7FA;
+        --shu-light: #D6E3FF;
+        --shu-soft: rgba(168, 199, 250, 0.12);
+        --on-accent: #0B2545;
+        --link: #A8C7FA;
+        --ink-primary: #F2F0EC;
+        --ink-secondary: #B8B4AC;
+        --ink-muted: #8C8880;
+        --ink-dim: #605D57;
         --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
         --shadow-md: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
         --shadow-lg: 0 18px 48px -14px rgba(0, 0, 0, 0.7);
-        --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.25);
+        --shadow-float: 0 4px 16px rgba(0, 0, 0, 0.35);
     }
 }
 
@@ -637,43 +725,92 @@ div[data-testid="stPopoverBody"] button { color: var(--ink-primary) !important; 
 }
 
 /* ---------- ウェルカム ---------- */
-.hero { margin: 10vh 0 28px; text-align: center; }
-.hero-eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em;
-    color: var(--shu); background: var(--shu-soft);
-    padding: 5px 12px; border-radius: 999px; margin-bottom: 18px;
+.mato-emblem {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--border-hairline);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--primary-indigo); margin: 0 auto 16px;
+    box-shadow: var(--shadow-sm);
 }
-.hero-title {
+.welcome-hero { text-align: center; margin: 2vh auto 20px; max-width: 680px; }
+.welcome-title {
     font-family: var(--font-serif) !important;
-    font-size: clamp(24px, 3.2vw, 30px) !important;
-    font-weight: 500 !important; line-height: 1.5 !important;
-    letter-spacing: 0 !important;
-    color: var(--ink-primary) !important; margin: 0 0 14px !important;
+    font-size: clamp(22px, 3.2vw, 30px) !important;
+    font-weight: 600 !important; line-height: 1.4 !important;
+    letter-spacing: -0.25px !important; color: var(--ink-primary) !important;
+    margin: 0 0 10px !important;
 }
-.hero-title em { font-style: normal; color: inherit; }
-.hero-sub { font-size: 14px; line-height: 1.8; color: var(--ink-muted); max-width: 480px; margin: 0 auto; }
+.welcome-sub {
+    font-size: 14px !important; line-height: 1.7 !important;
+    color: var(--ink-secondary) !important; max-width: 520px; margin: 0 auto 20px !important;
+}
 
-/* クイックアクション：枠だけの控えめなチップ */
-[data-testid="stMain"] [class*="st-key-quick_act_"] button {
-    background: transparent !important;
-    border: 1px solid var(--border-subtle) !important;
-    border-radius: 18px !important;
-    box-shadow: none !important;
-    min-height: 48px !important;
-    padding: 10px 18px !important;
+/* 4つのスターターカード */
+.welcome-cards-grid { width: 100%; margin-bottom: 12px; }
+.welcome-cards-grid [data-testid="stHorizontalBlock"] { gap: 10px !important; }
+[class*="st-key-welcome_card_"] { margin-bottom: 10px !important; }
+[class*="st-key-welcome_card_"] button {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 14px !important;
+    padding: 14px 16px !important;
+    min-height: 86px !important;
+    box-shadow: var(--shadow-sm) !important;
+    display: flex !important;
+    flex-direction: column !important;
     justify-content: flex-start !important;
+    align-items: flex-start !important;
     text-align: left !important;
-    color: var(--ink-primary) !important;
-    font-size: 15px !important; font-weight: 400 !important; letter-spacing: 0 !important;
-    transition: background 0.15s ease !important;
+    white-space: pre-line !important;
+    transition: all 0.16s ease !important;
+    cursor: pointer !important;
 }
-[data-testid="stMain"] [class*="st-key-quick_act_"] button > div { justify-content: flex-start !important; }
-[data-testid="stMain"] [class*="st-key-quick_act_"] button:hover {
-    background: var(--surface-3) !important;
-    border-color: var(--border-subtle) !important;
+[class*="st-key-welcome_card_"] button:hover {
+    background: var(--canvas-subtle) !important;
+    border-color: var(--border-strong) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+[class*="st-key-welcome_card_"] button p {
+    font-size: 12.5px !important;
+    color: var(--ink-secondary) !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+    text-align: left !important;
+    width: 100% !important;
+}
+[class*="st-key-welcome_card_"] button p::first-line {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--ink-primary) !important;
+    line-height: 2.0 !important;
+}
+[class*="st-key-welcome_card_"] button span[data-testid="stIconMaterial"] {
+    font-size: 18px !important;
+    color: var(--primary-indigo) !important;
+}
+.st-key-welcome_card_1 button span[data-testid="stIconMaterial"] {
+    color: var(--accent-red) !important;
+}
+
+/* トピックチップ */
+.quick-chip-row { width: 100%; margin-bottom: 20px; }
+.quick-chip-row [data-testid="stHorizontalBlock"] { gap: 8px !important; }
+[class*="st-key-chip_"] button {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 9999px !important;
+    color: var(--ink-primary) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    min-height: 34px !important;
+    padding: 5px 14px !important;
     box-shadow: none !important;
-    transform: none !important;
+    transition: all 0.15s ease !important;
+}
+[class*="st-key-chip_"] button:hover {
+    background: var(--surface-3) !important;
+    border-color: var(--border-strong) !important;
     color: var(--ink-primary) !important;
 }
 
@@ -683,25 +820,33 @@ div[data-testid="stChatMessage"] {
     padding: 6px 0 !important; margin: 0 auto 16px !important;
     max-width: 100% !important; width: 100% !important;
 }
-div[data-testid="stChatMessage"] [data-testid^="stChatMessageAvatar"] { display: none !important; }
 
 /* あなた：右寄せのやわらかい吹き出し */
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    max-width: 70% !important; width: fit-content !important;
+    max-width: 75% !important; width: fit-content !important;
     margin-left: auto !important; margin-right: 0 !important;
     background: var(--user-bubble) !important;
-    border: 0 !important;
-    border-radius: 24px !important;
-    padding: 10px 20px !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 20px !important;
+    padding: 10px 18px !important;
 }
+div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatarUser"] { display: none !important; }
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) p,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) span,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"] * {
     color: var(--ink-primary) !important;
 }
+
 /* AI：地に直接。枠なし、行間をゆったり */
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) {
-    padding: 2px 0 !important;
+    padding: 4px 0 !important;
+}
+div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) [data-testid^="stChatMessageAvatar"] {
+    width: 32px !important; height: 32px !important;
+    border-radius: 50% !important;
+    background: var(--primary-indigo) !important;
+    color: #ffffff !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
 }
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) p,
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) li {
@@ -782,9 +927,9 @@ div[data-testid="stBottomBlockContainer"] {
 }
 /* 注意書きを入力欄のすぐ上に固定（入力欄が複数行に伸びても追従） */
 div[data-testid="stBottomBlockContainer"]::before {
-    content: "弓道AI は間違いを犯すことがあります。重要な情報は必ず確認してください。";
-    display: block; text-align: center; font-size: 12px; line-height: 1.4;
-    color: var(--ink-muted); padding: 0 0 8px;
+    content: "射心AIの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
+    display: block; text-align: center; font-size: 12px; line-height: 1.5;
+    color: var(--ink-secondary); padding: 0 0 8px;
 }
 div[data-testid="stChatInput"] {
     background: var(--composer) !important;
@@ -932,17 +1077,34 @@ div[data-testid="stChatInput"] > div, div[data-testid="stChatInput"] > div > div
 }
 div[data-testid="stChatInput"] textarea:focus { outline: none !important; box-shadow: none !important; }
 
-/* ポップオーバーのボタン（Streamlit 新版では stPopover の直下ではないため、専用のセレクタで指定） */
-section[data-testid="stSidebar"] [data-testid="stPopoverButton"],
-section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
+/* ポップオーバーのボタン */
+section[data-testid="stSidebar"] [data-testid="stPopoverButton"] {
     background: transparent !important; border: 0 !important; box-shadow: none !important;
     border-radius: var(--radius-md) !important; min-height: 36px !important; padding: 6px 10px !important;
     color: var(--ink-primary) !important; font-weight: 500 !important; font-size: 14px !important;
 }
-section[data-testid="stSidebar"] [data-testid="stPopoverButton"]:hover,
-section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover { background: var(--surface-3) !important; }
-section[data-testid="stSidebar"] [data-testid="stPopoverButton"] > div,
-section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button > div { justify-content: flex-start !important; width: 100%; }
+section[data-testid="stSidebar"] [data-testid="stPopoverButton"]:hover { background: var(--surface-3) !important; }
+section[data-testid="stSidebar"] [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; width: 100%; }
+
+/* 新しい相談ボタン：白いカードスタイル */
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 10px !important;
+    box-shadow: var(--shadow-sm) !important;
+    color: var(--ink-primary) !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    min-height: 40px !important;
+    padding: 8px 14px !important;
+    justify-content: flex-start !important;
+    transition: all 0.15s ease !important;
+}
+section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button:hover {
+    background: var(--surface-3) !important;
+    border-color: var(--border-strong) !important;
+}
+
 [class*="st-key-msg_more_"] [data-testid="stPopoverButton"] {
     background: transparent !important; border: 0 !important; box-shadow: none !important;
 }
@@ -1012,25 +1174,31 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
     background: transparent !important; color: var(--shu) !important;
 }
 .login-wrap { margin: clamp(24px, 5vh, 48px) auto 20px; text-align: center; transition: none !important; }
-.login-logo { margin-left: auto; margin-right: auto; }
-.login-logo {
-    width: 48px; height: 48px; border-radius: 14px; background: var(--shu); color: var(--on-accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; margin-bottom: 20px;
-}
-.login-title { font-size: 30px; font-weight: 600; letter-spacing: 0; color: var(--ink-primary); }
-.login-subtitle { margin-top: 10px; font-size: 13.5px; line-height: 1.9; color: var(--ink-muted); }
+.login-title { font-size: 28px; font-weight: 600; font-family: var(--font-serif); letter-spacing: 0; color: var(--ink-primary); margin-bottom: 6px; }
+.login-subtitle { font-size: 13.5px; line-height: 1.8; color: var(--ink-muted); }
 
 /* ---------- レスポンシブ ---------- */
 @media (max-width: 900px) {
-    [data-testid="stMainBlockContainer"] { padding: 20px 16px var(--kyudo-main-pad, 24px) !important; }
-    .hero { margin-top: 0; }
-    /* ウェルカム画面：画面に固定して縦中央に表示（スクロール位置・余白に影響されない）。送信するとコンテナごと消える */
-    .st-key-welcome_wrap {
-        position: fixed !important; top: 46%; left: 50%; transform: translate(-50%, -50%);
-        width: calc(100% - 32px); max-width: 720px; z-index: 1;
-        max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); overflow-y: auto;
+    [data-testid="stMainBlockContainer"] { padding: 12px 16px var(--kyudo-main-pad, 24px) !important; }
+    .st-key-topbar { padding-left: 44px !important; }
+}
+@media (max-width: 640px) {
+    .welcome-cards-grid [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
     }
+    .welcome-cards-grid [data-testid="stHorizontalBlock"] > div {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .quick-chip-row [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    .quick-chip-row [data-testid="stHorizontalBlock"] > div {
+        flex: 1 1 calc(50% - 6px) !important;
+        min-width: 120px !important;
+    }
+}
     .st-key-topbar { padding-left: 44px !important; }
 }
 @media (max-width: 640px) {
@@ -1433,16 +1601,16 @@ def get_all_sessions():
     return sessions
 
 def group_sessions_by_date(sessions: list) -> dict:
-    """ChatGPT風：会話履歴を『今日』『昨日』『過去7日間』『それ以前』に分類"""
+    """射心UI：会話履歴を『今日』『過去7日間』『先月』『それ以前』に分類"""
     import datetime
     today = datetime.date.today()
-    yesterday = today - datetime.timedelta(days=1)
     seven_days_ago = today - datetime.timedelta(days=7)
+    thirty_days_ago = today - datetime.timedelta(days=30)
     
     groups = {
         "今日": [],
-        "昨日": [],
         "過去7日間": [],
+        "先月": [],
         "それ以前": []
     }
     
@@ -1452,10 +1620,10 @@ def group_sessions_by_date(sessions: list) -> dict:
             s_date = datetime.datetime.strptime(up_str.split()[0], "%Y-%m-%d").date()
             if s_date == today:
                 groups["今日"].append(s)
-            elif s_date == yesterday:
-                groups["昨日"].append(s)
             elif s_date >= seven_days_ago:
                 groups["過去7日間"].append(s)
+            elif s_date >= thirty_days_ago:
+                groups["先月"].append(s)
             else:
                 groups["それ以前"].append(s)
         except Exception:
@@ -1736,8 +1904,10 @@ def render_login_screen(slot=None):
     with col_center:
         st.markdown(f"""
         <div class="login-wrap">
-            <div class="login-logo">🏹</div>
-            <div class="login-title">弓道AI道場</div>
+            <div class="mato-emblem" style="width: 52px; height: 52px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-hairline); display: flex; align-items: center; justify-content: center; color: var(--shu); margin: 0 auto 16px; box-shadow: var(--shadow-sm);">
+                {get_mato_svg(28)}
+            </div>
+            <div class="login-title">弓道AI「射心」</div>
             <div class="login-subtitle">{"アカウントにログインして、稽古を続けましょう。" if is_login else "アカウントを作成して、稽古の記録を残しましょう。"}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -1965,25 +2135,21 @@ def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
 # ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
 
-    # ── ブランドヘッダー（ロゴ + バッジ） ─────────────────────────
-    logo_b64 = get_asset_base64("kyudo_ai_logo.jpg")
-    if logo_b64:
-        logo_html = f'<img src="data:image/jpeg;base64,{logo_b64}" style="width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-subtle); object-fit: cover;">'
-    else:
-        logo_html = '<div style="width: 38px; height: 38px; border-radius: 10px; background: var(--shu); color: var(--on-accent); display: flex; align-items: center; justify-content: center; font-size: 19px;">🏹</div>'
-
+    # ── ブランドヘッダー（的ロゴ + 射心 Kyudo AI） ───────────────
     st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 12px; padding: 8px 4px 16px 4px;">
-        {logo_html}
+    <div style="display: flex; align-items: center; gap: 10px; padding: 6px 4px 14px 4px;">
+        <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-hairline); display: flex; align-items: center; justify-content: center; shrink-0; box-shadow: var(--shadow-sm);">
+            {get_mato_svg(20)}
+        </div>
         <div>
-            <div class="sb-brand-name">弓道AI道場</div>
-            <span class="sb-brand-tag">KYUDO AI DOJO</span>
+            <div class="sb-brand-name">射心 Kyudo AI</div>
+            <span class="sb-brand-tag">弓道専門指導 AI</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── 新規チャットボタン ──────────────────────────────────────
-    if st.button("新しいチャット", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True, help="Ctrl+Shift+O"):
+    # ── 新規相談ボタン ──────────────────────────────────────────
+    if st.button("新しい相談", key="sidebar_new_chat_btn", icon=":material/edit_square:", use_container_width=True, help="⌘K / Ctrl+Shift+O"):
         new_id = f"session_{int(time.time())}"
         st.session_state.current_session_id = new_id
         st.session_state.messages = []
@@ -2054,7 +2220,7 @@ with st.sidebar:
         cur_id = st.session_state.get("current_session_id", all_sess[0]["id"])
         pinned_ids = {x.get("session_id") for x in load_sidebar_items("pins") if x.get("session_id")}
 
-        _q = st.text_input("チャットを検索", key="sidebar_search_chats", placeholder="チャットを検索（Ctrl+K）", label_visibility="collapsed")
+        _q = st.text_input("過去の相談を検索...", key="sidebar_search_chats", placeholder="過去の相談を検索...", label_visibility="collapsed")
         if _q.strip():
             _shown = [x for x in all_sess if _q.strip().lower() in x["title"].lower()]
             if not _shown:
@@ -2125,15 +2291,16 @@ with st.sidebar:
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
     # アカウントと設定・射手カルテを1つのボタンに統合（サイドバーの最下部に固定）
-    with st.popover(disp_name or "アカウント", icon=":material/account_circle:", use_container_width=True, key="sb_account"):
+    initial_char = disp_name[0].upper() if disp_name else "射"
+    with st.popover(f"{initial_char}  {disp_name}", icon=":material/account_circle:", use_container_width=True, key="sb_account"):
         st.markdown(f"""
         <div style="border: 1px solid var(--border-hairline); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface-2);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: var(--accent-emerald-soft); color: var(--accent-emerald-light); border: 1px solid var(--border-subtle); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.08em;">KYUDO AI PRO</span>
-                <span style="font-size: 11px; font-weight: 600; color: var(--accent-emerald-light);">● 稼働中</span>
+                <span style="background: var(--primary-container); color: var(--on-primary-container); border: 1px solid var(--border-subtle); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.08em;">射心 PRO</span>
+                <span style="font-size: 11px; font-weight: 600; color: #2E6F40;">● 稼働中</span>
             </div>
             <div style="font-size: 15px; font-weight: 700; color: var(--ink-primary); margin: 2px 0;">{disp_name}</div>
-            <div style="font-size: 11px; color: var(--ink-dim); font-family: monospace;">ID: KYD-8820-{user_id_num}</div>
+            <div style="font-size: 12px; color: var(--ink-secondary);">弐段・週3回稽古</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -2914,38 +3081,97 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 # ==================== チャット統合型メイン画面 ====================
 
-# ユーザーメッセージがまだない場合はChatGPTモバイル（2024-10）風のウェルカム画面を表示
+# トップ固定ヘッダーバー（射心・ChatGPTスタイル：指導陣モデル切替＋動画診断）
+with st.container(key="topbar"):
+    col_tb1, col_tb2 = st.columns([0.72, 0.28])
+    with col_tb1:
+        _cur_c_tb = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+        _cur_inf_tb = CHARACTERS.get(_cur_c_tb, list(CHARACTERS.values())[0])
+        with st.popover(f"🏹 射心 · {_cur_c_tb.split('（')[0]}", use_container_width=False):
+            st.caption("指導陣（AIモデル）を選択")
+            for cname, c_info_item in CHARACTERS.items():
+                st.button(
+                    f"{'✓ ' if cname == _cur_c_tb else '　 '}{c_info_item['icon']} {cname}",
+                    key=f"top_bar_sel_{cname}", use_container_width=True,
+                    on_click=switch_ai_character, args=(cname,),
+                )
+                st.caption(c_info_item["desc"])
+    with col_tb2:
+        st.button(
+            "📹 動画診断",
+            key="tb_chip_video",
+            use_container_width=True,
+            on_click=_set_quick_prompt,
+            args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",)
+        )
+
+# ユーザーメッセージがまだない場合は射心スタイルのウェルカム画面を表示
 quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバーのピン留め／プロジェクトからの質問
 
 welcome_slot = None
 if not st.session_state.messages and not quick_prompt:
   welcome_slot = st.empty()
   with welcome_slot.container(key="welcome_wrap"):
-    # ===== ウェルカム画面（送信と同時に welcome_slot ごと消す） =====
-    st.markdown("""
-    <div class="hero">
-        <h1 class="hero-title">今日の稽古は、<br><em>何</em>から始めますか。</h1>
-        <div class="hero-sub">射形の解析、早気や離れの相談、射法八節の学び直し。<br>下の入力欄から、いつでも道場へ。</div>
+    # ===== ウェルカム画面（射心スタイル：的エンブレム＋大見出し＋4つのスターターカード＋トピックチップ） =====
+    st.markdown(f"""
+    <div class="welcome-hero">
+        <div class="mato-emblem">
+            {get_mato_svg(28)}
+        </div>
+        <h1 class="welcome-title">今日の射形について、何を相談しますか？</h1>
+        <p class="welcome-sub">射法八節の気になる点や矢所の傾向を教えてください。練習動画や写真からのフォーム確認にも対応しています。</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # ChatGPT公式スタイル：3つの縦並びクイックアクション
-    col_w1, col_w_center, col_w2 = st.columns([0.15, 0.70, 0.15])
-    with col_w_center:
-        st.markdown("""
-        <div style="max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px;">
-        """, unsafe_allow_html=True)
-        
-        st.button("射形を3Dで解析する　射形動画・写真", key="quick_act_1", use_container_width=True,
-                  on_click=_set_quick_prompt, args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",))
-        st.button("早気・射癖の悩みを相談する", key="quick_act_2", use_container_width=True,
-                  on_click=_set_quick_prompt, args=("最近早気（はやけ）になってしまい、会で保てずに離れてしまいます。どうすれば克服できますか？",))
-        st.button("射法八節の要点を学び直す", key="quick_act_3", use_container_width=True,
-                  on_click=_set_quick_prompt, args=("射法八節（足踏みから残心まで）の中で、昇段審査や的中向上のために最も重要視すべき要点を教えてください。",))
+    # 4つのスターターカード（PCは2×2グリッド、スマホは1カラム縦積み）
+    st.markdown('<div class="welcome-cards-grid">', unsafe_allow_html=True)
+    col_c1, col_c2 = st.columns(2)
+    with col_c1:
+        with st.container(key="welcome_card_1"):
+            st.button(
+                "早気を克服したい\n会を3秒以上保つための呼吸法と、角見の意識の置き方を聞く",
+                key="act_hayake", icon=":material/north_east:", icon_position="right",
+                use_container_width=True, on_click=_set_quick_prompt,
+                args=("早気を克服したいです。会を3秒以上保つための呼吸法と、角見の意識の置き方を教えてください。",)
+            )
+        with st.container(key="welcome_card_3"):
+            st.button(
+                "会での肩の収まり\n肩根が上がる癖を直し、左右の伸び合いを安定させるコツ",
+                key="act_shoulder", icon=":material/accessibility_new:", icon_position="right",
+                use_container_width=True, on_click=_set_quick_prompt,
+                args=("引分けから会にかけて左肩が上がってしまいます。肩根を沈めて胸を開くコツを教えてください。",)
+            )
+    with col_c2:
+        with st.container(key="welcome_card_2"):
+            st.button(
+                "離れで矢が右に外れる\n押手・勝手どちらの原因が多いか、セルフチェック方法を確認",
+                key="act_right", icon=":material/adjust:", icon_position="right",
+                use_container_width=True, on_click=_set_quick_prompt,
+                args=("離れで矢が右に抜けることが多いです。押手と勝手どちらの原因が多いか、セルフチェック方法を教えてください。",)
+            )
+        with st.container(key="welcome_card_4"):
+            st.button(
+                "射形動画をチェック\n正面・側面の動画を添付して、射法八節ごとの改善点を整理",
+                key="act_video", icon=":material/videocam:", icon_position="right",
+                use_container_width=True, on_click=_set_quick_prompt,
+                args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",)
+            )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown("</div>", unsafe_allow_html=True)
+    # クイックトピックチップ（射法八節、手の内・角見、胴造り・残心、昇段審査・礼法）
+    st.markdown('<div class="quick-chip-row">', unsafe_allow_html=True)
+    col_chip1, col_chip2, col_chip3, col_chip4 = st.columns(4)
+    with col_chip1:
+        st.button("射法八節", key="chip_hassetsu", use_container_width=True, on_click=_set_quick_prompt, args=("射法八節の「会」における伸び合いのポイントを教えてください。",))
+    with col_chip2:
+        st.button("手の内・角見", key="chip_tenouchi", use_container_width=True, on_click=_set_quick_prompt, args=("手の内の作り方（天文筋と虎口）の基本を確認したいです。",))
+    with col_chip3:
+        st.button("胴造り・残心", key="chip_dozukuri", use_container_width=True, on_click=_set_quick_prompt, args=("残心で身が崩れないための足踏みと胴造りの意識を教えてください。",))
+    with col_chip4:
+        st.button("昇段審査・礼法", key="chip_shinsa", use_container_width=True, on_click=_set_quick_prompt, args=("弓道審査の学科試験でよく問われる射法の基本をまとめたいです。",))
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div style="margin-bottom: 40px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="margin-bottom: 32px;"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
@@ -3092,12 +3318,12 @@ if _is_guest:
 
 if _is_guest:
     chat_submission = st.chat_input(
-        placeholder="ログインするとチャットを続けられます" if _guest_locked else "弓道AIに聞く",
+        placeholder="ログインするとチャットを続けられます" if _guest_locked else "射形の悩みや、矢所・呼吸について相談する...",
         disabled=_guest_locked,
     )
 else:
     chat_submission = st.chat_input(
-        placeholder="弓道AIに聞く",
+        placeholder="射形の悩みや、矢所・呼吸について相談する...",
         accept_file=True,
         file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
     )

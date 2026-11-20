@@ -1,0 +1,516 @@
+<!DOCTYPE html><html lang="ja"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>弓道AI「射心」 — PC版 新規チャット</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#2D6A4F',
+        'on-accent': '#FFFFFF',
+        'success': '#3B8B66',
+        'warning': '#D97706',
+        'error': '#EF4444',
+        'light-primary': '#1B365D',
+        'light-on-primary': '#FFFFFF',
+        'light-primary-container': '#E2E8F4',
+        'light-on-primary-container': '#11233E',
+        'light-secondary': '#4A5568',
+        'light-on-secondary': '#FFFFFF',
+        'light-surface': '#FAF9F6',
+        'light-on-surface': '#1C1B18',
+        'light-surface-container-low': '#F3F1EC',
+        'light-surface-container': '#FFFFFF',
+        'light-surface-container-high': '#EAE7DF',
+        'light-on-surface-variant': '#57534E',
+        'light-outline': '#78716C',
+        'light-outline-variant': '#E2DED5',
+        'dark-primary': '#F0F0ED',
+        'dark-on-primary': '#181919',
+        'dark-primary-container': '#2C3531',
+        'dark-on-primary-container': '#D8E8DF',
+        'dark-secondary': '#A1A19C',
+        'dark-on-secondary': '#181919',
+        'dark-surface': '#1B1C1C',
+        'dark-on-surface': '#F0F0ED',
+        'dark-surface-container-low': '#131414',
+        'dark-surface-container': '#252626',
+        'dark-surface-container-high': '#2F3030',
+        'dark-on-surface-variant': '#A1A19C',
+        'dark-outline': '#71726E',
+        'dark-outline-variant': '#383939',
+      },
+      borderRadius: {
+        'sm': '6px',
+        'DEFAULT': '10px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Crimson Pro"', 'sans-serif'],
+        'headline': ['"Crimson Pro"', 'sans-serif'],
+        'title': ['"Commissioner"', 'sans-serif'],
+        'body': ['"Commissioner"', 'sans-serif'],
+        'label': ['"Commissioner"', 'sans-serif'],
+        'mono': ['"Source Code Pro"', 'monospace'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '600' }],
+        'display-lg-mobile': ['28px', { lineHeight: '36px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-lg': ['28px', { lineHeight: '36px', letterSpacing: '-0.25px', fontWeight: '600' }],
+        'headline-md': ['22px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-lg': ['18px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-md': ['15px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-lg': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['14px', { lineHeight: '22px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-sm': ['13px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-md': ['12px', { lineHeight: '16px', letterSpacing: '0.25px', fontWeight: '500' }],
+        'label-sm': ['11px', { lineHeight: '14px', letterSpacing: '0.25px', fontWeight: '500' }],
+        'mono-sm': ['12px', { lineHeight: '18px', letterSpacing: '0px', fontWeight: '500' }],
+      },
+      transitionDuration: {
+        'state-change': '100ms',
+        'surface-enter': '220ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+        'surface-exit': 'cubic-bezier(0.3, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600&amp;family=Crimson+Pro:wght@600&amp;family=Noto+Sans+JP:wght@400;500;600&amp;family=Source+Code+Pro:wght@500&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    body {
+      font-family: "Commissioner", "Noto Sans JP", sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-light-surface text-light-on-surface font-body antialiased">
+
+  <div class="min-h-[1024px] flex w-full bg-light-surface" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Left Sidebar (ChatGPT-style persistent navigation on desktop, collapsible) -->
+    <aside id="desktop-sidebar" class="hidden md:flex w-72 shrink-0 min-h-[1024px] bg-light-surface-container-low border-r border-light-outline-variant flex-col justify-between p-gutter-md" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <div class="flex flex-col gap-gutter-md">
+
+        <!-- Sidebar Top Actions -->
+        <div class="flex items-center justify-between gap-gutter-sm">
+          <div class="flex items-center gap-gutter-sm">
+            <div class="w-8 h-8 rounded-full bg-light-primary text-light-on-primary flex items-center justify-center shrink-0" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="5"></circle>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+              </svg>
+            </div>
+            <span data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">射心 Kyudo AI</span>
+          </div>
+          <!-- COMPONENT: button-icon-sidebar -->
+          <button data-component-id="button-icon-sidebar" data-component-type="button" data-component-variant="icon" type="button" aria-label="サイドバーを閉じる" onclick="toggleDesktopSidebar()" class="inline-flex items-center justify-center w-9 h-9 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high hover:text-light-on-surface transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">menu_open</span>
+          </button>
+        </div>
+
+        <!-- New Chat Button -->
+        <!-- COMPONENT: button-with-icon -->
+        <button data-component-id="button-with-icon" data-component-type="button" data-component-variant="with-icon" type="button" onclick="resetToWelcome()" class="w-full inline-flex items-center justify-between gap-gutter-sm px-gutter-md py-gutter-sm rounded-md bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+          <span class="inline-flex items-center gap-gutter-sm">
+            <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">edit_square</span>
+            <span data-design-text-token="label-lg" class="font-label text-label-lg">新しい相談</span>
+          </span>
+          <span data-design-text-token="label-sm" class="font-mono text-label-sm text-light-on-surface-variant">⌘K</span>
+        </button>
+
+        <!-- Search Input -->
+        <!-- COMPONENT: input-field-icon -->
+        <label data-component-id="input-field-icon" data-component-type="input-field" data-component-variant="with-icon" class="flex flex-col gap-gutter-xs">
+          <span class="sr-only font-label text-label-md" data-design-text-token="label-md">過去の相談を検索</span>
+          <div class="relative flex items-center">
+            <span aria-hidden="true" class="absolute left-gutter-sm text-light-on-surface-variant flex items-center">
+              <span class="material-symbols-outlined text-[18px]">search</span>
+            </span>
+            <input type="search" placeholder="過去の相談を検索..." class="w-full pl-9 pr-gutter-md py-gutter-xs rounded-md bg-light-surface-container border border-light-outline-variant text-light-on-surface placeholder:text-light-on-surface-variant font-body text-body-sm focus:border-light-primary focus:ring-1 focus:ring-light-primary focus:outline-none">
+          </div>
+        </label>
+
+        <!-- Chat History Groups -->
+        <nav aria-label="過去の相談履歴" class="flex flex-col gap-gutter-md mt-gutter-xs">
+          <div class="flex flex-col gap-gutter-xs">
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant px-gutter-sm">今日</span>
+            <button type="button" onclick="loadSampleChat(&#39;hayake&#39;)" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm transition-colors duration-state-change">
+              早気を直すための会の保ち方
+            </button>
+            <button type="button" onclick="loadSampleChat(&#39;right&#39;)" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm transition-colors duration-state-change">
+              離れで矢が右に抜ける原因
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant px-gutter-sm">過去7日間</span>
+            <button type="button" onclick="loadSampleChat(&#39;oshide&#39;)" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm transition-colors duration-state-change">
+              大三から引分けでの押手の角見
+            </button>
+            <button type="button" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm transition-colors duration-state-change">
+              肩根が上がる癖のセルフチェック
+            </button>
+            <button type="button" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm transition-colors duration-state-change">
+              参段審査に向けた体配と残心の確認
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant px-gutter-sm">先月</span>
+            <button type="button" class="w-full text-left px-gutter-sm py-gutter-xs rounded-sm hover:bg-light-surface-container-high text-light-on-surface font-body text-body-sm transition-colors duration-state-change">
+              弓返りが自然に出ないときの離れ
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <!-- User Profile Footer -->
+      <div class="pt-gutter-md border-t border-light-outline-variant flex items-center justify-between gap-gutter-sm">
+        <div class="flex items-center gap-gutter-sm">
+          <div class="w-8 h-8 rounded-full bg-light-primary-container text-light-on-primary-container flex items-center justify-center font-label text-label-md">
+            佐
+          </div>
+          <div class="flex flex-col">
+            <span data-design-text-token="label-md" class="font-label text-label-md text-light-on-surface">佐藤 健太</span>
+            <span data-design-text-token="label-sm" class="font-label text-label-sm text-light-on-surface-variant">弐段・週3回稽古</span>
+          </div>
+        </div>
+        <button type="button" aria-label="設定を開く" class="inline-flex items-center justify-center w-8 h-8 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">settings</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <div class="flex-1 min-h-[1024px] flex flex-col justify-between bg-light-surface" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+      <!-- Top Header Bar -->
+      <header class="sticky top-0 z-10 bg-light-surface px-gutter-md md:px-gutter-lg py-gutter-md flex items-center justify-between gap-gutter-sm">
+        <div class="flex items-center gap-gutter-sm">
+          <button id="reopen-sidebar-btn" type="button" aria-label="サイドバーを開く" onclick="toggleDesktopSidebar()" class="inline-flex md:hidden items-center justify-center w-9 h-9 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high transition-colors duration-state-change">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">menu</span>
+          </button>
+
+          <!-- Model / Mode Selector -->
+          <div class="relative">
+            <button type="button" onclick="toggleModelMenu()" class="inline-flex items-center gap-gutter-xs px-gutter-sm md:px-gutter-md py-gutter-xs rounded-md hover:bg-light-surface-container-low text-light-on-surface transition-colors duration-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <span id="current-model-label" data-design-text-token="title-md" class="font-title text-title-md">射心 Pro · 射形解析</span>
+              <span class="material-symbols-outlined text-[18px] text-light-on-surface-variant" aria-hidden="true">keyboard_arrow_down</span>
+            </button>
+
+            <div id="model-menu" class="hidden absolute left-0 mt-gutter-xs w-64 p-gutter-xs rounded-lg bg-light-surface-container border border-light-outline-variant shadow-sm z-20 flex-col gap-gutter-xs">
+              <button type="button" onclick="selectModel(&#39;射心 Pro · 射形解析&#39;)" class="w-full text-left px-gutter-sm py-gutter-sm rounded-sm hover:bg-light-surface-container-low flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span class="font-title text-title-md text-light-on-surface">射心 Pro</span>
+                  <span class="font-body text-body-sm text-light-on-surface-variant">動画・写真を含む詳しい射形指導</span>
+                </div>
+                <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">check</span>
+              </button>
+              <button type="button" onclick="selectModel(&#39;射心 Fast · 基礎・礼法&#39;)" class="w-full text-left px-gutter-sm py-gutter-sm rounded-sm hover:bg-light-surface-container-low flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span class="font-title text-title-md text-light-on-surface">射心 Fast</span>
+                  <span class="font-body text-body-sm text-light-on-surface-variant">射法八節や用語の素早い確認</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Utility Chip -->
+        <div class="flex items-center gap-gutter-sm shrink-0">
+          <!-- COMPONENT: chip-with-icon -->
+          <button data-component-id="chip-with-icon" data-component-type="chip" data-component-variant="with-icon" type="button" onclick="attachSampleVideo()" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+            <span class="material-symbols-outlined text-[16px] text-light-primary" aria-hidden="true">videocam</span>
+            <span data-design-text-token="label-md" class="font-label text-label-md">動画診断</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Center Content Area (Welcome State or Active Chat) -->
+      <main class="flex-1 flex flex-col items-center justify-center px-gutter-md md:px-gutter-lg py-gutter-lg w-full max-w-3xl mx-auto">
+
+        <!-- Welcome State (Initial View) -->
+        <section id="welcome-view" class="w-full flex flex-col items-center gap-gutter-xl">
+          <div class="flex flex-col items-center text-center gap-gutter-md">
+            <!-- Kyudo Mato Emblem -->
+            <div class="w-14 h-14 rounded-full bg-light-surface-container border border-light-outline-variant flex items-center justify-center text-light-primary">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <circle cx="12" cy="12" r="9.5"></circle>
+                <circle cx="12" cy="12" r="5.5"></circle>
+                <circle cx="12" cy="12" r="2" class="text-accent" fill="currentColor" stroke="none"></circle>
+              </svg>
+            </div>
+
+            <!-- COMPONENT: typography-display -->
+            <h1 data-component-id="typography-display" data-component-type="typography" data-component-variant="display" data-design-text-token="display-lg" class="font-display text-display-lg-mobile md:text-display-lg text-light-on-surface text-balance">今日の射形について、何を相談しますか？</h1>
+
+            <!-- COMPONENT: typography-body -->
+            <p data-component-id="typography-body" data-component-type="typography" data-component-variant="body" data-design-text-token="body-md" class="font-body text-body-md text-light-on-surface-variant text-pretty max-w-prose">射法八節の気になる点や矢所の傾向を教えてください。練習動画や写真からのフォーム確認にも対応しています。</p>
+          </div>
+
+          <!-- 4 Interactive Prompt Starter Cards -->
+          <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-gutter-md items-stretch">
+            <!-- COMPONENT: card-interactive-2 -->
+            <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="sendPrompt(&#39;早気を克服したいです。会を3秒以上保つための呼吸法と、角見の意識の置き方を教えてください。&#39;)" class="h-full p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low hover:border-light-outline transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <header class="flex items-center justify-between gap-gutter-sm">
+                <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">早気を克服したい</h3>
+                <span class="material-symbols-outlined text-[18px] text-accent" aria-hidden="true">north_east</span>
+              </header>
+              <div>
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant text-balance">会を3秒以上保つための呼吸法と、角見の意識の置き方を聞く</p>
+              </div>
+            </div>
+
+            <!-- COMPONENT: card-interactive-2 -->
+            <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="sendPrompt(&#39;離れで矢が右に抜けることが多いです。押手と勝手どちらの原因が多いか、セルフチェック方法を教えてください。&#39;)" class="h-full p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low hover:border-light-outline transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <header class="flex items-center justify-between gap-gutter-sm">
+                <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">離れで矢が右に外れる</h3>
+                <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">adjust</span>
+              </header>
+              <div>
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant text-balance">押手・勝手どちらの原因が多いか、セルフチェック方法を確認</p>
+              </div>
+            </div>
+
+            <!-- COMPONENT: card-interactive-2 -->
+            <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="sendPrompt(&#39;引分けから会にかけて左肩が上がってしまいます。肩根を沈めて胸を開くコツを教えてください。&#39;)" class="h-full p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low hover:border-light-outline transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <header class="flex items-center justify-between gap-gutter-sm">
+                <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">会での肩の収まり</h3>
+                <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">accessibility_new</span>
+              </header>
+              <div>
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant text-balance">肩根が上がる癖を直し、左右の伸び合いを安定させるコツ</p>
+              </div>
+            </div>
+
+            <!-- COMPONENT: card-interactive-2 -->
+            <div role="button" tabindex="0" data-component-id="card-interactive-2" data-component-type="card" data-component-variant="interactive" onclick="attachSampleVideo()" class="h-full p-gutter-md rounded-lg bg-light-surface-container border border-light-outline-variant hover:bg-light-surface-container-low hover:border-light-outline transition-colors duration-state-change ease-state-change flex flex-col gap-gutter-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <header class="flex items-center justify-between gap-gutter-sm">
+                <h3 data-design-text-token="title-md" class="font-title text-title-md text-light-on-surface">射形動画をチェック</h3>
+                <span class="material-symbols-outlined text-[18px] text-light-primary" aria-hidden="true">videocam</span>
+              </header>
+              <div>
+                <p data-design-text-token="body-sm" class="font-body text-body-sm text-light-on-surface-variant text-balance">正面・側面の動画を添付して、射法八節ごとの改善点を整理</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Topic Chips -->
+          <div class="flex flex-wrap items-center justify-center gap-gutter-sm">
+            <!-- COMPONENT: chip-action -->
+            <button data-component-id="chip-action" data-component-type="chip" data-component-variant="action" type="button" onclick="fillComposer(&#39;射法八節の「会」における伸び合いのポイントを教えてください。&#39;)" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <span data-design-text-token="label-md" class="font-label text-label-md">射法八節</span>
+            </button>
+            <button data-component-id="chip-action" data-component-type="chip" data-component-variant="action" type="button" onclick="fillComposer(&#39;手の内の作り方（天文筋と虎口）の基本を確認したいです。&#39;)" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <span data-design-text-token="label-md" class="font-label text-label-md">手の内・角見</span>
+            </button>
+            <button data-component-id="chip-action" data-component-type="chip" data-component-variant="action" type="button" onclick="fillComposer(&#39;残心で身が崩れないための足踏みと胴造りの意識を教えてください。&#39;)" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <span data-design-text-token="label-md" class="font-label text-label-md">胴造り・残心</span>
+            </button>
+            <button data-component-id="chip-action" data-component-type="chip" data-component-variant="action" type="button" onclick="fillComposer(&#39;弓道審査の学科試験でよく問われる射法の基本をまとめたいです。&#39;)" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-light-surface-container border border-light-outline-variant text-light-on-surface hover:bg-light-surface-container-high transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+              <span data-design-text-token="label-md" class="font-label text-label-md">昇段審査・礼法</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Active Chat Thread (Hidden initially, shown when user sends a prompt) -->
+        <section id="chat-thread" class="hidden w-full flex-col gap-gutter-lg py-gutter-md"></section>
+
+      </main>
+
+      <!-- Bottom Floating Composer (ChatGPT-style) -->
+      <footer class="sticky bottom-0 bg-light-surface px-gutter-md md:px-gutter-lg pb-gutter-md pt-gutter-sm">
+        <div class="max-w-3xl mx-auto flex flex-col gap-gutter-xs">
+
+          <!-- Attachment Preview Row (Hidden unless attached) -->
+          <div id="attachment-row" class="hidden items-center gap-gutter-sm px-gutter-xs">
+            <!-- COMPONENT: chip-input -->
+            <span data-component-id="chip-input" data-component-type="chip" data-component-variant="input" class="inline-flex items-center gap-gutter-xs pl-gutter-md pr-gutter-xs py-gutter-xs rounded-full bg-light-primary-container text-light-on-primary-container">
+              <span class="material-symbols-outlined text-[15px]" aria-hidden="true">videocam</span>
+              <span data-design-text-token="label-md" class="font-label text-label-md">側面射形_稽古.mp4</span>
+              <button type="button" onclick="clearAttachment()" aria-label="添付を削除" class="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-light-surface-container-high">
+                <span class="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
+              </button>
+            </span>
+          </div>
+
+          <!-- Composer Box -->
+          <form onsubmit="handleSubmit(event)" class="rounded-2xl bg-light-surface-container border border-light-outline-variant shadow-sm p-gutter-sm flex flex-col gap-gutter-xs focus-within:border-light-primary transition-colors duration-state-change">
+            <textarea id="composer-input" rows="2" placeholder="射形の悩みや、矢所・呼吸について相談する..." onkeydown="handleKeyDown(event)" class="w-full resize-none border-0 bg-transparent px-gutter-sm py-gutter-xs text-light-on-surface placeholder:text-light-on-surface-variant font-body text-body-md focus:ring-0 focus:outline-none"></textarea>
+
+            <div class="flex items-center justify-between px-gutter-xs">
+              <div class="flex items-center gap-gutter-xs">
+                <!-- COMPONENT: button-icon -->
+                <button data-component-id="button-icon" data-component-type="button" data-component-variant="icon" type="button" onclick="attachSampleVideo()" aria-label="写真や動画を添付" class="inline-flex items-center justify-center w-9 h-9 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high hover:text-light-on-surface transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+                  <span class="material-symbols-outlined text-[20px]" aria-hidden="true">attach_file</span>
+                </button>
+                <button type="button" aria-label="音声で入力" class="inline-flex items-center justify-center w-9 h-9 rounded-full text-light-on-surface-variant hover:bg-light-surface-container-high hover:text-light-on-surface transition-colors duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary">
+                  <span class="material-symbols-outlined text-[20px]" aria-hidden="true">mic</span>
+                </button>
+              </div>
+
+              <!-- COMPONENT: button-icon-send -->
+              <button data-component-id="button-icon-send" data-component-type="button" data-component-variant="icon" type="submit" aria-label="相談を送信" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-light-primary text-light-on-primary hover:opacity-90 transition-opacity duration-state-change ease-state-change focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-light-primary focus-visible:ring-offset-2">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_upward</span>
+              </button>
+            </div>
+          </form>
+
+          <p class="text-center font-label text-label-sm text-light-on-surface-variant">
+            射心AIの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。
+          </p>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    function toggleDesktopSidebar() {
+      const sidebar = document.getElementById('desktop-sidebar');
+      const reopenBtn = document.getElementById('reopen-sidebar-btn');
+      const isHidden = sidebar.classList.contains('hidden');
+      if (isHidden) {
+        sidebar.classList.remove('hidden');
+        sidebar.classList.add('flex');
+        reopenBtn.classList.add('md:hidden');
+      } else {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('flex');
+        reopenBtn.classList.remove('md:hidden');
+      }
+    }
+
+    function toggleModelMenu() {
+      const menu = document.getElementById('model-menu');
+      menu.classList.toggle('hidden');
+      menu.classList.toggle('flex');
+    }
+
+    function selectModel(name) {
+      document.getElementById('current-model-label').textContent = name;
+      toggleModelMenu();
+    }
+
+    function fillComposer(text) {
+      const input = document.getElementById('composer-input');
+      input.value = text;
+      input.focus();
+    }
+
+    function attachSampleVideo() {
+      const row = document.getElementById('attachment-row');
+      row.classList.remove('hidden');
+      row.classList.add('flex');
+      const input = document.getElementById('composer-input');
+      if (!input.value.trim()) {
+        input.value = '添付した動画の「引分け」から「会・離れ」にかけて改善点があれば教えてください。';
+      }
+      input.focus();
+    }
+
+    function clearAttachment() {
+      const row = document.getElementById('attachment-row');
+      row.classList.add('hidden');
+      row.classList.remove('flex');
+    }
+
+    function handleKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+    }
+
+    function resetToWelcome() {
+      document.getElementById('welcome-view').classList.remove('hidden');
+      document.getElementById('welcome-view').classList.add('flex');
+      document.getElementById('chat-thread').classList.add('hidden');
+      document.getElementById('chat-thread').innerHTML = '';
+      document.getElementById('composer-input').value = '';
+      clearAttachment();
+    }
+
+    function sendPrompt(text) {
+      document.getElementById('welcome-view').classList.add('hidden');
+      document.getElementById('welcome-view').classList.remove('flex');
+      const thread = document.getElementById('chat-thread');
+      thread.classList.remove('hidden');
+      thread.classList.add('flex');
+
+      const userBubble = document.createElement('div');
+      userBubble.className = 'flex justify-end';
+      userBubble.innerHTML = '<div class="max-w-xl px-gutter-md py-gutter-sm rounded-2xl bg-light-surface-container-low text-light-on-surface font-body text-body-md">' + text + '</div>';
+      thread.appendChild(userBubble);
+
+      const aiBubble = document.createElement('div');
+      aiBubble.className = 'flex items-start gap-gutter-md';
+      aiBubble.innerHTML = '<div class="w-8 h-8 rounded-full bg-light-primary text-light-on-primary flex items-center justify-center shrink-0 mt-1"><span class="material-symbols-outlined text-[16px]" aria-hidden="true">adjust</span></div><div class="flex-1 flex flex-col gap-gutter-sm text-light-on-surface font-body text-body-md text-pretty"><p>ご相談ありがとうございます。射形の安定には<strong>「左右の均等な伸び合い」</strong>と<strong>「呼吸の収まり」</strong>が鍵になります。</p><p>まずは矢束いっぱいまで引き分けた後、息を静かに詰めながら両肩を水平に保ち、的と弓が一体になる感覚を2〜3秒味わうところから試してみてください。具体的な矢所の偏り（右・左・上・下）も教えていただければ、さらに絞って整理します。</p></div>';
+      thread.appendChild(aiBubble);
+    }
+
+    function loadSampleChat(key) {
+      const prompts = {
+        hayake: '早気を直すための会の保ち方を教えてください。',
+        right: '離れで矢が右に抜ける原因は何が考えられますか？',
+        oshide: '大三から引分けでの押手の角見の効かせ方を教えてください。'
+      };
+      document.getElementById('chat-thread').innerHTML = '';
+      sendPrompt(prompts[key] || prompts.hayake);
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('composer-input');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+      clearAttachment();
+      sendPrompt(val);
+    }
+  </script>
+
+
+</body></html>
