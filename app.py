@@ -450,16 +450,65 @@ html, body, [class*="css"], .stApp {
 [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] button {
     position: relative; z-index: 1002;
     color: var(--ink-secondary) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+    transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+[data-testid="stExpandSidebarButton"] {
+    position: fixed !important; top: 12px !important; left: 12px !important;
+    width: 36px; height: 36px;
     background: var(--surface-2) !important;
     border: 1px solid var(--border-subtle) !important;
-    border-radius: 999px !important;
     box-shadow: var(--shadow-sm) !important;
 }
-[data-testid="stExpandSidebarButton"] { position: fixed !important; top: 12px !important; left: 12px !important; width: 36px; height: 36px; }
 [data-testid="stExpandSidebarButton"]:hover, [data-testid="stSidebarCollapseButton"] button:hover {
-    border-color: var(--shu) !important; color: var(--shu) !important;
+    background: var(--surface-3) !important;
+    border-color: var(--border-hairline) !important;
+    color: var(--ink-primary) !important;
 }
 [data-testid="stExpandSidebarButton"] *, [data-testid="stSidebarCollapseButton"] button * { color: inherit !important; }
+
+/* ✕ アイコン（サイドバー閉じるボタン）: double-arrow → close に差し替え */
+[data-testid="stSidebarCollapseButton"] button span {
+    font-size: 0 !important;
+    width: 24px !important; height: 24px !important;
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+[data-testid="stSidebarCollapseButton"] button span::after {
+    content: "close" !important;
+    font-family: "Material Symbols Outlined", "Material Symbols Rounded", "Material Icons" !important;
+    font-size: 22px !important; line-height: 1 !important;
+    display: inline-block !important; color: inherit !important;
+    font-style: normal !important; font-weight: 300 !important;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24 !important;
+}
+
+/* サイドバーヘッダー：ブランドをボタン左横に配置 */
+[data-testid="stSidebarHeader"] {
+    padding: 10px 8px 10px 14px !important;
+    height: auto !important;
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+[data-testid="stSidebarHeader"] #kyudo-sidebar-brand {
+    display: flex !important; align-items: center !important;
+    gap: 10px !important; flex: 1 1 auto !important;
+    padding: 0 !important; margin: 0 !important; min-width: 0 !important;
+}
+[data-testid="stSidebarHeader"] .sb-brand-name {
+    font-size: 15px !important; line-height: 1.25 !important;
+}
+[data-testid="stSidebarHeader"] .sb-brand-tag {
+    font-size: 10px !important; letter-spacing: 0.06em !important;
+}
+/* stSidebarUserContent 内のブランド（移動前）は非表示にしてガタつき防止 */
+[data-testid="stSidebarUserContent"] #kyudo-sidebar-brand {
+    display: none !important;
+}
 
 [data-testid="stMainBlockContainer"] {
     max-width: 768px !important;
@@ -2235,10 +2284,10 @@ def render_custom_sidebar_section(kind: str, title: str, item_icon: str):
 # ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
 
-    # ── ブランドヘッダー（的ロゴ + 射心 Kyudo AI） ───────────────
+    # ── ブランドヘッダー（的ロゴ + 射心 Kyudo AI）：JSでサイドバーヘッダーに移動 ───
     st.markdown(f"""
-    <div style="display: flex; align-items: center; gap: 10px; padding: 6px 4px 14px 4px;">
-        <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-hairline); display: flex; align-items: center; justify-content: center; shrink-0; box-shadow: var(--shadow-sm);">
+    <div id="kyudo-sidebar-brand" style="display: flex; align-items: center; gap: 10px; padding: 6px 4px 14px 4px;">
+        <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-hairline); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm);">
             {get_mato_svg(20)}
         </div>
         <div>
@@ -2246,6 +2295,33 @@ with st.sidebar:
             <span class="sb-brand-tag">弓道専門指導 AI</span>
         </div>
     </div>
+    <script>
+    (function kyudoBrandMount() {{
+        function moveBrand() {{
+            var brand = document.getElementById('kyudo-sidebar-brand');
+            var header = document.querySelector('[data-testid="stSidebarHeader"]');
+            if (!brand || !header) return false;
+            if (header.contains(brand)) return true;
+            var collapseBtn = header.querySelector('[data-testid="stSidebarCollapseButton"]');
+            if (collapseBtn) {{
+                header.insertBefore(brand, collapseBtn);
+            }} else {{
+                header.appendChild(brand);
+            }}
+            brand.style.removeProperty('padding');
+            brand.style.removeProperty('margin');
+            return true;
+        }}
+        // 即時実行 → 失敗したらリトライ
+        if (!moveBrand()) {{
+            [50, 150, 350, 700].forEach(function(d) {{ setTimeout(moveBrand, d); }});
+        }}
+        // Streamlit の再レンダリング後も維持する MutationObserver
+        var obs = new MutationObserver(function() {{ moveBrand(); }});
+        var target = document.querySelector('[data-testid="stSidebar"]') || document.body;
+        obs.observe(target, {{ childList: true, subtree: true }});
+    }})();
+    </script>
     """, unsafe_allow_html=True)
 
     # ── 新規相談ボタン ──────────────────────────────────────────
