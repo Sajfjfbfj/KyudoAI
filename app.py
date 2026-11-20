@@ -470,13 +470,14 @@ html, body, [class*="css"], .stApp {
 }
 [data-testid="stExpandSidebarButton"] *, [data-testid="stSidebarCollapseButton"] button * { color: inherit !important; }
 
-/* ✕ アイコン（サイドバー閉じるボタン）: double-arrow → close に差し替え */
-[data-testid="stSidebarCollapseButton"] button span {
+/* ✕ アイコン（サイドバー閉じるボタン）: double-arrow → close に差し替え
+   button 内の全 span に当てると複数 × が出るため、アイコン span だけ狙う */
+[data-testid="stSidebarCollapseButton"] [data-testid="stIconMaterial"] {
     font-size: 0 !important;
     width: 24px !important; height: 24px !important;
     display: inline-flex !important; align-items: center !important; justify-content: center !important;
 }
-[data-testid="stSidebarCollapseButton"] button span::after {
+[data-testid="stSidebarCollapseButton"] [data-testid="stIconMaterial"]::after {
     content: "close" !important;
     font-family: "Material Symbols Outlined", "Material Symbols Rounded", "Material Icons" !important;
     font-size: 22px !important; line-height: 1 !important;
