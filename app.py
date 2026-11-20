@@ -5,6 +5,7 @@ import re
 import tempfile
 import hashlib
 import shutil
+import html
 import secrets
 from concurrent.futures import ThreadPoolExecutor
 import base64
@@ -895,6 +896,35 @@ div[data-testid="stPopoverBody"] textarea::placeholder,
 div[data-testid="stPopoverBody"] input::placeholder {
     color: var(--ink-dim) !important;
     -webkit-text-fill-color: var(--ink-dim) !important;
+}
+/* 段位・称号のタップ選択ボタン */
+div[data-testid="stPopoverBody"] button[kind="pills"] {
+    background: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+div[data-testid="stPopoverBody"] button[kind="pillsActive"] {
+    background: var(--shu-soft) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--shu) !important;
+    font-weight: 600 !important;
+}
+/* 段位・称号のタップ選択ボタン：ダークでも読めるようテーマ色で塗る。選択中は朱色の縁で目立たせる */
+div[data-testid="stPopoverBody"] button[data-testid="stBaseButton-pills"],
+div[data-testid="stPopoverBody"] [data-testid="stButtonGroup"] button {
+    background: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+div[data-testid="stPopoverBody"] button[data-testid="stBaseButton-pillsActive"] {
+    background: var(--shu-soft) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--shu) !important;
+    font-weight: 600 !important;
+}
+div[data-testid="stPopoverBody"] [data-testid="stButtonGroup"] button p,
+div[data-testid="stPopoverBody"] [data-testid="stButtonGroup"] button span {
+    color: var(--ink-primary) !important;
 }
 /* 選択ボックスを開いたときの一覧（ポップアップの外側に描画される） */
 div[data-baseweb="popover"] ul[role="listbox"],
@@ -1826,11 +1856,28 @@ def set_user_title(username: str, title: str):
         notes.insert(1 if notes and notes[0].startswith(RANK_PREFIXES) else 0, f"称号: {title}")
     save_user_memory(username, notes)
 
+def _pick_one(label: str, options: list, key: str, on_change, help_text: str = ""):
+    """プルダウンはポップアップ内で開けないことがあるため、タップで選べるボタン形式にする"""
+    if hasattr(st, "pills"):
+        st.pills(label, options, selection_mode="single", key=key, on_change=on_change, help=help_text or None)
+    else:
+        st.radio(label, options, index=None, key=key, on_change=on_change, horizontal=True, help=help_text or None)
+
+def _add_memory_from_input():
+    """入力欄の内容を記憶に追加する。複数行なら1行ずつ別の記憶にする。追加後は入力欄を空にする"""
+    user = st.session_state.get("logged_in_user", "default")
+    raw = st.session_state.get("new_mem_pop", "") or ""
+    for line in raw.splitlines():
+        line = line.strip()
+        if line:
+            add_user_memory_item(user, line[:2000])
+    st.session_state["new_mem_pop"] = ""
+
 def _on_title_change():
-    set_user_title(st.session_state.get("logged_in_user", "default"), st.session_state.get("sb_title_select", RANK_UNSET))
+    set_user_title(st.session_state.get("logged_in_user", "default"), st.session_state.get("sb_title_select") or RANK_UNSET)
 
 def _on_rank_change():
-    set_user_rank(st.session_state.get("logged_in_user", "default"), st.session_state.get("sb_rank_select", RANK_UNSET))
+    set_user_rank(st.session_state.get("logged_in_user", "default"), st.session_state.get("sb_rank_select") or RANK_UNSET)
 
 def add_user_memory_item(username: str, note_text: str):
     """手動または自動で記憶を1つ追加"""
@@ -2836,21 +2883,25 @@ with st.sidebar:
             st.caption("AIが対話から覚えた情報です。")
             # 段位：選ぶとカルテに保存され、AIが毎回の回答で覚えている情報として使う
             _cur_rank = get_user_rank(cur_user)
-            _rank_opts = RANK_CHOICES if _cur_rank in RANK_CHOICES else RANK_CHOICES + [_cur_rank]  # AIが抽出した表記ゆれ対策
-            st.session_state["sb_rank_select"] = _cur_rank
-            st.selectbox("あなたの段位", _rank_opts, key="sb_rank_select", on_change=_on_rank_change,
-                         help="選んだ段位はAIが覚えて、レベルに合わせた指導をします")
+            _rank_opts = [c for c in RANK_CHOICES if c != RANK_UNSET]
+            if _cur_rank != RANK_UNSET and _cur_rank not in _rank_opts:
+                _rank_opts.append(_cur_rank)  # AIが抽出した表記ゆれ対策
+            st.session_state["sb_rank_select"] = None if _cur_rank == RANK_UNSET else _cur_rank
+            _pick_one("あなたの段位", _rank_opts, "sb_rank_select", _on_rank_change,
+                      "タップして選択（もう一度タップで未設定）。選んだ段位はAIが覚えて、レベルに合わせた指導をします")
             _cur_title = get_user_title(cur_user)
-            _title_opts = TITLE_CHOICES if _cur_title in TITLE_CHOICES else TITLE_CHOICES + [_cur_title]
-            st.session_state["sb_title_select"] = _cur_title
-            st.selectbox("あなたの称号", _title_opts, key="sb_title_select", on_change=_on_title_change,
-                         help="錬士・教士・範士。選んだ称号もAIが覚えて、指導に反映します")
+            _title_opts = [c for c in TITLE_CHOICES if c != RANK_UNSET]
+            if _cur_title != RANK_UNSET and _cur_title not in _title_opts:
+                _title_opts.append(_cur_title)
+            st.session_state["sb_title_select"] = None if _cur_title == RANK_UNSET else _cur_title
+            _pick_one("あなたの称号", _title_opts, "sb_title_select", _on_title_change,
+                      "錬士・教士・範士。タップして選択（もう一度タップで未設定）。AIが覚えて指導に反映します")
             user_notes = load_user_memory(cur_user)
             if user_notes:
                 for idx, note in enumerate(user_notes):
                     col_n1, col_n2 = st.columns([0.80, 0.20])
                     with col_n1:
-                        st.markdown(f"<div style='font-size: 12px; padding: 4px 8px; background: var(--surface-3); border-radius: 6px; margin-bottom: 4px; color: var(--ink-primary);'>📌 {note}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='font-size: 12px; padding: 4px 8px; background: var(--surface-3); border-radius: 6px; margin-bottom: 4px; color: var(--ink-primary); white-space: pre-wrap; word-break: break-word;'>📌 {html.escape(str(note))}</div>", unsafe_allow_html=True)
                     with col_n2:
                         if st.button("✕", key=f"del_mem_p_{idx}", help="削除"):
                             remove_user_memory_item(cur_user, idx)
@@ -2861,11 +2912,9 @@ with st.sidebar:
             else:
                 st.info("記憶はまだありません。")
 
-            new_note = st.text_input("追加する情報:", key="new_mem_pop", placeholder="例: 弓力14kg、参段目標")
-            if st.button("記憶を追加", use_container_width=True, key="add_mem_pop_btn"):
-                if new_note.strip():
-                    add_user_memory_item(cur_user, new_note.strip())
-                    st.rerun()
+            st.text_area("追加する情報:", key="new_mem_pop", height=160,
+                         placeholder="例:\n弓力14kg、直心II\n参段審査に向けて会の伸びを練習中\n早気が出やすい\n\n（改行すると、1行ずつ別の記憶として追加されます）")
+            st.button("記憶を追加", use_container_width=True, key="add_mem_pop_btn", on_click=_add_memory_from_input)
 
         with tab_inst:
             st.caption("AIへの前提知識や希望スタイル")
