@@ -960,7 +960,9 @@ section[data-testid="stSidebar"] .st-key-sb_account {
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] { min-height: 44px !important; font-weight: 600 !important; }
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; }
 
-/* 不可視スクリプト・iframe（Cookie/localStorage保存用）の余白・高さを完全ゼロにして押し下げを防止 */
+/* 不可視スクリプト・iframe（Cookie/localStorage保存用）を完全不可視・DOM外に隔離 */
+.st-key-cookie_sync_slot,
+.st-key-cookie_sync_slot *,
 iframe[height="0"], iframe[height="1"],
 div[data-testid="stCustomComponentV1"]:has(iframe[height="0"]),
 div[data-testid="stCustomComponentV1"]:has(iframe[height="1"]),
@@ -968,20 +970,31 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="0"]),
 div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
 .element-container:has(iframe[height="0"]),
 .element-container:has(iframe[height="1"]) {
-    position: absolute !important;
+    position: fixed !important;
     top: -9999px !important;
     left: -9999px !important;
     width: 0 !important;
     height: 0 !important;
+    min-width: 0 !important;
     min-height: 0 !important;
+    max-width: 0 !important;
     max-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     pointer-events: none !important;
     opacity: 0 !important;
+    visibility: hidden !important;
     overflow: hidden !important;
     line-height: 0 !important;
+    font-size: 0 !important;
+    z-index: -9999 !important;
+}
+
+/* フォーム送信時の下部余白の乱れ・ショートカット指示文・ステータスちらつき防止 */
+[data-testid="stFormInstructions"],
+[data-testid="stFormSubmitButton"] + div {
+    display: none !important;
 }
 
 /* ---------- ログイン ---------- */
@@ -1683,13 +1696,15 @@ def _flush_cookie_js():
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.removeItem('{LOGIN_COOKIE}');}}catch(e){{}}"
               f"try{{P.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';}}catch(e){{}}")
-    components.html(f"<script>{js}</script>", height=0)
+    with st.container(key="cookie_sync_slot"):
+        components.html(f"<script>{js}</script>", height=0)
 
 def _restore_login_js():
     """リロード直後：localStorage にトークンがあれば、URLに一時的に付けて再読み込みし自動ログインさせる。"""
     js = (f"try{{var P=window.parent;var t=P.localStorage.getItem('{LOGIN_COOKIE}');"
           "if(t){var u=new URL(P.location.href);if(!u.searchParams.get('auth')){u.searchParams.set('auth',t);P.location.replace(u.toString());}}}catch(e){}")
-    components.html(f"<script>{js}</script>", height=0)
+    with st.container(key="cookie_sync_slot"):
+        components.html(f"<script>{js}</script>", height=0)
 
 def _query_login_token() -> str:
     try:
@@ -1713,7 +1728,7 @@ def _complete_login(username: str, guest: bool = False, issue_token: bool = True
         st.session_state.pop(k, None)
     st.rerun()
 
-def render_login_screen():
+def render_login_screen(slot=None):
     mode = st.session_state.get("auth_mode", "login")
     is_login = (mode == "login")
 
@@ -1735,6 +1750,8 @@ def render_login_screen():
                     submitted = st.form_submit_button("ログイン", use_container_width=True, type="primary")
                 if submitted:
                     if uname and upass and authenticate_user(uname, upass):
+                        if slot is not None:
+                            slot.empty()
                         _complete_login(uname)
                     else:
                         st.error("ユーザー名またはパスワードが正しくありません。")
@@ -1753,6 +1770,8 @@ def render_login_screen():
                     else:
                         ok, msg = register_user(reg_name, reg_pass1, reg_disp)
                         if ok:
+                            if slot is not None:
+                                slot.empty()
                             _complete_login(reg_name)
                         else:
                             st.error(msg)
@@ -1767,6 +1786,8 @@ def render_login_screen():
                 st.session_state.auth_mode = "login"
                 st.rerun()
         if st.button(f"ログインせずに使う（チャット{GUEST_CHAT_LIMIT}回まで・ファイル送信不可）", key="guest_login", use_container_width=True):
+            if slot is not None:
+                slot.empty()
             _complete_login(f"guest_{secrets.token_hex(4)}", guest=True)
 
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
@@ -1792,7 +1813,9 @@ _flush_cookie_js()
 if st.session_state.pop("_restore_pending", False):
     _restore_login_js()
 if not st.session_state.authenticated:
-    render_login_screen()
+    login_slot = st.empty()
+    with login_slot.container():
+        render_login_screen(login_slot)
     st.stop()
 if "logged_in_user" not in st.session_state or not st.session_state.logged_in_user:
     st.session_state.logged_in_user = "archer"
