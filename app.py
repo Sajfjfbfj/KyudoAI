@@ -506,9 +506,17 @@ html, body, [class*="css"], .stApp {
 [data-testid="stSidebarHeader"] .sb-brand-tag {
     font-size: 10px !important; letter-spacing: 0.06em !important;
 }
-/* stSidebarUserContent 内のブランド（移動前）は非表示にしてガタつき防止 */
+/* stSidebarUserContent 内のブランド（JSで header へ移動後）は完全に消す */
 [data-testid="stSidebarUserContent"] #kyudo-sidebar-brand {
     display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* stSidebarUserContent のブランド移動後は余分な上パディングを取り除く */
+[data-testid="stSidebarUserContent"] #kyudo-sidebar-brand ~ * {
+    /* ブランドの直後の要素はそのまま自然な位置に */
 }
 
 [data-testid="stMainBlockContainer"] {
@@ -585,6 +593,16 @@ section[data-testid="stSidebar"] {
     border-right: 0 !important;
 }
 section[data-testid="stSidebar"] > div { background: transparent !important; }
+/* stSidebarContent（ヘッダー＋スクロール領域全体）はフレックス縦積み */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    display: flex !important;
+    flex-direction: column !important;
+}
+/* スクロール可能なユーザーコンテンツ領域は header の高さ分オフセット不要だが
+   ヘッダーが sticky になった場合の被りを防ぐために scroll-padding を設定 */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    overflow-y: auto !important;
+}
 section[data-testid="stSidebar"] .stMarkdown,
 section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] span,
@@ -606,8 +624,9 @@ section[data-testid="stSidebar"] strong { color: var(--ink-primary) !important; 
     font-size: 11.5px !important;
     font-weight: 600 !important;
     letter-spacing: 0.05em !important;
-    padding: 14px 10px 4px !important;
-    margin-top: 4px;
+    padding: 10px 10px 4px !important;
+    margin-top: 2px !important;
+    display: block !important;
 }
 
 section[data-testid="stSidebar"] .stButton > button,
@@ -736,7 +755,8 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 }
 /* サイドバーの縦の間隔を詰めて整頓 */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: 0.2rem !important; }
-section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 1.2rem !important; }
+/* ブランドをヘッダーに移した後は UserContent の上パディング不要 */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 0.4rem !important; }
 section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] { gap: 0.2rem !important; align-items: center !important; }
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button { color: var(--ink-muted) !important; }
 
@@ -2304,21 +2324,37 @@ with st.sidebar:
             if (!brand || !header) return false;
             if (header.contains(brand)) return true;
             var collapseBtn = header.querySelector('[data-testid="stSidebarCollapseButton"]');
+            // ヘッダーの先頭（✕ボタンの左横）に移動
             if (collapseBtn) {{
                 header.insertBefore(brand, collapseBtn);
             }} else {{
-                header.appendChild(brand);
+                header.prepend(brand);
             }}
-            brand.style.removeProperty('padding');
-            brand.style.removeProperty('margin');
+            // インラインスタイルをリセット（CSSで制御）
+            brand.style.cssText = '';
+            // 元の UserContent 内に残る wrapper の余白を詰める
+            var uc = document.querySelector('[data-testid="stSidebarUserContent"]');
+            if (uc) {{
+                var firstEl = uc.firstElementChild;
+                if (firstEl) {{
+                    firstEl.style.marginTop = '0';
+                    firstEl.style.paddingTop = '0';
+                }}
+            }}
             return true;
         }}
         // 即時実行 → 失敗したらリトライ
         if (!moveBrand()) {{
-            [50, 150, 350, 700].forEach(function(d) {{ setTimeout(moveBrand, d); }});
+            [50, 150, 300, 600, 1000].forEach(function(d) {{ setTimeout(moveBrand, d); }});
         }}
         // Streamlit の再レンダリング後も維持する MutationObserver
-        var obs = new MutationObserver(function() {{ moveBrand(); }});
+        var obs = new MutationObserver(function(mutations) {{
+            var brand = document.getElementById('kyudo-sidebar-brand');
+            var header = document.querySelector('[data-testid="stSidebarHeader"]');
+            if (brand && header && !header.contains(brand)) {{
+                moveBrand();
+            }}
+        }});
         var target = document.querySelector('[data-testid="stSidebar"]') || document.body;
         obs.observe(target, {{ childList: true, subtree: true }});
     }})();
