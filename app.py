@@ -1697,12 +1697,67 @@ def save_user_memory(username: str, notes: list[str]):
     except Exception:
         pass
 
+RANK_PREFIXES = ("段位:", "段位：")
+RANK_UNSET = "未設定"
+RANK_CHOICES = [RANK_UNSET, "級位（無段）", "初段", "弐段", "参段", "四段", "五段", "六段", "七段", "八段"]
+
+def get_user_rank(username: str) -> str:
+    """カルテに保存されている段位を返す（なければ未設定）"""
+    for n in load_user_memory(username):
+        if n.startswith(RANK_PREFIXES):
+            val = n.split(":", 1)[-1].split("：", 1)[-1].strip() if n else ""
+            return val or RANK_UNSET
+    return RANK_UNSET
+
+def set_user_rank(username: str, rank: str):
+    """段位をカルテに保存（未設定を選んだら削除）。AIが毎回の回答で参照する"""
+    notes = [n for n in load_user_memory(username) if not n.startswith(RANK_PREFIXES)]
+    if rank and rank != RANK_UNSET:
+        notes.insert(0, f"段位: {rank}")
+    save_user_memory(username, notes)
+
+TITLE_PREFIXES = ("称号:", "称号：")
+TITLE_CHOICES = [RANK_UNSET, "錬士", "教士", "範士"]
+
+def get_user_title(username: str) -> str:
+    """カルテに保存されている称号（錬士・教士・範士）を返す（なければ未設定）"""
+    for n in load_user_memory(username):
+        if n.startswith(TITLE_PREFIXES):
+            val = n.split(":", 1)[-1].split("：", 1)[-1].strip()
+            return val or RANK_UNSET
+    return RANK_UNSET
+
+def set_user_title(username: str, title: str):
+    """称号をカルテに保存（未設定を選んだら削除）"""
+    notes = [n for n in load_user_memory(username) if not n.startswith(TITLE_PREFIXES)]
+    if title and title != RANK_UNSET:
+        notes.insert(1 if notes and notes[0].startswith(RANK_PREFIXES) else 0, f"称号: {title}")
+    save_user_memory(username, notes)
+
+def _on_title_change():
+    set_user_title(st.session_state.get("logged_in_user", "default"), st.session_state.get("sb_title_select", RANK_UNSET))
+
+def _on_rank_change():
+    set_user_rank(st.session_state.get("logged_in_user", "default"), st.session_state.get("sb_rank_select", RANK_UNSET))
+
 def add_user_memory_item(username: str, note_text: str):
     """手動または自動で記憶を1つ追加"""
     clean_text = note_text.strip()
     if not clean_text:
         return
     notes = load_user_memory(username)
+    # 段位は1件だけ持つ（AIの自動抽出や手動入力で新しい段位が来たら置き換える）
+    if clean_text.startswith(RANK_PREFIXES):
+        notes = [n for n in notes if not n.startswith(RANK_PREFIXES)]
+        notes.append(clean_text)
+        save_user_memory(username, notes)
+        return
+    # 称号（錬士・教士・範士）も1件だけ持つ
+    if clean_text.startswith(TITLE_PREFIXES):
+        notes = [n for n in notes if not n.startswith(TITLE_PREFIXES)]
+        notes.append(clean_text)
+        save_user_memory(username, notes)
+        return
     # 重複防止
     if clean_text not in notes:
         notes.append(clean_text)
@@ -1729,14 +1784,16 @@ def build_memory_prompt_section(username: str) -> str:
         f"【射手カルテ（あなたがこの射手について記憶しているパーソナル情報）】\n"
         f"{bullet_points}\n"
         f"※上記の射手情報（使用弓具・弓力・目標・抱えている課題など）を熟知している前提で、"
-        f"これまでの稽古の文脈に寄り添い、射手にとって最適なアドバイスを行ってください。\n\n"
+        f"これまでの稽古の文脈に寄り添い、射手にとって最適なアドバイスを行ってください。\n"
+        + ("※射手の段位・称号（錬士・教士・範士）に合わせて、説明の難しさや用語の深さ、次に目指す課題を調整してください。\n" if any(n.startswith(RANK_PREFIXES + TITLE_PREFIXES) for n in notes) else "")
+        + "\n"
     )
 
 def auto_extract_and_save_memory(username: str, user_text: str, api_key: str) -> list[str]:
     """ユーザーの発言から弓道に関する自己情報（弓力・段位・悩みなど）をAIが自動抽出し記憶に追加。抽出した項目一覧を返す。"""
     if not api_key or not user_text or len(user_text.strip()) < 4:
         return []
-    trigger_words = ["弓力", "kg", "キロ", "段", "級", "高校", "大学", "部活", "矢尺", "cm", "流派", "直心", "肥後", "グラス", "カーボン", "早気", "もたれ", "手の内", "審査", "大会", "歴", "年目"]
+    trigger_words = ["弓力", "kg", "キロ", "段", "級", "高校", "大学", "部活", "矢尺", "cm", "流派", "直心", "肥後", "グラス", "カーボン", "早気", "もたれ", "手の内", "審査", "大会", "歴", "年目", "錬士", "教士", "範士", "称号"]
     if not any(w in user_text for w in trigger_words):
         return []
 
@@ -1752,9 +1809,13 @@ def auto_extract_and_save_memory(username: str, user_text: str, api_key: str) ->
 【発言テキスト】:
 {user_text}
 
+段位が分かる場合は必ず「段位: 参段」の形式（段位: ＋段・級だけ）、
+称号（錬士・教士・範士）が分かる場合は「称号: 錬士」の形式で出力してください。
+
 【出力形式の例】:
 ・弓力: 14kg (直心II)
-・目標: 参段審査の合格
+・段位: 参段
+・目標: 四段審査の合格
 """
         response = client.models.generate_content(
             model="gemini-3.5-flash-lite",
@@ -2687,6 +2748,17 @@ with st.sidebar:
 
         with tab_memory:
             st.caption("AIが対話から覚えた情報です。")
+            # 段位：選ぶとカルテに保存され、AIが毎回の回答で覚えている情報として使う
+            _cur_rank = get_user_rank(cur_user)
+            _rank_opts = RANK_CHOICES if _cur_rank in RANK_CHOICES else RANK_CHOICES + [_cur_rank]  # AIが抽出した表記ゆれ対策
+            st.session_state["sb_rank_select"] = _cur_rank
+            st.selectbox("あなたの段位", _rank_opts, key="sb_rank_select", on_change=_on_rank_change,
+                         help="選んだ段位はAIが覚えて、レベルに合わせた指導をします")
+            _cur_title = get_user_title(cur_user)
+            _title_opts = TITLE_CHOICES if _cur_title in TITLE_CHOICES else TITLE_CHOICES + [_cur_title]
+            st.session_state["sb_title_select"] = _cur_title
+            st.selectbox("あなたの称号", _title_opts, key="sb_title_select", on_change=_on_title_change,
+                         help="錬士・教士・範士。選んだ称号もAIが覚えて、指導に反映します")
             user_notes = load_user_memory(cur_user)
             if user_notes:
                 for idx, note in enumerate(user_notes):
