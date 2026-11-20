@@ -1348,7 +1348,6 @@ section[data-testid="stSidebar"] [data-testid="stPopoverButton"] > div { justify
 [data-testid="stCaptionContainer"] p, [data-testid="stCaptionContainer"] { font-size: 13px !important; color: var(--ink-muted) !important; line-height: 1.6 !important; }
 
 /* サイドバー最下部のアカウントボタン（アカウント＋設定・射手カルテを統合） */
-section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] { min-height: calc(100vh - 2.6rem); }
 section[data-testid="stSidebar"] .st-key-sb_account {
     margin-top: auto !important; position: sticky !important; bottom: 0 !important; z-index: 50 !important;
     background: var(--surface-1) !important;
@@ -1367,6 +1366,18 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
     min-height: 0 !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: 0 !important;   /* Streamlit標準の下余白が、固定したアカウント欄の下に隙間を作るため0にする */
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div {
+    flex: 1 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {
+    flex: 1 0 auto !important;
+    min-height: 0 !important;
 }
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] { min-height: 44px !important; font-weight: 600 !important; }
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; }
