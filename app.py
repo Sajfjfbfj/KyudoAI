@@ -4,6 +4,7 @@ import json
 import re
 import tempfile
 import hashlib
+import shutil
 import secrets
 from concurrent.futures import ThreadPoolExecutor
 import base64
@@ -865,6 +866,52 @@ div[data-baseweb="popover"] [data-baseweb="popover-arrow"] {
     background: var(--surface-2) !important;
 }
 
+/* 設定ポップアップ内の入力欄（カルテの「追加する情報」、指示の2つのテキスト欄、段位・称号の選択）：
+   ダークモードで枠が白のまま、文字だけ明るくなって見えなくなる問題の対策。入力欄とその外枠を面の色で塗る */
+div[data-testid="stPopoverBody"] div:has(> textarea),
+div[data-testid="stPopoverBody"] div:has(> input),
+div[data-testid="stPopoverBody"] div:has(> div > textarea),
+div[data-testid="stPopoverBody"] div:has(> div > input),
+div[data-testid="stPopoverBody"] [data-baseweb="input"],
+div[data-testid="stPopoverBody"] [data-baseweb="base-input"],
+div[data-testid="stPopoverBody"] [data-baseweb="textarea"],
+div[data-testid="stPopoverBody"] [data-baseweb="select"] > div,
+div[data-testid="stPopoverBody"] [data-testid="stTextInputRootElement"],
+div[data-testid="stPopoverBody"] [data-testid="stTextAreaRootElement"] {
+    background: var(--surface-3) !important;
+    background-color: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
+    border-color: var(--border-subtle) !important;
+}
+div[data-testid="stPopoverBody"] textarea,
+div[data-testid="stPopoverBody"] input {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: var(--ink-primary) !important;
+    -webkit-text-fill-color: var(--ink-primary) !important;
+    caret-color: var(--ink-primary) !important;
+}
+div[data-testid="stPopoverBody"] textarea::placeholder,
+div[data-testid="stPopoverBody"] input::placeholder {
+    color: var(--ink-dim) !important;
+    -webkit-text-fill-color: var(--ink-dim) !important;
+}
+/* 選択ボックスを開いたときの一覧（ポップアップの外側に描画される） */
+div[data-baseweb="popover"] ul[role="listbox"],
+div[data-baseweb="popover"] [data-baseweb="menu"] {
+    background: var(--surface-2) !important;
+    color: var(--ink-primary) !important;
+}
+div[data-baseweb="popover"] li[role="option"],
+div[data-baseweb="popover"] li[role="option"] * {
+    background: transparent !important;
+    color: var(--ink-primary) !important;
+}
+div[data-baseweb="popover"] li[role="option"]:hover,
+div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
+    background: var(--surface-3) !important;
+}
+
 /* ---------- 上部バー（コンテナ key="topbar"） ---------- */
 .st-key-topbar {
     position: sticky; top: 0; z-index: 90;
@@ -1657,10 +1704,57 @@ def register_user(username: str, password: str, display_name: str = "") -> tuple
     save_users(users)
     return True, "アカウントが正常に作成されました！"
 
+# ==================== ユーザー別データの保存先（他のユーザーと絶対に混ざらないようにする） ====================
+def _legacy_user_safe(username: str) -> str:
+    return "".join(c for c in (username or "") if c.isalnum() or c in ("-", "_"))
+
+def user_data_key(username: str) -> str:
+    """ユーザー名から保存用の名前を作る。記号を含む名前は、記号を取り除くと別ユーザーと同じ名前になって
+    データが混ざる恐れがあるため、その場合はユーザー名のハッシュを付けて必ず別の名前にする。"""
+    u = (username or "").strip().lower()
+    safe = _legacy_user_safe(u)
+    if u and safe == u:
+        return safe
+    h = hashlib.sha256(u.encode("utf-8")).hexdigest()[:10]
+    return f"{safe[:24] or 'user'}_{h}"
+
+def _legacy_is_exclusively_mine(username: str) -> bool:
+    """旧方式（記号を除くだけ）の保存先を、他のユーザーと共有していなかったか確認する"""
+    u = (username or "").strip().lower()
+    legacy = _legacy_user_safe(u)
+    if not legacy:
+        return False
+    try:
+        owners = [n for n in load_users() if _legacy_user_safe(n) == legacy]
+    except Exception:
+        return False
+    return owners == [u]
+
+def user_data_file(base_dir: str, username: str, suffix: str = ".json") -> str:
+    """ユーザー専用ファイルのパス。旧方式のデータが自分だけのものだった場合に限り、新しい保存先へ引き継ぐ"""
+    os.makedirs(base_dir, exist_ok=True)
+    key = user_data_key(username)
+    path = os.path.join(base_dir, f"{key}{suffix}")
+    legacy = _legacy_user_safe((username or "").strip().lower())
+    if legacy and key != legacy and not os.path.exists(path):
+        old = os.path.join(base_dir, f"{legacy}{suffix}")
+        if os.path.exists(old) and _legacy_is_exclusively_mine(username):
+            try:
+                shutil.copy2(old, path)
+            except Exception:
+                pass
+    return path
+
 def get_current_history_dir() -> str:
     current_user = st.session_state.get("logged_in_user", "default")
-    user_safe = "".join(c for c in current_user if c.isalnum() or c in ("-", "_"))
-    h_dir = os.path.join(os.path.dirname(__file__), "history", user_safe)
+    base = os.path.join(os.path.dirname(__file__), "history")
+    h_dir = os.path.join(base, user_data_key(current_user))
+    legacy_dir = os.path.join(base, _legacy_user_safe((current_user or "").strip().lower()))
+    if (not os.path.exists(h_dir)) and legacy_dir != h_dir and os.path.isdir(legacy_dir) and _legacy_is_exclusively_mine(current_user):
+        try:
+            shutil.copytree(legacy_dir, h_dir)
+        except Exception:
+            pass
     os.makedirs(h_dir, exist_ok=True)
     return h_dir
 
@@ -1668,9 +1762,7 @@ def get_current_history_dir() -> str:
 MEMORIES_DIR = os.path.join(os.path.dirname(__file__), "data", "memories")
 
 def get_user_memory_path(username: str) -> str:
-    os.makedirs(MEMORIES_DIR, exist_ok=True)
-    user_safe = "".join(c for c in username if c.isalnum() or c in ("-", "_")) or "default"
-    return os.path.join(MEMORIES_DIR, f"{user_safe}.json")
+    return user_data_file(MEMORIES_DIR, username)
 
 def load_user_memory(username: str) -> list[str]:
     """ユーザーのAI記憶（弓力・段位・射癖・目標など）を取得"""
@@ -1835,9 +1927,7 @@ def auto_extract_and_save_memory(username: str, user_text: str, api_key: str) ->
 CUSTOM_INSTR_DIR = os.path.join(os.path.dirname(__file__), "data", "custom_instructions")
 
 def get_custom_instructions_path(username: str) -> str:
-    os.makedirs(CUSTOM_INSTR_DIR, exist_ok=True)
-    user_safe = "".join(c for c in username if c.isalnum() or c in ("-", "_")) or "default"
-    return os.path.join(CUSTOM_INSTR_DIR, f"{user_safe}.json")
+    return user_data_file(CUSTOM_INSTR_DIR, username)
 
 def load_custom_instructions(username: str) -> dict:
     """ユーザー独自のカスタム指示を取得"""
@@ -1876,6 +1966,7 @@ def build_custom_instructions_prompt(username: str) -> str:
         parts.append(f"【射手自身について知っておくべき追加事項】\n{profile}")
     if resp_pref:
         parts.append(f"【射手が希望するAIの応答スタイル・特別ルール】\n{resp_pref}")
+    parts.append("※上記は、いま話している射手本人が設定した内容です。この射手への回答では必ず反映し、守ってください（他の射手の情報は一切使いません）。")
     return "\n\n" + "\n\n".join(parts) + "\n\n"
 
 # ==================== 会話履歴の管理（名前変更・削除・スマート要約） ====================
@@ -2354,10 +2445,8 @@ if "current_session_id" not in st.session_state:
 # 選択キャラの保存・復元（ユーザーが変えるまで同じキャラを維持。リロードや新規チャットでも保持）
 def _char_pref_path() -> str:
     user = st.session_state.get("logged_in_user", "default")
-    user_safe = "".join(c for c in user if c.isalnum() or c in ("-", "_")) or "default"
     d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sidebar_items")
-    os.makedirs(d, exist_ok=True)
-    return os.path.join(d, f"{user_safe}_char.json")
+    return user_data_file(d, user, "_char.json")
 
 def _load_saved_char():
     try:
@@ -2393,10 +2482,8 @@ def switch_ai_character(new_char: str):
 # ==================== サイドバーのピン留め／プロジェクト（ユーザーが自由に追加・編集・削除） ====================
 def _sidebar_items_path() -> str:
     user = st.session_state.get("logged_in_user", "default")
-    user_safe = "".join(c for c in user if c.isalnum() or c in ("-", "_")) or "default"
     d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sidebar_items")
-    os.makedirs(d, exist_ok=True)
-    return os.path.join(d, f"{user_safe}.json")
+    return user_data_file(d, user)
 
 def load_sidebar_items(kind: str) -> list:
     """kind は 'pins'。初期状態は空。旧「プロジェクト」項目があればピン留めへ移行する。"""
@@ -2711,7 +2798,6 @@ with st.sidebar:
                 <span style="font-size: 11px; font-weight: 600; color: #2E6F40;">● 稼働中</span>
             </div>
             <div style="font-size: 15px; font-weight: 700; color: var(--ink-primary); margin: 2px 0;">{disp_name}</div>
-            <div style="font-size: 12px; color: var(--ink-secondary);">弐段・週3回稽古</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -3046,6 +3132,8 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
                 f"{regen_instruction}"
                 f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、生体力学・骨格アライメントの説明は身体の専門知識がない人にも直感的にわかる日常の言葉に言い換えて回答してください。弓道用語はそのまま使ってかまいません）】\n"
                 f"{system_instruction}\n\n"
+                f"{custom_instructions}"
+                f"{memory_section}"
                 f"【会話内容】\n" + "\n".join(contents)
             )
 
@@ -3146,6 +3234,8 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
             f"{regen_instruction}"
             f"【設定・役割（必ず上記科学的エビデンスを頭に入れつつ、生体力学・骨格アライメントの説明は身体の専門知識がない人にも直感的にわかる日常の言葉に言い換えて回答してください。弓道用語はそのまま使ってかまいません）】\n"
             f"{system_instruction}\n\n"
+            f"{custom_instructions}"
+            f"{memory_section}"
             f"【会話内容】\n" + "\n".join(contents)
         )
 
