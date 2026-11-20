@@ -2912,9 +2912,10 @@ with st.sidebar:
         </div>
         """, unsafe_allow_html=True)
 
-        tab_profile, tab_memory, tab_inst, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ", "🎯 指示", "💾 会話"])
+        tab_profile, tab_memory, tab_appset = st.tabs(["⚙️ 設定", "🧠 カルテ・指示", "💾 会話"])
 
         with tab_profile:
+            st.markdown("**表示**")
             st.radio("表示テーマ", THEME_CHOICES, key="ui_theme", horizontal=True, on_change=save_ui_theme)
             font_size_choice = st.radio(
                 "文字の大きさ:",
@@ -2928,7 +2929,7 @@ with st.sidebar:
             
             # ── 詳細設定（あなた専用。メモリーのON/OFFなど） ──
             st.divider()
-            st.markdown("**詳細設定**")
+            st.markdown("**AIの動作**")
             _us = load_user_settings(cur_user)
             st.session_state["sb_set_mem"] = _us["memory_enabled"]
             st.session_state["sb_set_auto"] = _us["auto_learn"]
@@ -2943,28 +2944,12 @@ with st.sidebar:
                       help="最近の相談テーマをAIに伝えて、これまでの流れを踏まえた回答にします")
             st.radio("回答の長さ", ANSWER_STYLES, key="sb_set_style", on_change=_on_user_setting_change, horizontal=True)
             st.caption("これらの設定と、AIが覚えた内容は、あなたのアカウントだけに保存されます。")
-            
-            st.divider()
-            if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
-                cur_tok = _query_login_token() or _browser_login_cookie()
-                revoke_login_token(cur_tok)
-                if "auth" in st.query_params:
-                    del st.query_params["auth"]
-                if "_kt" in st.query_params:
-                    del st.query_params["_kt"]
-                st.session_state["_cookie_clear"] = True
-                st.session_state.authenticated = False
-                st.session_state.is_guest = False
-                st.session_state.logged_in_user = ""
-                st.session_state.messages = []
-                if "current_session_id" in st.session_state:
-                    del st.session_state["current_session_id"]
-                st.rerun()
 
         with tab_memory:
+            st.markdown("**射手カルテ**")
             st.caption("AIが対話から覚えた情報です。")
             if not load_user_settings(cur_user)["memory_enabled"]:
-                st.warning("メモリーがOFFです。AIはカルテを参照しません（⚙️ 設定タブの「詳細設定」で変更できます）。")
+                st.warning("メモリーがOFFです。AIはカルテを参照しません（⚙️ 設定タブの「AIの動作」で変更できます）。")
             # 段位：選ぶとカルテに保存され、AIが毎回の回答で覚えている情報として使う
             _cur_rank = get_user_rank(cur_user)
             _rank_opts = [c for c in RANK_CHOICES if c != RANK_UNSET]
@@ -3000,7 +2985,8 @@ with st.sidebar:
                          placeholder="例:\n弓力14kg、直心II\n参段審査に向けて会の伸びを練習中\n早気が出やすい\n\n（改行すると、1行ずつ別の記憶として追加されます）")
             st.button("記憶を追加", use_container_width=True, key="add_mem_pop_btn", on_click=_add_memory_from_input)
 
-        with tab_inst:
+            st.divider()
+            st.markdown("**AIへの指示**")
             st.caption("AIへの前提知識や希望スタイル")
             cur_ci = load_custom_instructions(cur_user)
             ci_prof = st.text_area("あなた自身について:", value=cur_ci.get("profile", ""), height=65, key="ci_p_pop")
@@ -3037,6 +3023,25 @@ with st.sidebar:
                 🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
             """, unsafe_allow_html=True)
+
+        # ── ログアウト（どのタブからでも押せるよう、タブの外に配置） ──
+        
+        st.divider()
+        if st.button("🚪 ログアウト", use_container_width=True, key="btn_logout_pop"):
+            cur_tok = _query_login_token() or _browser_login_cookie()
+            revoke_login_token(cur_tok)
+            if "auth" in st.query_params:
+                del st.query_params["auth"]
+            if "_kt" in st.query_params:
+                del st.query_params["_kt"]
+            st.session_state["_cookie_clear"] = True
+            st.session_state.authenticated = False
+            st.session_state.is_guest = False
+            st.session_state.logged_in_user = ""
+            st.session_state.messages = []
+            if "current_session_id" in st.session_state:
+                del st.session_state["current_session_id"]
+            st.rerun()
 
 # ==================== サイドバーの右クリックメニュー（履歴・ピン留め・プロジェクト） ====================
 # Streamlit には右クリックメニューの機能がないため、親ページに小さなJSを1回だけ注入し、
