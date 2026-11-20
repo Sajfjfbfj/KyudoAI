@@ -1350,8 +1350,23 @@ section[data-testid="stSidebar"] [data-testid="stPopoverButton"] > div { justify
 /* サイドバー最下部のアカウントボタン（アカウント＋設定・射手カルテを統合） */
 section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] { min-height: calc(100vh - 2.6rem); }
 section[data-testid="stSidebar"] .st-key-sb_account {
-    margin-top: auto; position: sticky; bottom: 0; z-index: 5;
-    background: var(--surface-1); padding: 8px 0 4px !important; border-top: 1px solid var(--border-hairline);
+    margin-top: auto !important; position: sticky !important; bottom: 0 !important; z-index: 50 !important;
+    background: var(--surface-1) !important;
+    padding: 8px 0 calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+    border-top: 1px solid var(--border-hairline);
+}
+/* アカウント欄を常にサイドバー最下部に固定：サイドバー全体を画面の高さに収め、履歴部分だけをスクロールさせる */
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    height: 100% !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] { flex: 0 0 auto !important; }
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
 }
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] { min-height: 44px !important; font-weight: 600 !important; }
 section[data-testid="stSidebar"] .st-key-sb_account [data-testid="stPopoverButton"] > div { justify-content: flex-start !important; }
