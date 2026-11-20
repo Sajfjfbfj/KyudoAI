@@ -633,9 +633,28 @@ section[data-testid="stSidebar"] strong { color: var(--ink-primary) !important; 
     font-size: 11.5px !important;
     font-weight: 600 !important;
     letter-spacing: 0.05em !important;
-    padding: 10px 10px 4px !important;
-    margin-top: 2px !important;
+    line-height: 1.4 !important;
+    padding: 12px 10px 6px !important;
+    margin: 2px 0 0 !important;
     display: block !important;
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* 「今日」などの見出しが、直下のチャットタイトル行に隠れないよう、見出し側の要素を前面に出して高さを確保する */
+section[data-testid="stSidebar"] [data-testid="stElementContainer"]:has(> [data-testid="stMarkdown"] .sb-section-label),
+section[data-testid="stSidebar"] .stElementContainer:has(.sb-section-label),
+section[data-testid="stSidebar"] .element-container:has(.sb-section-label) {
+    position: relative !important;
+    z-index: 3 !important;
+    height: auto !important;
+    min-height: 28px !important;
+    overflow: visible !important;
+    margin-bottom: 2px !important;
+}
+/* 見出しの直後の行（チャットタイトル）は見出しより下の層に置く */
+section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"]:has([class*="st-key-sess_btn_"], [class*="st-key-sess_active_"]) {
+    position: relative !important;
+    z-index: 1 !important;
 }
 
 section[data-testid="stSidebar"] .stButton > button,
