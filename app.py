@@ -487,24 +487,33 @@ html, body, [class*="css"], .stApp {
 }
 
 /* サイドバーヘッダー：ブランドをボタン左横に配置 */
+/* height/min-height は設定しない — Streamlit内部の 2.875rem 計算を壊さないため */
 [data-testid="stSidebarHeader"] {
-    padding: 10px 8px 10px 14px !important;
-    height: auto !important;
-    min-height: 52px !important;
+    padding: 0 8px 0 14px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
+    overflow: visible !important;
 }
 [data-testid="stSidebarHeader"] #kyudo-sidebar-brand {
     display: flex !important; align-items: center !important;
-    gap: 10px !important; flex: 1 1 auto !important;
+    gap: 8px !important; flex: 1 1 auto !important;
     padding: 0 !important; margin: 0 !important; min-width: 0 !important;
+    overflow: hidden !important;
 }
 [data-testid="stSidebarHeader"] .sb-brand-name {
-    font-size: 15px !important; line-height: 1.25 !important;
+    font-size: 13px !important; line-height: 1.2 !important;
+    white-space: nowrap !important; overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 [data-testid="stSidebarHeader"] .sb-brand-tag {
-    font-size: 10px !important; letter-spacing: 0.06em !important;
+    font-size: 9.5px !important; letter-spacing: 0.06em !important;
+    white-space: nowrap !important;
+}
+/* ロゴ円をヘッダー高さに収まるようコンパクトに */
+[data-testid="stSidebarHeader"] #kyudo-sidebar-brand > div:first-child {
+    width: 26px !important; height: 26px !important; min-width: 26px !important;
+    font-size: 13px !important;
 }
 /* stSidebarUserContent 内のブランド（JSで header へ移動後）は完全に消す */
 [data-testid="stSidebarUserContent"] #kyudo-sidebar-brand {
@@ -755,8 +764,9 @@ button:focus-visible, [role="button"]:focus-visible, a:focus-visible {
 }
 /* サイドバーの縦の間隔を詰めて整頓 */
 section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap: 0.2rem !important; }
-/* ブランドをヘッダーに移した後は UserContent の上パディング不要 */
-section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 0.4rem !important; }
+/* ブランドをヘッダーに移した後は UserContent の上パディングはデフォルト値（0.75rem）に戻す */
+/* padding-top を大きくしすぎると header との間にスペースができ、今日ラベルが被る原因になる */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 0.75rem !important; }
 section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] { gap: 0.2rem !important; align-items: center !important; }
 section[data-testid="stSidebar"] [data-testid="stPopover"] > button { color: var(--ink-muted) !important; }
 
