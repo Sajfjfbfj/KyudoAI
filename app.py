@@ -2654,10 +2654,12 @@ def render_login_screen(slot=None):
 
     _, col_center, _ = st.columns([1, 1.5, 1])
     with col_center:
+        _yumiqa_b64 = get_asset_base64("yumiqa_icon.png")
+        _img_src = f"data:image/png;base64,{_yumiqa_b64}" if _yumiqa_b64 else "/app/static/icon-512.png"
         st.markdown(f"""
         <div class="login-wrap">
-            <div class="mato-emblem" style="width: 76px; height: 76px; border-radius: 16px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(0, 229, 255, 0.25), 0 2px 8px rgba(0,0,0,0.3);">
-                <img src="/app/static/icon-512.png?v=4" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
+            <div class="mato-emblem" style="width: 84px; height: 84px; border-radius: 18px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 8px 28px rgba(0, 229, 255, 0.35), 0 2px 10px rgba(0,0,0,0.4);">
+                <img src="{_img_src}" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
             </div>
             <div class="login-title">YUMIQA</div>
             <div class="login-subtitle">{"その一射に、次の成長を。AI弓道分析" if is_login else "アカウントを作成して、射の分析と記録を始めましょう。"}</div>
@@ -2894,10 +2896,12 @@ def _hist_show_less():
 with st.sidebar:
 
     # ── ブランドヘッダー（YUMIQA アイコン + YUMIQA｜AI弓道分析）：JSでサイドバーヘッダーに移動 ───
+    _sb_yumiqa_b64 = get_asset_base64("yumiqa_icon.png")
+    _sb_img_src = f"data:image/png;base64,{_sb_yumiqa_b64}" if _sb_yumiqa_b64 else "/app/static/icon-192.png"
     st.markdown(f"""
     <div id="kyudo-sidebar-brand" style="display: flex; align-items: center; gap: 8px; padding: 6px 4px 14px 4px;">
         <div style="width: 26px; height: 26px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm);">
-            <img src="/app/static/icon-192.png?v=4" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
+            <img src="{_sb_img_src}" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
         </div>
         <div>
             <div class="sb-brand-name">YUMIQA</div>
@@ -3968,11 +3972,13 @@ welcome_slot = None
 if not st.session_state.messages and not quick_prompt:
   welcome_slot = st.empty()
   with welcome_slot.container(key="welcome_wrap"):
-    # ===== ウェルカム画面（射心スタイル：的エンブレム＋大見出し＋4つのスターターカード＋トピックチップ） =====
+    # ===== ウェルカム画面（YUMIQAスタイル：エンブレム＋大見出し＋4つのスターターカード＋トピックチップ） =====
+    _wel_yumiqa_b64 = get_asset_base64("yumiqa_icon.png")
+    _wel_img_src = f"data:image/png;base64,{_wel_yumiqa_b64}" if _wel_yumiqa_b64 else "/app/static/icon-192.png"
     st.markdown(f"""
     <div class="welcome-hero">
-        <div class="mato-emblem" style="width: 58px; height: 58px; border-radius: 14px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25);">
-            <img src="/app/static/icon-192.png?v=4" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
+        <div class="mato-emblem" style="width: 64px; height: 64px; border-radius: 16px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25);">
+            <img src="{_wel_img_src}" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
         </div>
         <h1 class="welcome-title">今日の射形について、何を相談しますか？</h1>
         <p class="welcome-sub">射法八節の気になる点や矢所の傾向を教えてください。練習動画や写真からのフォーム確認にも対応しています。</p>
