@@ -201,7 +201,7 @@ cleanup_residual_files()
 
 # ページ基本設定
 st.set_page_config(
-    page_title="弓道AI道場 - Kyudo AI Chat",
+    page_title="YUMIQA｜AI弓道分析",
     page_icon="🏹",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -209,15 +209,15 @@ st.set_page_config(
 
 # ── PWA メタタグ＆ServiceWorker注入（ホーム画面追加・スプラッシュ対応） ──
 st.html("""
-<link rel="manifest" href="/app/static/manifest.json?v=2">
+<link rel="manifest" href="/app/static/manifest.json?v=3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="射心">
-<meta name="application-name" content="射心">
-<meta name="theme-color" content="#1B365D">
-<link rel="icon" type="image/png" href="/app/static/icon-192.png?v=2">
-<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=2">
+<meta name="apple-mobile-web-app-title" content="YUMIQA">
+<meta name="application-name" content="YUMIQA">
+<meta name="theme-color" content="#101D35">
+<link rel="icon" type="image/png" href="/app/static/icon-192.png?v=3">
+<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=3">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
 (function() {
@@ -231,8 +231,8 @@ st.html("""
             try { el.parentNode.removeChild(el); } catch(e) {}
         });
 
-        // 射心アプリアイコン・ファビコン
-        var iconUrl = '/app/static/icon-192.png?v=2';
+        // YUMIQA アプリアイコン・ファビコン
+        var iconUrl = '/app/static/icon-192.png?v=3';
         var fav = pDoc.createElement('link');
         fav.rel = 'icon';
         fav.type = 'image/png';
@@ -247,18 +247,18 @@ st.html("""
         // 新しい Manifest を <head> の先頭に挿入
         var manifestLink = pDoc.createElement('link');
         manifestLink.rel = 'manifest';
-        manifestLink.href = '/app/static/manifest.json?v=2';
+        manifestLink.href = '/app/static/manifest.json?v=3';
         pDoc.head.insertBefore(manifestLink, pDoc.head.firstChild);
 
-        pDoc.title = '射心 Kyudo AI';
+        pDoc.title = 'YUMIQA｜AI弓道分析';
 
         var metaTags = [
             { name: 'mobile-web-app-capable', content: 'yes' },
             { name: 'apple-mobile-web-app-capable', content: 'yes' },
             { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-            { name: 'apple-mobile-web-app-title', content: '射心' },
-            { name: 'application-name', content: '射心' },
-            { name: 'theme-color', content: '#1B365D' }
+            { name: 'apple-mobile-web-app-title', content: 'YUMIQA' },
+            { name: 'application-name', content: 'YUMIQA' },
+            { name: 'theme-color', content: '#101D35' }
         ];
 
         metaTags.forEach(function(tag) {
@@ -271,7 +271,7 @@ st.html("""
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/app/static/sw.js?v=2').catch(function(e){});
+            navigator.serviceWorker.register('/app/static/sw.js?v=3').catch(function(e){});
         }
     }
     setupPWA();
@@ -1412,7 +1412,7 @@ div[data-testid="stBottomBlockContainer"] {
 }
 /* 注意書きを入力欄のすぐ下に配置 */
 div[data-testid="stBottomBlockContainer"]::after {
-    content: "射心AIの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
+    content: "YUMIQAの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
     display: block; text-align: center; font-size: 11.5px; line-height: 1.5;
     color: var(--ink-secondary); padding: 8px 0 2px;
 }
@@ -2435,7 +2435,7 @@ def save_current_session(session_id: str, messages: list, custom_title: str = No
 def export_session_to_text(messages: list) -> str:
     """会話履歴を読みやすいテキスト・Markdownに整形"""
     output = []
-    output.append("# 🏹 弓道AI道場 稽古録\n")
+    output.append("# 🏹 YUMIQA 稽古録\n")
     output.append(f"記録日時: {time.strftime('%Y年%m月%d日 %H:%M')}\n")
     output.append("=" * 45 + "\n")
     
@@ -2654,11 +2654,11 @@ def render_login_screen(slot=None):
     with col_center:
         st.markdown(f"""
         <div class="login-wrap">
-            <div class="mato-emblem" style="width: 52px; height: 52px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-hairline); display: flex; align-items: center; justify-content: center; color: var(--shu); margin: 0 auto 16px; box-shadow: var(--shadow-sm);">
-                {get_mato_svg(28)}
+            <div class="mato-emblem" style="width: 56px; height: 56px; border-radius: 12px; overflow: hidden; margin: 0 auto 16px; box-shadow: var(--shadow-md);">
+                <img src="/app/static/icon-192.png?v=3" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
             </div>
-            <div class="login-title">弓道AI「射心」</div>
-            <div class="login-subtitle">{"アカウントにログインして、稽古を続けましょう。" if is_login else "アカウントを作成して、稽古の記録を残しましょう。"}</div>
+            <div class="login-title">YUMIQA</div>
+            <div class="login-subtitle">{"その一射に、次の成長を。AI弓道分析" if is_login else "アカウントを作成して、射の分析と記録を始めましょう。"}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -2891,15 +2891,15 @@ def _hist_show_less():
 # ==================== 弓道AI道場 ナビゲーション（Linear / Apple Pro スタイル） ====================
 with st.sidebar:
 
-    # ── ブランドヘッダー（的ロゴ + 射心 Kyudo AI）：JSでサイドバーヘッダーに移動 ───
+    # ── ブランドヘッダー（YUMIQA アイコン + YUMIQA｜AI弓道分析）：JSでサイドバーヘッダーに移動 ───
     st.markdown(f"""
-    <div id="kyudo-sidebar-brand" style="display: flex; align-items: center; gap: 10px; padding: 6px 4px 14px 4px;">
-        <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-hairline); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm);">
-            {get_mato_svg(20)}
+    <div id="kyudo-sidebar-brand" style="display: flex; align-items: center; gap: 8px; padding: 6px 4px 14px 4px;">
+        <div style="width: 26px; height: 26px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm);">
+            <img src="/app/static/icon-192.png?v=3" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
         </div>
         <div>
-            <div class="sb-brand-name">射心 Kyudo AI</div>
-            <span class="sb-brand-tag">弓道専門指導 AI</span>
+            <div class="sb-brand-name">YUMIQA</div>
+            <span class="sb-brand-tag">AI弓道分析</span>
         </div>
     </div>
     <script>
@@ -3107,7 +3107,7 @@ with st.sidebar:
         st.markdown(f"""
         <div style="border: 1px solid var(--border-hairline); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface-2);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="background: var(--primary-container); color: var(--on-primary-container); border: 1px solid var(--border-subtle); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.08em;">射心 PRO</span>
+                <span style="background: var(--primary-container); color: var(--on-primary-container); border: 1px solid var(--border-subtle); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.08em;">YUMIQA PRO</span>
                 <span style="font-size: 11px; font-weight: 600; color: #2E6F40;">● 稼働中</span>
             </div>
             <div style="font-size: 15px; font-weight: 700; color: var(--ink-primary); margin: 2px 0;">{disp_name}</div>
@@ -3941,7 +3941,7 @@ with st.container(key="topbar"):
     with col_tb1:
         _cur_c_tb = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
         _cur_inf_tb = CHARACTERS.get(_cur_c_tb, list(CHARACTERS.values())[0])
-        with st.popover(f"🏹 射心 · {_cur_c_tb.split('（')[0]}", use_container_width=False):
+        with st.popover(f"🏹 YUMIQA · {_cur_c_tb.split('（')[0]}", use_container_width=False):
             st.caption("指導陣（AIモデル）を選択")
             for cname, c_info_item in CHARACTERS.items():
                 st.button(
