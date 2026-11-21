@@ -202,22 +202,23 @@ cleanup_residual_files()
 # ページ基本設定
 st.set_page_config(
     page_title="YUMIQA｜AI弓道分析",
-    page_icon="🏹",
+    page_icon="assets/yumiqa_icon.png",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ── PWA メタタグ＆ServiceWorker注入（ホーム画面追加・スプラッシュ対応） ──
 st.html("""
-<link rel="manifest" href="/app/static/manifest.json?v=3">
+<link rel="manifest" href="/app/static/manifest.json?v=4">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="YUMIQA">
 <meta name="application-name" content="YUMIQA">
 <meta name="theme-color" content="#101D35">
-<link rel="icon" type="image/png" href="/app/static/icon-192.png?v=3">
-<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=3">
+<link rel="icon" type="image/png" href="/app/static/favicon.png?v=4">
+<link rel="shortcut icon" href="/app/static/favicon.ico?v=4">
+<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=4">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
 (function() {
@@ -232,11 +233,12 @@ st.html("""
         });
 
         // YUMIQA アプリアイコン・ファビコン
-        var iconUrl = '/app/static/icon-192.png?v=3';
+        var iconUrl = '/app/static/icon-192.png?v=4';
+        var favUrl = '/app/static/favicon.png?v=4';
         var fav = pDoc.createElement('link');
         fav.rel = 'icon';
         fav.type = 'image/png';
-        fav.href = iconUrl;
+        fav.href = favUrl;
         pDoc.head.appendChild(fav);
 
         var appleIcon = pDoc.createElement('link');
@@ -247,7 +249,7 @@ st.html("""
         // 新しい Manifest を <head> の先頭に挿入
         var manifestLink = pDoc.createElement('link');
         manifestLink.rel = 'manifest';
-        manifestLink.href = '/app/static/manifest.json?v=3';
+        manifestLink.href = '/app/static/manifest.json?v=4';
         pDoc.head.insertBefore(manifestLink, pDoc.head.firstChild);
 
         pDoc.title = 'YUMIQA｜AI弓道分析';
@@ -271,7 +273,7 @@ st.html("""
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/app/static/sw.js?v=3').catch(function(e){});
+            navigator.serviceWorker.register('/app/static/sw.js?v=4').catch(function(e){});
         }
     }
     setupPWA();
@@ -2654,8 +2656,8 @@ def render_login_screen(slot=None):
     with col_center:
         st.markdown(f"""
         <div class="login-wrap">
-            <div class="mato-emblem" style="width: 56px; height: 56px; border-radius: 12px; overflow: hidden; margin: 0 auto 16px; box-shadow: var(--shadow-md);">
-                <img src="/app/static/icon-192.png?v=3" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
+            <div class="mato-emblem" style="width: 76px; height: 76px; border-radius: 16px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 8px 24px rgba(0, 229, 255, 0.25), 0 2px 8px rgba(0,0,0,0.3);">
+                <img src="/app/static/icon-512.png?v=4" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
             </div>
             <div class="login-title">YUMIQA</div>
             <div class="login-subtitle">{"その一射に、次の成長を。AI弓道分析" if is_login else "アカウントを作成して、射の分析と記録を始めましょう。"}</div>
@@ -2895,7 +2897,7 @@ with st.sidebar:
     st.markdown(f"""
     <div id="kyudo-sidebar-brand" style="display: flex; align-items: center; gap: 8px; padding: 6px 4px 14px 4px;">
         <div style="width: 26px; height: 26px; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: var(--shadow-sm);">
-            <img src="/app/static/icon-192.png?v=3" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
+            <img src="/app/static/icon-192.png?v=4" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
         </div>
         <div>
             <div class="sb-brand-name">YUMIQA</div>
@@ -3969,8 +3971,8 @@ if not st.session_state.messages and not quick_prompt:
     # ===== ウェルカム画面（射心スタイル：的エンブレム＋大見出し＋4つのスターターカード＋トピックチップ） =====
     st.markdown(f"""
     <div class="welcome-hero">
-        <div class="mato-emblem">
-            {get_mato_svg(28)}
+        <div class="mato-emblem" style="width: 58px; height: 58px; border-radius: 14px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25);">
+            <img src="/app/static/icon-192.png?v=4" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
         </div>
         <h1 class="welcome-title">今日の射形について、何を相談しますか？</h1>
         <p class="welcome-sub">射法八節の気になる点や矢所の傾向を教えてください。練習動画や写真からのフォーム確認にも対応しています。</p>
