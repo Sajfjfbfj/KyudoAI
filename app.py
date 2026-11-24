@@ -226,6 +226,18 @@ st.html("""
         var pDoc = window.parent.document;
         if (!pDoc || !pDoc.head) return;
 
+        // 即座に自動ログイン復元（localStorage にトークンがあれば即座にauthパラメータ付与）
+        try {
+            var pWin = window.parent;
+            var savedTok = pWin.localStorage.getItem('kyudo_auth');
+            var curUrl = new URL(pWin.location.href);
+            if (savedTok && !curUrl.searchParams.get('auth')) {
+                curUrl.searchParams.set('auth', savedTok);
+                pWin.location.replace(curUrl.toString());
+                return;
+            }
+        } catch(e) {}
+
         // 既存の Streamlit 公式 manifest やアイコンを削除して上書き
         var oldEls = pDoc.querySelectorAll('link[rel="manifest"], link[rel="apple-touch-icon"], link[rel*="icon"]');
         oldEls.forEach(function(el) {
@@ -2711,11 +2723,14 @@ def _flush_cookie_js():
               f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
               "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}"
               f"try{{P.localStorage.setItem('yumiqa_u','{_fp_user}');P.localStorage.setItem('yumiqa_fp','{_fp_val}');}}catch(e){{}}"
+              f"try{{if(window.AndroidAuth){{window.AndroidAuth.saveAuth('{set_tok}');}}else if(P.AndroidAuth){{P.AndroidAuth.saveAuth('{set_tok}');}}}}catch(e){{}}"
               )
     else:
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.removeItem('{LOGIN_COOKIE}');P.localStorage.removeItem('yumiqa_u');P.localStorage.removeItem('yumiqa_fp');}}catch(e){{}}"
-              f"try{{P.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';}}catch(e){{}}")
+              f"try{{P.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';}}catch(e){{}}"
+              f"try{{if(window.AndroidAuth){{window.AndroidAuth.clearAuth();}}else if(P.AndroidAuth){{P.AndroidAuth.clearAuth();}}}}catch(e){{}}"
+              )
     with st.container(key="cookie_sync_slot"):
         components.html(f"<script>{js}</script>", height=0)
 
