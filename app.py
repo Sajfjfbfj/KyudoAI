@@ -272,13 +272,63 @@ st.html("""
             pDoc.head.appendChild(m);
         });
 
+        // 各機種のノッチ・ステータスバー・セーフエリアを動的検出してCSS変数に適用
+        function updateDeviceSafeArea() {
+            try {
+                var viewportMeta = pDoc.querySelector('meta[name="viewport"]');
+                if (viewportMeta) {
+                    var content = viewportMeta.getAttribute('content') || '';
+                    if (!content.includes('viewport-fit=cover')) {
+                        viewportMeta.setAttribute('content', content + ', viewport-fit=cover');
+                    }
+                } else {
+                    var vm = pDoc.createElement('meta');
+                    vm.name = 'viewport';
+                    vm.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+                    pDoc.head.appendChild(vm);
+                }
+
+                var testDiv = pDoc.createElement('div');
+                testDiv.style.position = 'fixed';
+                testDiv.style.top = '0';
+                testDiv.style.left = '0';
+                testDiv.style.height = 'env(safe-area-inset-top, 0px)';
+                testDiv.style.width = 'env(safe-area-inset-left, 0px)';
+                testDiv.style.visibility = 'hidden';
+                testDiv.style.pointerEvents = 'none';
+                pDoc.body.appendChild(testDiv);
+
+                var computedTop = parseFloat(window.getComputedStyle(testDiv).height) || 0;
+                var computedLeft = parseFloat(window.getComputedStyle(testDiv).width) || 0;
+                try { pDoc.body.removeChild(testDiv); } catch(e) {}
+
+                // Android APK / Standalone で env が 0px の場合の機種補正
+                var ua = navigator.userAgent || '';
+                var isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                   window.navigator.standalone || 
+                                   (ua.indexOf('wv') !== -1 || (ua.indexOf('Android') !== -1 && ua.indexOf('Version/') !== -1));
+                var safeTop = computedTop;
+                if (safeTop === 0 && isStandalone) {
+                    safeTop = 28; // 機種ステータスバーの標準安全余白
+                }
+
+                pDoc.documentElement.style.setProperty('--device-safe-top', safeTop + 'px');
+                pDoc.documentElement.style.setProperty('--device-safe-left', computedLeft + 'px');
+                document.documentElement.style.setProperty('--device-safe-top', safeTop + 'px');
+                document.documentElement.style.setProperty('--device-safe-left', computedLeft + 'px');
+            } catch(err) {}
+        }
+        updateDeviceSafeArea();
+        window.addEventListener('resize', updateDeviceSafeArea);
+        window.addEventListener('orientationchange', updateDeviceSafeArea);
+
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/app/static/sw.js?v=4').catch(function(e){});
         }
     }
     setupPWA();
-    setTimeout(setupPWA, 500);
-    setTimeout(setupPWA, 1500);
+    setTimeout(setupPWA, 300);
+    setTimeout(setupPWA, 1000);
 })();
 </script>
 """)
@@ -593,27 +643,28 @@ html, body, [class*="css"], .stApp {
 }
 [data-testid="stExpandSidebarButton"] {
     position: fixed !important;
-    top: 14px !important;
-    left: 12px !important;
-    width: 42px !important;
-    height: 42px !important;
+    top: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 12px) !important;
+    left: calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 12px) !important;
+    width: 44px !important;
+    height: 44px !important;
     background: var(--surface-2) !important;
     border: 1px solid var(--border-subtle) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
     z-index: 999999 !important;
     pointer-events: auto !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
+    touch-action: manipulation !important;
 }
 [data-testid="stExpandSidebarButton"] button {
     width: 100% !important;
     height: 100% !important;
     background: transparent !important;
     border: none !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1103,7 +1154,7 @@ div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
     background: var(--surface-glass);
     -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
     border-bottom: 1px solid var(--border-hairline);
-    padding: 10px 24px !important;
+    padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) 24px 10px calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 64px) !important;
     margin-left: -24px !important;
     margin-right: -24px !important;
     margin-top: -10px !important;
@@ -1693,32 +1744,38 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
 
 /* ---------- レスポンシブ（スマホ・タブレット・APK特化の極上視認性） ---------- */
 @media (max-width: 900px) {
-    [data-testid="stMainBlockContainer"] { padding: 10px 16px var(--kyudo-main-pad, 130px) !important; }
-    .st-key-topbar { padding: 10px 16px 10px 52px !important; margin-left: -16px !important; margin-right: -16px !important; }
+    [data-testid="stMainBlockContainer"] {
+        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) calc(var(--device-safe-right, env(safe-area-inset-right, 0px)) + 16px) var(--kyudo-main-pad, 130px) calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 16px) !important;
+    }
+    .st-key-topbar {
+        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) 16px 10px calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 60px) !important;
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+    }
 }
 [data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stMain"] .st-key-topbar {
-    padding-left: 52px !important;
+    padding-left: calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 60px) !important;
 }
 @media (max-width: 680px) {
     /* 画面全体の余白：スマホ・APK画面を左右いっぱいに見やすく活用 */
     [data-testid="stMainBlockContainer"] {
-        padding: 8px 14px var(--kyudo-main-pad, 130px) !important;
+        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 8px) calc(var(--device-safe-right, env(safe-area-inset-right, 0px)) + 14px) var(--kyudo-main-pad, 130px) calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 14px) !important;
     }
     
     /* 上部固定バー：ノッチ・ステータスバーを考慮し、すっきり整列 */
     .st-key-topbar {
-        padding: max(8px, env(safe-area-inset-top, 0px)) 14px 8px 52px !important;
+        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 8px) 14px 8px calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 58px) !important;
         margin-left: -14px !important;
         margin-right: -14px !important;
         margin-bottom: 16px !important;
     }
 
-    /* サイドバー開くボタン：スマホ・APK画面でも確実に見えてタップできる位置に */
+    /* サイドバー開くボタン：スマホ・APK機種ごとのノッチ・ステータスバーに合わせて自動配置 */
     [data-testid="stExpandSidebarButton"] {
-        top: 12px !important;
-        left: 10px !important;
-        width: 42px !important;
-        height: 42px !important;
+        top: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) !important;
+        left: calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 10px) !important;
+        width: 44px !important;
+        height: 44px !important;
         z-index: 999999 !important;
         pointer-events: auto !important;
     }
