@@ -1294,11 +1294,13 @@ div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
     transform: translateY(-1px) !important;
 }
 
-/* ---------- 会話 ---------- */
+/* ---------- 会話（GPU合成レイヤーによる超スムーズなストリーミング描画） ---------- */
 div[data-testid="stChatMessage"] {
     background: transparent !important; border: 0 !important; box-shadow: none !important;
     padding: 6px 0 !important; margin: 0 auto 16px !important;
     max-width: 100% !important; width: 100% !important;
+    contain: layout style !important;
+    transform: translateZ(0) !important;
 }
 
 /* あなた：右寄せのやわらかい吹き出し（可読性と行間を最適化） */
