@@ -738,7 +738,7 @@ html, body, [class*="css"], .stApp {
 
 [data-testid="stMainBlockContainer"] {
     max-width: 768px !important;
-    padding: 10px 24px var(--kyudo-main-pad, 24px) !important;
+    padding: 44px 24px var(--kyudo-main-pad, 24px) !important;
     margin: 0 auto !important;
 }
 
@@ -1779,34 +1779,18 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
 /* ---------- レスポンシブ（スマホ・タブレット・APK特化の極上視認性） ---------- */
 @media (max-width: 900px) {
     [data-testid="stMainBlockContainer"] {
-        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) calc(var(--device-safe-right, env(safe-area-inset-right, 0px)) + 16px) var(--kyudo-main-pad, 130px) calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 16px) !important;
+        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 52px) calc(var(--device-safe-right, env(safe-area-inset-right, 0px)) + 16px) var(--kyudo-main-pad, 130px) calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 16px) !important;
     }
-    .st-key-topbar {
-        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) 16px 10px calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 60px) !important;
-        margin-left: -16px !important;
-        margin-right: -16px !important;
-    }
-}
-[data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stMain"] .st-key-topbar {
-    padding-left: calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 60px) !important;
 }
 @media (max-width: 680px) {
-    /* 画面全体の余白：スマホ・APK画面を左右いっぱいに見やすく活用 */
+    /* 画面全体の余白：スマホ・APK画面を左右いっぱいに見やすく活用（サイドバー開くボタンの下から綺麗に開始） */
     [data-testid="stMainBlockContainer"] {
-        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 8px) calc(var(--device-safe-right, env(safe-area-inset-right, 0px)) + 14px) var(--kyudo-main-pad, 130px) calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 14px) !important;
-    }
-    
-    /* 上部固定バー：ノッチ・ステータスバーを考慮し、すっきり整列 */
-    .st-key-topbar {
-        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 8px) 14px 8px calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 58px) !important;
-        margin-left: -14px !important;
-        margin-right: -14px !important;
-        margin-bottom: 16px !important;
+        padding: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 48px) calc(var(--device-safe-right, env(safe-area-inset-right, 0px)) + 14px) var(--kyudo-main-pad, 130px) calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 14px) !important;
     }
 
     /* サイドバー開くボタン：スマホ・APK機種ごとのノッチ・ステータスバーに合わせて自動配置 */
     [data-testid="stExpandSidebarButton"] {
-        top: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 10px) !important;
+        top: calc(var(--device-safe-top, env(safe-area-inset-top, 0px)) + 8px) !important;
         left: calc(var(--device-safe-left, env(safe-area-inset-left, 0px)) + 10px) !important;
         width: 44px !important;
         height: 44px !important;
@@ -3332,6 +3316,11 @@ with st.sidebar:
             )
             st.caption(c_info_item["desc"])
 
+    # ── 📹 動画診断 ──────────────────────────────────────────
+    if st.button("📹 動画診断（撮影のコツ・手順）", key="sidebar_video_diag_btn", use_container_width=True):
+        _set_quick_prompt("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。")
+        st.rerun()
+
     # ── できること（解析・稽古目標・射法八節・生体力学を1つに集約） ──────
     cur_c = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     c_info = CHARACTERS.get(cur_c, list(CHARACTERS.values())[0])
@@ -4300,30 +4289,6 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                 pass
 
 # ==================== チャット統合型メイン画面 ====================
-
-# トップ固定ヘッダーバー（射心・ChatGPTスタイル：指導陣モデル切替＋動画診断）
-with st.container(key="topbar"):
-    col_tb1, col_tb2 = st.columns([0.75, 0.25])
-    with col_tb1:
-        _cur_c_tb = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
-        _cur_inf_tb = CHARACTERS.get(_cur_c_tb, list(CHARACTERS.values())[0])
-        with st.popover(f"🏹 YUMIQA · {_cur_c_tb.split('（')[0]}", use_container_width=False):
-            st.caption("指導陣（AIモデル）を選択")
-            for cname, c_info_item in CHARACTERS.items():
-                st.button(
-                    f"{'✓ ' if cname == _cur_c_tb else '　 '}{c_info_item['icon']} {cname}",
-                    key=f"top_bar_sel_{cname}", use_container_width=True,
-                    on_click=switch_ai_character, args=(cname,),
-                )
-                st.caption(c_info_item["desc"])
-    with col_tb2:
-        st.button(
-            "📹 動画診断",
-            key="tb_chip_video",
-            use_container_width=False,
-            on_click=_set_quick_prompt,
-            args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",)
-        )
 
 # ユーザーメッセージがまだない場合は射心スタイルのウェルカム画面を表示
 quick_prompt = st.session_state.pop("sidebar_prompt", None)  # サイドバーのピン留め／プロジェクトからの質問
