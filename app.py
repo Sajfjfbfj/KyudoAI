@@ -2714,6 +2714,17 @@ def render_login_screen(slot=None):
                 slot.empty()
             _complete_login(f"guest_{secrets.token_hex(4)}", guest=True)
 
+        st.markdown("""
+        <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-hairline);">
+            <a href="/app/static/YUMIQA.apk" download="YUMIQA.apk" style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--link); text-decoration: none; padding: 8px 16px; border-radius: 999px; background: var(--surface-1); border: 1px solid var(--border-subtle);">
+                📲 Android専用アプリ（APK）をダウンロード
+            </a>
+            <div style="font-size: 11px; color: var(--ink-muted); margin-top: 6px;">
+                ※ストア申請不要で直接スマホにインストールできます
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False

@@ -21,3 +21,6 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Android Build project
+yumiqa_android/
