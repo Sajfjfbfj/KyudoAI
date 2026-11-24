@@ -1804,40 +1804,40 @@ div[data-testid="stChatMessage"] li,
 div[data-testid="stChatMessage"] span,
 div[data-testid="stChatMessage"] div,
 div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
-div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li {
+div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li {{
     font-size: var(--font-size-chat) !important;
     line-height: var(--line-height-chat) !important;
     letter-spacing: 0.015em !important;
-}
+}}
 
-div[data-testid="stChatMessage"] p {
+div[data-testid="stChatMessage"] p {{
     margin-bottom: 0.85em !important;
-}
+}}
 
 div[data-testid="stChatMessage"] ul,
-div[data-testid="stChatMessage"] ol {
+div[data-testid="stChatMessage"] ol {{
     margin-top: 0.4em !important;
     margin-bottom: 0.8em !important;
     padding-left: 1.4em !important;
-}
+}}
 
-div[data-testid="stChatMessage"] li {
+div[data-testid="stChatMessage"] li {{
     margin-bottom: 0.35em !important;
-}
+}}
 
-div[data-testid="stChatMessage"] strong {
+div[data-testid="stChatMessage"] strong {{
     color: var(--ink-primary) !important;
     font-weight: 600 !important;
-}
+}}
 
 /* 引用ブロック（アドバイスやポイント提示の見やすさ） */
-div[data-testid="stChatMessage"] blockquote {
+div[data-testid="stChatMessage"] blockquote {{
     border-left: 3px solid var(--primary-indigo) !important;
     background: var(--surface-1) !important;
     padding: 8px 14px !important;
     margin: 12px 0 !important;
     border-radius: 0 8px 8px 0 !important;
-}
+}}
 
 /* マークダウン・段落・本文全般 */
 .stMarkdown, .stMarkdown p, .stMarkdown li,
