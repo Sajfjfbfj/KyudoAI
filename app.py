@@ -592,11 +592,33 @@ html, body, [class*="css"], .stApp {
     transition: background 0.15s ease, border-color 0.15s ease !important;
 }
 [data-testid="stExpandSidebarButton"] {
-    position: fixed !important; top: 12px !important; left: 12px !important;
-    width: 36px; height: 36px;
+    position: fixed !important;
+    top: 14px !important;
+    left: 12px !important;
+    width: 42px !important;
+    height: 42px !important;
     background: var(--surface-2) !important;
     border: 1px solid var(--border-subtle) !important;
-    box-shadow: var(--shadow-sm) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+[data-testid="stExpandSidebarButton"] button {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
 }
 [data-testid="stExpandSidebarButton"]:hover, [data-testid="stSidebarCollapseButton"] button:hover {
     background: var(--surface-3) !important;
@@ -1685,10 +1707,20 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
     
     /* 上部固定バー：ノッチ・ステータスバーを考慮し、すっきり整列 */
     .st-key-topbar {
-        padding: max(8px, env(safe-area-inset-top, 0px)) 14px 8px 48px !important;
+        padding: max(8px, env(safe-area-inset-top, 0px)) 14px 8px 52px !important;
         margin-left: -14px !important;
         margin-right: -14px !important;
         margin-bottom: 16px !important;
+    }
+
+    /* サイドバー開くボタン：スマホ・APK画面でも確実に見えてタップできる位置に */
+    [data-testid="stExpandSidebarButton"] {
+        top: 12px !important;
+        left: 10px !important;
+        width: 42px !important;
+        height: 42px !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
     }
     
     /* スターターカード：1カラム縦積みで押しやすく */
