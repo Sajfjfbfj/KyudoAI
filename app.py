@@ -3004,18 +3004,11 @@ def _save_char(name: str):
 if st.session_state.get("current_selected_char") not in CHARACTERS:
     st.session_state.current_selected_char = _load_saved_char() or list(CHARACTERS.keys())[0]
 
-# キャラクター安全切り替え関数（競合・巻き戻り防止）
+# キャラクター安全切り替え関数（ウェルカムボードは維持し、選択モデルのみ切り替え）
 def switch_ai_character(new_char: str):
     if new_char in CHARACTERS:
         st.session_state.current_selected_char = new_char
         _save_char(new_char)
-        # 会話が未開始または初期挨拶のみの場合は、新キャラのウェルカムに即時切り替え
-        if not st.session_state.messages or (len(st.session_state.messages) == 1 and st.session_state.messages[0].get("role") == "assistant"):
-            st.session_state.messages = [{
-                "role": "assistant",
-                "char": new_char,
-                "content": CHARACTERS[new_char]["welcome"]
-            }]
 
 # ==================== サイドバーのピン留め／プロジェクト（ユーザーが自由に追加・編集・削除） ====================
 def _sidebar_items_path() -> str:
