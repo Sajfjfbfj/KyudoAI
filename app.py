@@ -1439,28 +1439,40 @@ div[data-testid="stBottomBlockContainer"]::after {
     color: var(--ink-secondary); padding: 8px 0 2px;
 }
 
-/* 入力欄の真上に配置されるキャラクター（指導陣）選択ピルボタン */
+/* 入力欄内の動画アップ（＋）ボタンのすぐ隣に配置されるキャラクター（指導陣）選択ピルボタン */
 .st-key-input_char_pill_row {
-    margin-bottom: 6px !important;
+    margin-bottom: -48px !important;
+    margin-left: 48px !important;
+    height: 44px !important;
     display: flex !important;
-    justify-content: flex-start !important;
+    align-items: center !important;
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: none !important;
+    width: fit-content !important;
+}
+.st-key-input_char_pill_row [data-testid="stPopover"] {
+    display: inline-flex !important;
+    pointer-events: auto !important;
+    margin: 0 !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] > button {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 4px !important;
     background: var(--surface-2) !important;
     border: 1px solid var(--border-subtle) !important;
     border-radius: 9999px !important;
-    padding: 3px 12px !important;
+    padding: 2px 10px !important;
     min-height: 28px !important;
     height: 28px !important;
-    font-size: 12.5px !important;
-    font-weight: 500 !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
     color: var(--ink-secondary) !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
     transition: all 0.15s ease !important;
     cursor: pointer !important;
+    white-space: nowrap !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] > button:hover {
     background: var(--surface-3) !important;
@@ -1491,6 +1503,7 @@ div[data-testid="stChatInput"] [data-baseweb] {
 div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
     font-size: 15px !important; line-height: 1.6 !important;
+    padding-left: 105px !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
 div[data-testid="stChatInput"] button {
@@ -4386,6 +4399,14 @@ with _bottom_ctx:
     # 入力欄から直接指導陣（AIキャラクター）を切り替えられるピルボタン
     _cur_c_in = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     _cur_inf_in = CHARACTERS.get(_cur_c_in, list(CHARACTERS.values())[0])
+
+    if _is_guest:
+        st.markdown("""
+        <style>
+        .st-key-input_char_pill_row { margin-left: 14px !important; }
+        div[data-testid="stChatInput"] textarea { padding-left: 78px !important; }
+        </style>
+        """, unsafe_allow_html=True)
 
     with st.container(key="input_char_pill_row"):
         with st.popover(f"{_cur_inf_in['icon']} {_cur_c_in.split('（')[0]}", use_container_width=False):
