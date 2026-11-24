@@ -1420,7 +1420,7 @@ div[data-testid="stChatMessage"] [data-testid="stPopover"] > button:hover {
 [class*="st-key-btn_regen_"] button[kind] > div, [class*="st-key-regen_char_"] button[kind] > div { justify-content: flex-start !important; }
 [class*="st-key-btn_regen_"] button[kind]:hover, [class*="st-key-regen_char_"] button[kind]:hover { background: var(--surface-3) !important; }
 
-/* ---------- 入力欄 ---------- */
+/* ---------- 入力欄（Gemini 公式完全準拠スタイル） ---------- */
 div[data-testid="stBottom"], div[data-testid="stBottom"] > div {
     background: transparent !important; border-top: 0 !important;
 }
@@ -1430,20 +1430,82 @@ div[data-testid="stBottom"] {
     z-index: 9999 !important;
 }
 div[data-testid="stBottomBlockContainer"] {
-    max-width: 768px !important; padding: 0 24px !important; margin: 0 auto !important;
+    max-width: 768px !important;
+    padding: 0 24px !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
+    position: relative !important;
 }
 /* 注意書きを入力欄のすぐ下に配置 */
 div[data-testid="stBottomBlockContainer"]::after {
+    grid-column: 1 / 2 !important;
+    grid-row: 2 / 3 !important;
     content: "YUMIQAの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
-    display: block; text-align: center; font-size: 11.5px; line-height: 1.5;
-    color: var(--ink-secondary); padding: 8px 0 2px;
+    display: block !important;
+    text-align: center !important;
+    font-size: 11.5px !important;
+    line-height: 1.5 !important;
+    color: var(--ink-secondary) !important;
+    padding: 8px 0 2px !important;
 }
 
-/* 入力欄内の動画アップ（＋）ボタンのすぐ隣に配置されるキャラクター（指導陣）選択ピルボタン */
+/* Gemini風 カード型入力ボックス */
+div[data-testid="stChatInput"] {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 / 2 !important;
+    background: var(--composer, #f0f4f9) !important;
+    border: 1px solid var(--border-hairline) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05), var(--shadow-float) !important;
+    padding: 10px 14px 8px 14px !important;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
+}
+div[data-testid="stChatInput"]:focus-within {
+    border-color: var(--primary-indigo) !important;
+    box-shadow: 0 0 0 1.5px var(--primary-indigo), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+div[data-testid="stChatInput"] [data-baseweb="textarea"],
+div[data-testid="stChatInput"] [data-baseweb="base-input"],
+div[data-testid="stChatInput"] [data-baseweb="textarea"] > div {
+    border: 0 !important; background: transparent !important; box-shadow: none !important; border-radius: 0 !important;
+}
+div[data-testid="stChatInput"] div,
+div[data-testid="stChatInput"] [data-baseweb] {
+    background: transparent !important; background-color: transparent !important; box-shadow: none !important;
+}
+div[data-testid="stChatInput"] textarea {
+    background: transparent !important; color: var(--ink-primary) !important;
+    font-size: 15px !important; line-height: 1.6 !important;
+    padding-left: 0 !important;
+}
+div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
+div[data-testid="stChatInput"] button {
+    background: transparent !important; color: var(--ink-muted) !important;
+    border: 0 !important; border-radius: 999px !important; transition: all 0.15s ease !important;
+}
+div[data-testid="stChatInput"] button:hover { background: var(--surface-3) !important; color: var(--ink-primary) !important; }
+
+/* 送信ボタン：プライマリインディゴ（#1B365D）の円形ボタン */
+div[data-testid="stChatInputSubmitButton"] button, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
+    background: var(--primary-indigo) !important; color: #ffffff !important;
+    border-radius: 999px !important;
+}
+div[data-testid="stChatInputSubmitButton"] button:hover, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {
+    background: var(--primary-indigo) !important; color: #ffffff !important; opacity: 0.9 !important;
+}
+div[data-testid="stChatInput"] button:disabled { background: transparent !important; color: var(--ink-dim) !important; }
+
+/* キャラクター（指導陣）選択ピルボタン：Gemini風ツールチップとして動画アップ（＋）ボタンのすぐ右隣に配置 */
 .st-key-input_char_pill_row {
-    margin-bottom: -48px !important;
-    margin-left: 48px !important;
-    height: 44px !important;
+    grid-column: 1 / 2 !important;
+    grid-row: 1 / 2 !important;
+    align-self: end !important;
+    justify-self: start !important;
+    margin-left: 48px !important; /* +ボタン(約36px)のすぐ右隣 */
+    margin-bottom: 7px !important; /* 下部ツールバーの底面にぴったり揃える */
+    height: 32px !important;
     display: flex !important;
     align-items: center !important;
     position: relative !important;
@@ -1460,7 +1522,7 @@ div[data-testid="stBottomBlockContainer"]::after {
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;
-    background: var(--surface-2) !important;
+    background: var(--surface-2, rgba(0, 0, 0, 0.05)) !important;
     border: 1px solid var(--border-subtle) !important;
     border-radius: 9999px !important;
     padding: 2px 10px !important;
@@ -1469,7 +1531,7 @@ div[data-testid="stBottomBlockContainer"]::after {
     font-size: 11.5px !important;
     font-weight: 600 !important;
     color: var(--ink-secondary) !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     transition: all 0.15s ease !important;
     cursor: pointer !important;
     white-space: nowrap !important;
@@ -1479,46 +1541,6 @@ div[data-testid="stBottomBlockContainer"]::after {
     border-color: var(--border-strong) !important;
     color: var(--ink-primary) !important;
 }
-div[data-testid="stChatInput"] {
-    background: var(--composer) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: 24px !important;
-    box-shadow: var(--shadow-float) !important;
-    padding: 4px 10px !important;
-    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
-}
-div[data-testid="stChatInput"]:focus-within {
-    border-color: var(--primary-indigo) !important;
-    box-shadow: 0 0 0 1px var(--primary-indigo), var(--shadow-float) !important;
-}
-div[data-testid="stChatInput"] [data-baseweb="textarea"],
-div[data-testid="stChatInput"] [data-baseweb="base-input"],
-div[data-testid="stChatInput"] [data-baseweb="textarea"] > div {
-    border: 0 !important; background: transparent !important; box-shadow: none !important; border-radius: 0 !important;
-}
-div[data-testid="stChatInput"] div,
-div[data-testid="stChatInput"] [data-baseweb] {
-    background: transparent !important; background-color: transparent !important; box-shadow: none !important;
-}
-div[data-testid="stChatInput"] textarea {
-    background: transparent !important; color: var(--ink-primary) !important;
-    font-size: 15px !important; line-height: 1.6 !important;
-    padding-left: 105px !important;
-}
-div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
-div[data-testid="stChatInput"] button {
-    background: transparent !important; color: var(--ink-muted) !important;
-    border: 0 !important; border-radius: 999px !important; transition: all 0.15s ease !important;
-}
-div[data-testid="stChatInput"] button:hover { background: var(--surface-3) !important; color: var(--ink-primary) !important; }
-/* 送信ボタン：プライマリインディゴ（#1B365D） */
-div[data-testid="stChatInputSubmitButton"] button, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
-    background: var(--primary-indigo) !important; color: #ffffff !important;
-}
-div[data-testid="stChatInputSubmitButton"] button:hover, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {
-    background: var(--primary-indigo) !important; color: #ffffff !important; opacity: 0.9 !important;
-}
-div[data-testid="stChatInput"] button:disabled { background: transparent !important; color: var(--ink-dim) !important; }
 
 /* ---------- ボタン・フォーム ---------- */
 .stButton > button, .stDownloadButton > button, button[kind="secondary"] {
@@ -3627,15 +3649,15 @@ _CTX_MENU_JS = r"""
     if (!b) return;
     if (window.visualViewport) {
       var offset = window.innerHeight - window.visualViewport.height;
-      if (offset > 100) {
-        b.style.bottom = Math.round(offset) + 'px';
-        b.style.transition = 'bottom 0.15s ease-out';
+      if (offset > 60) {
+        b.style.setProperty('transform', 'translateY(-' + Math.round(offset) + 'px)', 'important');
+        b.style.setProperty('transition', 'transform 0.12s ease-out', 'important');
         var activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) {
           activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       } else {
-        b.style.bottom = '0px';
+        b.style.setProperty('transform', 'none', 'important');
       }
     }
   }
@@ -3648,14 +3670,14 @@ _CTX_MENU_JS = r"""
       setTimeout(function () {
         handleKeyboard();
         e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 250);
+      }, 200);
     }
   });
   document.addEventListener('focusout', function (e) {
     if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) {
       setTimeout(function () {
         var b = document.querySelector('[data-testid="stBottom"]');
-        if (b) b.style.bottom = '0px';
+        if (b) b.style.setProperty('transform', 'none', 'important');
       }, 150);
     }
   });
@@ -4403,8 +4425,7 @@ with _bottom_ctx:
     if _is_guest:
         st.markdown("""
         <style>
-        .st-key-input_char_pill_row { margin-left: 14px !important; }
-        div[data-testid="stChatInput"] textarea { padding-left: 78px !important; }
+        .st-key-input_char_pill_row { margin-left: 10px !important; }
         </style>
         """, unsafe_allow_html=True)
 
