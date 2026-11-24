@@ -2842,6 +2842,42 @@ def render_login_screen(slot=None):
                     uname = st.text_input("ユーザー名", placeholder="ユーザー名")
                     upass = st.text_input("パスワード", type="password", placeholder="パスワード")
                     submitted = st.form_submit_button("ログイン", use_container_width=True, type="primary")
+                # ブラウザ・スマホのパスワードマネージャー対応：autocomplete 属性を注入
+                st.markdown("""
+                <script>
+                (function patchAutocomplete() {
+                    function doIt() {
+                        try {
+                            var pDoc = window.parent.document;
+                            var allInputs = pDoc.querySelectorAll('input');
+                            allInputs.forEach(function(el) {
+                                var ph = el.getAttribute('placeholder') || '';
+                                if (ph === 'ユーザー名') {
+                                    el.setAttribute('autocomplete', 'username');
+                                    el.setAttribute('name', 'username');
+                                    el.setAttribute('id', 'login-username');
+                                }
+                                if (el.type === 'password' && ph === 'パスワード') {
+                                    el.setAttribute('autocomplete', 'current-password');
+                                    el.setAttribute('name', 'password');
+                                    el.setAttribute('id', 'login-password');
+                                }
+                            });
+                            // フォームタグにもaction/method付与してブラウザが保存ダイアログを出せるようにする
+                            var allForms = pDoc.querySelectorAll('form');
+                            allForms.forEach(function(f) {
+                                if (!f.getAttribute('method')) f.setAttribute('method', 'post');
+                                if (!f.getAttribute('action')) f.setAttribute('action', '');
+                                f.setAttribute('autocomplete', 'on');
+                            });
+                        } catch(e) {}
+                    }
+                    doIt();
+                    setTimeout(doIt, 500);
+                    setTimeout(doIt, 1500);
+                })();
+                </script>
+                """, unsafe_allow_html=True)
                 if submitted:
                     if uname and upass and authenticate_user(uname, upass):
                         if slot is not None:
@@ -2856,6 +2892,41 @@ def render_login_screen(slot=None):
                     reg_pass1 = st.text_input("パスワード（6文字以上）", type="password", placeholder="パスワード")
                     reg_pass2 = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
                     submitted = st.form_submit_button("アカウントを作成", use_container_width=True, type="primary")
+                # 新規登録フォームにも autocomplete 属性を付与（スマホがパスワード提案を出せるように）
+                st.markdown("""
+                <script>
+                (function patchRegAutocomplete() {
+                    function doIt() {
+                        try {
+                            var pDoc = window.parent.document;
+                            var allInputs = pDoc.querySelectorAll('input');
+                            allInputs.forEach(function(el) {
+                                var ph = el.getAttribute('placeholder') || '';
+                                if (ph === '例: yamada') {
+                                    el.setAttribute('autocomplete', 'username');
+                                    el.setAttribute('name', 'username');
+                                }
+                                if (ph === 'パスワード' && el.type === 'password') {
+                                    el.setAttribute('autocomplete', 'new-password');
+                                    el.setAttribute('name', 'new-password');
+                                }
+                                if (ph === 'もう一度入力' && el.type === 'password') {
+                                    el.setAttribute('autocomplete', 'new-password');
+                                }
+                            });
+                            var allForms = pDoc.querySelectorAll('form');
+                            allForms.forEach(function(f) {
+                                if (!f.getAttribute('method')) f.setAttribute('method', 'post');
+                                f.setAttribute('autocomplete', 'on');
+                            });
+                        } catch(e) {}
+                    }
+                    doIt();
+                    setTimeout(doIt, 500);
+                    setTimeout(doIt, 1500);
+                })();
+                </script>
+                """, unsafe_allow_html=True)
                 if submitted:
                     if not reg_name or not reg_pass1:
                         st.error("ユーザー名とパスワードを入力してください。")
