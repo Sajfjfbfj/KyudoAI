@@ -2088,6 +2088,21 @@ def authenticate_user(username: str, password: str) -> bool:
     pw_hash, _ = hash_password(password, user["salt"])
     return pw_hash == user["password_hash"]
 
+def get_user_credential_fingerprint(username: str) -> str:
+    """ブラウザ側自動ログイン用：ユーザー名とパスワードハッシュからフィンガープリントを生成"""
+    users = load_users()
+    user = users.get(username.strip().lower())
+    if not user:
+        return ""
+    # username + password_hash + 固定salt でHMAC署名 → ブラウザに保存しても安全
+    combined = f"{username.strip().lower()}:{user['password_hash']}"
+    return hashlib.sha256(combined.encode("utf-8")).hexdigest()
+
+def verify_credential_fingerprint(username: str, fingerprint: str) -> bool:
+    """ブラウザに保存されたフィンガープリントを検証してログイン"""
+    expected = get_user_credential_fingerprint(username)
+    return bool(expected and expected == fingerprint)
+
 def register_user(username: str, password: str, display_name: str = "") -> tuple[bool, str]:
     uname = username.strip().lower()
     if len(uname) < 3:
@@ -2779,21 +2794,36 @@ def _flush_cookie_js():
     if not (set_tok or clear):
         return
     if set_tok:
+        # ログイン成功トークン＋ユーザーフィンガープリント（app再起動後も自動ログインできるよう両方保存）
+        _fp_user = st.session_state.get("logged_in_user", "")
+        _fp_val = get_user_credential_fingerprint(_fp_user) if _fp_user else ""
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.setItem('{LOGIN_COOKIE}','{set_tok}');}}catch(e){{}}"
               f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
-              "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}")
+              "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}"
+              f"try{{P.localStorage.setItem('yumiqa_u','{_fp_user}');P.localStorage.setItem('yumiqa_fp','{_fp_val}');}}catch(e){{}}"
+              )
     else:
         js = (f"var P=window.parent;"
-              f"try{{P.localStorage.removeItem('{LOGIN_COOKIE}');}}catch(e){{}}"
+              f"try{{P.localStorage.removeItem('{LOGIN_COOKIE}');P.localStorage.removeItem('yumiqa_u');P.localStorage.removeItem('yumiqa_fp');}}catch(e){{}}"
               f"try{{P.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';}}catch(e){{}}")
     with st.container(key="cookie_sync_slot"):
         components.html(f"<script>{js}</script>", height=0)
 
 def _restore_login_js():
-    """リロード直後：localStorage にトークンがあれば、URLに一時的に付けて再読み込みし自動ログインさせる。"""
-    js = (f"try{{var P=window.parent;var t=P.localStorage.getItem('{LOGIN_COOKIE}');"
-          "if(t){var u=new URL(P.location.href);if(!u.searchParams.get('auth')){u.searchParams.set('auth',t);P.location.replace(u.toString());}}}catch(e){}")
+    """リロード直後：localStorageにトークンまたはフィンガープリントがあれば、URLパラメータで渡して自動ログインさせる。"""
+    js = (
+        f"try{{var P=window.parent;"
+        # まずトークンで復元を試みる
+        f"var t=P.localStorage.getItem('{LOGIN_COOKIE}');"
+        f"var u_name=P.localStorage.getItem('yumiqa_u');"
+        f"var fp=P.localStorage.getItem('yumiqa_fp');"
+        f"var url=new URL(P.location.href);"
+        f"if(t&&!url.searchParams.get('auth')){{url.searchParams.set('auth',t);P.location.replace(url.toString());}}"
+        # トークンがなければフィンガープリント（app再起動後の自動ログイン用）
+        f"else if(!t&&u_name&&fp&&!url.searchParams.get('yumiqa_u')){{url.searchParams.set('yumiqa_u',u_name);url.searchParams.set('yumiqa_fp',fp);P.location.replace(url.toString());}}"
+        f"}}catch(e){{}}"
+    )
     with st.container(key="cookie_sync_slot"):
         components.html(f"<script>{js}</script>", height=0)
 
@@ -2803,6 +2833,17 @@ def _query_login_token() -> str:
         return v if isinstance(v, str) else (v[0] if v else "")
     except Exception:
         return ""
+
+def _query_fingerprint() -> tuple[str, str]:
+    """URLパラメータからフィンガープリント認証情報を取得"""
+    try:
+        u = st.query_params.get("yumiqa_u", "")
+        fp = st.query_params.get("yumiqa_fp", "")
+        u = u if isinstance(u, str) else (u[0] if u else "")
+        fp = fp if isinstance(fp, str) else (fp[0] if fp else "")
+        return u, fp
+    except Exception:
+        return "", ""
 
 def _complete_login(username: str, guest: bool = False, issue_token: bool = True):
     """ログイン成功時の共通処理。URLパラメータにトークンを保持しリロード時も維持。"""
@@ -2972,7 +3013,7 @@ def render_login_screen(slot=None):
 # ==================== 認証状態チェック（未ログインならログイン画面を表示） ====================
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
-    # リロード等で新しいセッションになった場合：URLパラメータまたはCookieからトークンを検証して即座にログイン復元
+    # 1) URLパラメータ or Cookie のトークンで復元
     _tok = _query_login_token() or _browser_login_cookie()
     _auto_user, _auto_guest = verify_login_token(_tok)
     if _auto_user:
@@ -2984,7 +3025,23 @@ if "authenticated" not in st.session_state:
         st.session_state.font_size_choice = st.session_state.sb_font_size_choice
         st.query_params["auth"] = _tok
     else:
-        if "auth" in st.query_params or "_kt" in st.query_params:
+        # 2) app再起動後にトークンが失効した場合：フィンガープリントで自動ログイン（パスワード不要）
+        _fp_u, _fp_val = _query_fingerprint()
+        if _fp_u and _fp_val and verify_credential_fingerprint(_fp_u, _fp_val):
+            # フィンガープリントが一致 → 新トークンを発行して自動ログイン
+            _new_tok = issue_login_token(_fp_u, is_guest=False)
+            st.session_state["_cookie_set"] = _new_tok
+            st.query_params["auth"] = _new_tok
+            # URLからフィンガープリントパラメータを除去
+            st.query_params.pop("yumiqa_u", None)
+            st.query_params.pop("yumiqa_fp", None)
+            st.session_state.authenticated = True
+            st.session_state.is_guest = False
+            st.session_state.logged_in_user = _fp_u
+            st.session_state.ui_theme = load_ui_theme()
+            st.session_state.sb_font_size_choice = load_user_font_size(_fp_u)
+            st.session_state.font_size_choice = st.session_state.sb_font_size_choice
+        elif "auth" in st.query_params or "_kt" in st.query_params:
             st.query_params.clear()
             st.session_state["_cookie_clear"] = True
         elif not _browser_login_cookie():
