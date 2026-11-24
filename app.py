@@ -1433,15 +1433,10 @@ div[data-testid="stBottomBlockContainer"] {
     max-width: 768px !important;
     padding: 0 24px !important;
     margin: 0 auto !important;
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    grid-template-rows: auto auto !important;
     position: relative !important;
 }
 /* 注意書きを入力欄のすぐ下に配置 */
 div[data-testid="stBottomBlockContainer"]::after {
-    grid-column: 1 / 2 !important;
-    grid-row: 2 / 3 !important;
     content: "YUMIQAの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
     display: block !important;
     text-align: center !important;
@@ -1453,14 +1448,13 @@ div[data-testid="stBottomBlockContainer"]::after {
 
 /* Gemini風 カード型入力ボックス */
 div[data-testid="stChatInput"] {
-    grid-column: 1 / 2 !important;
-    grid-row: 1 / 2 !important;
     background: var(--composer, #f0f4f9) !important;
     border: 1px solid var(--border-hairline) !important;
     border-radius: 28px !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05), var(--shadow-float) !important;
     padding: 10px 14px 8px 14px !important;
     transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
+    position: relative !important;
 }
 div[data-testid="stChatInput"]:focus-within {
     border-color: var(--primary-indigo) !important;
@@ -1479,6 +1473,7 @@ div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
     font-size: 15px !important; line-height: 1.6 !important;
     padding-left: 0 !important;
+    padding-bottom: 44px !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
 div[data-testid="stChatInput"] button {
@@ -1497,20 +1492,15 @@ div[data-testid="stChatInputSubmitButton"] button:hover, div[data-testid="stChat
 }
 div[data-testid="stChatInput"] button:disabled { background: transparent !important; color: var(--ink-dim) !important; }
 
-/* キャラクター（指導陣）選択ピルボタン：Gemini風ツールチップとして動画アップ（＋）ボタンのすぐ右隣に配置 */
+/* キャラクター（指導陣）選択ピルボタン：Gemini風ツールチップとして入力欄内部（＋ボタンのすぐ右隣）に配置 */
 .st-key-input_char_pill_row {
-    grid-column: 1 / 2 !important;
-    grid-row: 1 / 2 !important;
-    align-self: end !important;
-    justify-self: start !important;
-    margin-left: 48px !important; /* +ボタン(約36px)のすぐ右隣 */
-    margin-bottom: 7px !important; /* 下部ツールバーの底面にぴったり揃える */
-    height: 32px !important;
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
-    position: relative !important;
+    margin: 0 0 0 8px !important;
+    padding: 0 !important;
+    height: 32px !important;
+    vertical-align: middle !important;
     z-index: 10 !important;
-    pointer-events: none !important;
     width: fit-content !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] {
@@ -3682,6 +3672,40 @@ _CTX_MENU_JS = r"""
     }
   });
 
+  /* キャラクター選択ピルボタンを入力欄内の + ボタンの右隣に安全に重ね合わせる（DOM移動しないためReact再描画でも絶対消えない！） */
+  function syncCharPillPosition() {
+    var pill = document.querySelector('.st-key-input_char_pill_row');
+    var chatInput = document.querySelector('[data-testid="stChatInput"]');
+    if (!pill || !chatInput) return;
+
+    // + ボタン（ファイル添付）を探す（なければ下部ツールバーの送信ボタンを基準にする）
+    var uploadBtn = chatInput.querySelector('[data-testid="stChatInputFileUploadButton"]');
+    var submitBtn = chatInput.querySelector('[data-testid="stChatInputSubmitButton"]');
+    var targetEl = uploadBtn || submitBtn;
+    if (!targetEl) return;
+
+    var inputRect = chatInput.getBoundingClientRect();
+    var targetRect = targetEl.getBoundingClientRect();
+
+    var leftPos = uploadBtn
+      ? (targetRect.right + 8)
+      : (inputRect.left + 14);
+    var topPos = targetRect.top + (targetRect.height - 28) / 2;
+
+    pill.style.setProperty('position', 'fixed', 'important');
+    pill.style.setProperty('left', Math.round(leftPos) + 'px', 'important');
+    pill.style.setProperty('top', Math.round(topPos) + 'px', 'important');
+    pill.style.setProperty('z-index', '10000', 'important');
+    pill.style.setProperty('display', 'inline-flex', 'important');
+    pill.style.setProperty('visibility', 'visible', 'important');
+    pill.style.setProperty('margin', '0', 'important');
+    pill.style.setProperty('padding', '0', 'important');
+  }
+  syncCharPillPosition();
+  window.addEventListener('resize', syncCharPillPosition);
+  window.addEventListener('scroll', syncCharPillPosition, true);
+  setInterval(syncCharPillPosition, 100);
+
   document.addEventListener('click', hide, true);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
   window.addEventListener('scroll', hide, true);
@@ -4421,13 +4445,6 @@ with _bottom_ctx:
     # 入力欄から直接指導陣（AIキャラクター）を切り替えられるピルボタン
     _cur_c_in = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     _cur_inf_in = CHARACTERS.get(_cur_c_in, list(CHARACTERS.values())[0])
-
-    if _is_guest:
-        st.markdown("""
-        <style>
-        .st-key-input_char_pill_row { margin-left: 10px !important; }
-        </style>
-        """, unsafe_allow_html=True)
 
     with st.container(key="input_char_pill_row"):
         with st.popover(f"{_cur_inf_in['icon']} {_cur_c_in.split('（')[0]}", use_container_width=False):
