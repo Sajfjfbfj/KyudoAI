@@ -1248,7 +1248,7 @@ div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
 }
 
 /* 4つのスターターカード */
-.welcome-cards-grid { width: 100%; margin-bottom: 8px; }
+.welcome-cards-grid { width: 100%; margin-bottom: 32px; }
 .welcome-cards-grid [data-testid="stHorizontalBlock"] {
     display: flex !important;
     gap: 12px !important;
@@ -1781,6 +1781,9 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
     }
     
     /* スターターカード：1カラム縦積みで押しやすく */
+    .welcome-cards-grid {
+        margin-bottom: 48px !important;
+    }
     .welcome-cards-grid [data-testid="stHorizontalBlock"] {
         flex-direction: column !important;
         gap: 10px !important;
@@ -3604,7 +3607,8 @@ _CTX_MENU_JS = r"""
     var b = document.querySelector('[data-testid="stBottom"]');
     if (!b) return;
     var pos = getComputedStyle(b).position;
-    var pad = (pos === 'fixed' || pos === 'absolute') ? Math.ceil(b.getBoundingClientRect().height) + 16 : 16;
+    // カードが被らないよう余裕を大きめ（+48px）にとる
+    var pad = (pos === 'fixed' || pos === 'absolute') ? Math.ceil(b.getBoundingClientRect().height) + 48 : 48;
     document.documentElement.style.setProperty('--kyudo-main-pad', pad + 'px');
   }
   updateBottomPad();
@@ -4289,7 +4293,7 @@ if not st.session_state.messages and not quick_prompt:
         st.button("昇段審査・礼法", key="chip_shinsa", use_container_width=True, on_click=_set_quick_prompt, args=("弓道審査の学科試験でよく問われる射法の基本をまとめたいです。",))
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div style="margin-bottom: 32px;"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="margin-bottom: 80px;"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
