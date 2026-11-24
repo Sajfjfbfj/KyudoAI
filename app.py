@@ -1426,6 +1426,35 @@ div[data-testid="stBottomBlockContainer"]::after {
     display: block; text-align: center; font-size: 11.5px; line-height: 1.5;
     color: var(--ink-secondary); padding: 8px 0 2px;
 }
+
+/* 入力欄の真上に配置されるキャラクター（指導陣）選択ピルボタン */
+.st-key-input_char_pill_row {
+    margin-bottom: 6px !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+}
+.st-key-input_char_pill_row [data-testid="stPopover"] > button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 9999px !important;
+    padding: 3px 12px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: var(--ink-secondary) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.15s ease !important;
+    cursor: pointer !important;
+}
+.st-key-input_char_pill_row [data-testid="stPopover"] > button:hover {
+    background: var(--surface-3) !important;
+    border-color: var(--border-strong) !important;
+    color: var(--ink-primary) !important;
+}
 div[data-testid="stChatInput"] {
     background: var(--composer) !important;
     border: 1px solid var(--border-hairline) !important;
@@ -3180,19 +3209,6 @@ with st.sidebar:
         st.session_state.messages = []
         st.rerun()
 
-    # ── 指導陣（AIモデル）の選択：新しいチャットのすぐ下 ──────────
-    _sel_char = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
-    _sel_info = CHARACTERS.get(_sel_char, list(CHARACTERS.values())[0])
-    with st.popover(f"{_sel_info['icon']} {_sel_char.split('（')[0]}", use_container_width=True):
-        st.caption("指導陣（AIモデル）を選択")
-        for cname, c_info_item in CHARACTERS.items():
-            st.button(
-                f"{'✓ ' if cname == _sel_char else '　 '}{c_info_item['icon']} {cname}",
-                key=f"top_sel_{cname}", use_container_width=True,
-                on_click=switch_ai_character, args=(cname,),
-            )
-            st.caption(c_info_item["desc"])
-
     # ── 📹 動画診断 ──────────────────────────────────────────
     if st.button("📹 動画診断（撮影のコツ・手順）", key="sidebar_video_diag_btn", use_container_width=True):
         show_video_diagnosis_guide()
@@ -4357,28 +4373,44 @@ _is_guest = bool(st.session_state.get("is_guest"))
 _guest_left = max(0, GUEST_CHAT_LIMIT - guest_used_count()) if _is_guest else None
 _guest_locked = _is_guest and _guest_left == 0
 
-if _is_guest:
-    if _guest_locked:
-        st.info(f"ゲストのチャットは{GUEST_CHAT_LIMIT}回までです。続けるには、ログインまたは新規登録をしてください。")
-        if st.button("ログイン・新規登録へ", key="guest_to_login", type="primary"):
-            st.session_state.authenticated = False
-            st.session_state.is_guest = False
-            st.session_state.auth_mode = "register"
-            st.rerun()
-    else:
-        st.caption(f"ゲスト利用中：あと{_guest_left}回チャットできます（ファイルの送信はログイン後に使えます）")
+with st.bottom():
+    # 入力欄から直接指導陣（AIキャラクター）を切り替えられるピルボタン
+    _cur_c_in = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+    _cur_inf_in = CHARACTERS.get(_cur_c_in, list(CHARACTERS.values())[0])
 
-if _is_guest:
-    chat_submission = st.chat_input(
-        placeholder="ログインするとチャットを続けられます" if _guest_locked else "射形の悩みや、矢所・呼吸について相談する...",
-        disabled=_guest_locked,
-    )
-else:
-    chat_submission = st.chat_input(
-        placeholder="射形の悩みや、矢所・呼吸について相談する...",
-        accept_file=True,
-        file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
-    )
+    with st.container(key="input_char_pill_row"):
+        with st.popover(f"{_cur_inf_in['icon']} {_cur_c_in.split('（')[0]}", use_container_width=False):
+            st.caption("指導陣（AIモデル）を選択")
+            for cname, c_info_item in CHARACTERS.items():
+                st.button(
+                    f"{'✓ ' if cname == _cur_c_in else '　 '}{c_info_item['icon']} {cname}",
+                    key=f"input_sel_{cname}", use_container_width=True,
+                    on_click=switch_ai_character, args=(cname,),
+                )
+                st.caption(c_info_item["desc"])
+
+    if _is_guest:
+        if _guest_locked:
+            st.info(f"ゲストのチャットは{GUEST_CHAT_LIMIT}回までです。続けるには、ログインまたは新規登録をしてください。")
+            if st.button("ログイン・新規登録へ", key="guest_to_login", type="primary"):
+                st.session_state.authenticated = False
+                st.session_state.is_guest = False
+                st.session_state.auth_mode = "register"
+                st.rerun()
+        else:
+            st.caption(f"ゲスト利用中：あと{_guest_left}回チャットできます（ファイルの送信はログイン後に使えます）")
+
+    if _is_guest:
+        chat_submission = st.chat_input(
+            placeholder="ログインするとチャットを続けられます" if _guest_locked else "射形の悩みや、矢所・呼吸について相談する...",
+            disabled=_guest_locked,
+        )
+    else:
+        chat_submission = st.chat_input(
+            placeholder="射形の悩みや、矢所・呼吸について相談する...",
+            accept_file=True,
+            file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
+        )
 
 # 注意書きは CSS（stBottomBlockContainer::before）で入力欄の直上に固定表示
 
