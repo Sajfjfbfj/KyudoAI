@@ -1301,9 +1301,9 @@ div[data-testid="stChatMessage"] {
     max-width: 100% !important; width: 100% !important;
 }
 
-/* あなた：右寄せのやわらかい吹き出し */
+/* あなた：右寄せのやわらかい吹き出し（可読性と行間を最適化） */
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    max-width: 76% !important; width: fit-content !important;
+    max-width: 78% !important; width: fit-content !important;
     margin-left: auto !important; margin-right: 0 !important;
     background: var(--user-bubble) !important;
     border: 1px solid var(--border-hairline) !important;
@@ -1311,17 +1311,12 @@ div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
     padding: 12px 18px !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
 }
-    margin-left: auto !important; margin-right: 0 !important;
-    background: var(--user-bubble) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: 20px !important;
-    padding: 10px 18px !important;
-}
 div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatarUser"] { display: none !important; }
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) p,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) span,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"] * {
     color: var(--ink-primary) !important;
+    line-height: 1.65 !important;
 }
 
 /* AI：地に直接。枠なし、行間をゆったり */
@@ -1672,15 +1667,29 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
 .login-title { font-size: 28px; font-weight: 600; font-family: var(--font-serif); letter-spacing: 0; color: var(--ink-primary); margin-bottom: 6px; }
 .login-subtitle { font-size: 13.5px; line-height: 1.8; color: var(--ink-muted); }
 
-/* ---------- レスポンシブ ---------- */
+/* ---------- レスポンシブ（スマホ・タブレット・APK特化の極上視認性） ---------- */
 @media (max-width: 900px) {
-    [data-testid="stMainBlockContainer"] { padding: 10px 16px var(--kyudo-main-pad, 24px) !important; }
+    [data-testid="stMainBlockContainer"] { padding: 10px 16px var(--kyudo-main-pad, 130px) !important; }
     .st-key-topbar { padding: 10px 16px 10px 52px !important; margin-left: -16px !important; margin-right: -16px !important; }
 }
 [data-testid="stSidebar"][aria-expanded="false"] ~ [data-testid="stMain"] .st-key-topbar {
     padding-left: 52px !important;
 }
-@media (max-width: 640px) {
+@media (max-width: 680px) {
+    /* 画面全体の余白：スマホ・APK画面を左右いっぱいに見やすく活用 */
+    [data-testid="stMainBlockContainer"] {
+        padding: 8px 14px var(--kyudo-main-pad, 130px) !important;
+    }
+    
+    /* 上部固定バー：ノッチ・ステータスバーを考慮し、すっきり整列 */
+    .st-key-topbar {
+        padding: max(8px, env(safe-area-inset-top, 0px)) 14px 8px 48px !important;
+        margin-left: -14px !important;
+        margin-right: -14px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* スターターカード：1カラム縦積みで押しやすく */
     .welcome-cards-grid [data-testid="stHorizontalBlock"] {
         flex-direction: column !important;
         gap: 10px !important;
@@ -1690,6 +1699,19 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
         width: 100% !important;
         max-width: 100% !important;
     }
+    [class*="st-key-welcome_card_"] button {
+        padding: 12px 14px !important;
+        min-height: 64px !important;
+    }
+    [class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] strong {
+        font-size: 14.5px !important;
+    }
+    [class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 12.5px !important;
+        line-height: 1.45 !important;
+    }
+    
+    /* トピックチップ：スマホで押しやすいピル型配置 */
     .quick-chip-row [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
         gap: 8px !important;
@@ -1699,7 +1721,40 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
         min-width: 120px !important;
         max-width: none !important;
     }
-    /* 回答末尾のバー（コピー・読み上げ・⋮）：スマホでも縦積みにせず1行に並べる */
+    [class*="st-key-chip_"] button {
+        font-size: 12.5px !important;
+        padding: 6px 14px !important;
+        min-height: 36px !important;
+        height: 36px !important;
+    }
+
+    /* あなたの吹き出し：スマホ画面幅に最適化（88%でゆったり折り返し） */
+    div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+        max-width: 88% !important;
+        padding: 10px 16px !important;
+        font-size: var(--font-size-chat, 16px) !important;
+        line-height: 1.65 !important;
+    }
+
+    /* AI回答メッセージ：画面端に張り付かず、余白を広々確保 */
+    div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) {
+        padding: 4px 2px !important;
+    }
+
+    /* 入力エリア（下部固定） */
+    div[data-testid="stBottom"] > div {
+        padding: 0 10px !important;
+    }
+    div[data-testid="stChatInput"] {
+        padding: 3px 8px !important;
+        border-radius: 20px !important;
+    }
+    div[data-testid="stChatInput"] textarea {
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+    }
+
+    /* 回答末尾のバー（コピー・読み上げ・⋮）：スマホでも綺麗に1行整列 */
     div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) {
         flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 4px !important;
     }
@@ -1708,12 +1763,6 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
     }
     div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) > div[data-testid="stColumn"]:nth-child(1) { flex: 0 0 76px !important; width: 76px !important; }
     div[data-testid="stHorizontalBlock"]:has([class*="st-key-msg_more_"]) > div[data-testid="stColumn"]:nth-child(3) { flex: 1 1 0 !important; }
-}
-@media (max-width: 600px) {
-    [data-testid="stMainBlockContainer"] { padding: 10px 12px var(--kyudo-main-pad, 24px) !important; }
-    div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { max-width: 90% !important; padding: 10px 16px !important; }
-    div[data-testid="stBottom"] > div { padding: 0 9px !important; }
-    [data-testid="stMain"] [class*="st-key-quick_act_"] button { font-size: 14.5px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
@@ -1747,16 +1796,46 @@ st.markdown(f"""
     --font-size-sidebar: {_fs['sidebar']};
 }}
 
-/* チャット本文全体（ユーザー・AI・リスト・強調すべて） */
+/* チャット本文全体（ユーザー・AI・リスト・強調すべて：可読性を極限まで高める） */
 div[data-testid="stChatMessage"] p,
 div[data-testid="stChatMessage"] li,
 div[data-testid="stChatMessage"] span,
 div[data-testid="stChatMessage"] div,
 div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
-div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li {{
+div[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] li {
     font-size: var(--font-size-chat) !important;
     line-height: var(--line-height-chat) !important;
-}}
+    letter-spacing: 0.015em !important;
+}
+
+div[data-testid="stChatMessage"] p {
+    margin-bottom: 0.85em !important;
+}
+
+div[data-testid="stChatMessage"] ul,
+div[data-testid="stChatMessage"] ol {
+    margin-top: 0.4em !important;
+    margin-bottom: 0.8em !important;
+    padding-left: 1.4em !important;
+}
+
+div[data-testid="stChatMessage"] li {
+    margin-bottom: 0.35em !important;
+}
+
+div[data-testid="stChatMessage"] strong {
+    color: var(--ink-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* 引用ブロック（アドバイスやポイント提示の見やすさ） */
+div[data-testid="stChatMessage"] blockquote {
+    border-left: 3px solid var(--primary-indigo) !important;
+    background: var(--surface-1) !important;
+    padding: 8px 14px !important;
+    margin: 12px 0 !important;
+    border-radius: 0 8px 8px 0 !important;
+}
 
 /* マークダウン・段落・本文全般 */
 .stMarkdown, .stMarkdown p, .stMarkdown li,
