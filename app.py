@@ -1226,148 +1226,52 @@ div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
     color: var(--ink-primary) !important;
 }
 
-/* ---------- ウェルカム ---------- */
+/* ---------- ウェルカム（ChatGPT風 ミニマル・センター） ---------- */
 .mato-emblem {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--surface-2); border: 1px solid var(--border-hairline);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--primary-indigo); margin: 0 auto 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    width: 68px; height: 68px; border-radius: 18px;
+    overflow: hidden;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 28px rgba(0, 229, 255, 0.28), 0 2px 8px rgba(0,0,0,0.3);
 }
-.welcome-hero { text-align: center; margin: 2vh auto 24px; max-width: 680px; }
+.mato-emblem img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.welcome-hero {
+    text-align: center;
+    margin: clamp(40px, 12vh, 120px) auto 0;
+    max-width: 640px;
+    padding: 0 16px;
+}
 .welcome-title {
     font-family: var(--font-serif) !important;
-    font-size: clamp(24px, 3.2vw, 32px) !important;
-    font-weight: 600 !important; line-height: 1.35 !important;
-    letter-spacing: -0.25px !important; color: var(--ink-primary) !important;
-    margin: 0 0 12px !important;
+    font-size: clamp(22px, 3.2vw, 30px) !important;
+    font-weight: 600 !important; line-height: 1.4 !important;
+    letter-spacing: -0.2px !important; color: var(--ink-primary) !important;
+    margin: 0 0 14px !important;
 }
 .welcome-sub {
-    font-size: 14.5px !important; line-height: 1.65 !important;
-    color: var(--ink-secondary) !important; max-width: 540px; margin: 0 auto 24px !important;
+    font-size: 14px !important; line-height: 1.75 !important;
+    color: var(--ink-secondary) !important;
+    max-width: 500px; margin: 0 auto !important;
 }
-
-/* スマホ（680px以下）：1画面に収まるコンパクトレイアウト */
 @media (max-width: 680px) {
-    /* ウェルカムエリア全体：スクロールなしで画面内に収める */
-    [data-testid="stMain"] [data-testid="stMainBlockContainer"]:has(.welcome-hero) {
-        display: flex !important;
-        flex-direction: column !important;
-        min-height: 0 !important;
-    }
     .welcome-hero {
-        margin: 1vh auto 10px !important;
+        margin: clamp(28px, 10vh, 70px) auto 0 !important;
     }
-    /* アイコン：小さくして縦スペース節約 */
-    .welcome-hero .mato-emblem,
-    .welcome-hero div[style*="border-radius: 16px"] {
-        width: 48px !important;
-        height: 48px !important;
-        margin-bottom: 8px !important;
+    .mato-emblem {
+        width: 56px !important; height: 56px !important;
+        border-radius: 15px !important;
+        margin-bottom: 16px !important;
     }
-    .welcome-hero img {
-        width: 48px !important;
-        height: 48px !important;
-    }
-    /* タイトル：コンパクト化 */
     .welcome-title {
         font-size: 20px !important;
-        margin-bottom: 6px !important;
-        line-height: 1.3 !important;
+        margin-bottom: 10px !important;
     }
-    /* サブタイトル：スマホでは非表示にしてスペース確保 */
     .welcome-sub {
-        display: none !important;
+        font-size: 13px !important;
+        line-height: 1.65 !important;
     }
 }
-
-/* 4つのスターターカード */
-.welcome-cards-grid { width: 100%; margin-bottom: 32px; }
-.welcome-cards-grid [data-testid="stHorizontalBlock"] {
-    display: flex !important;
-    gap: 12px !important;
-    margin-bottom: 12px !important;
-}
-.welcome-cards-grid [data-testid="stColumn"] {
-    display: flex !important;
-    flex-direction: column !important;
-}
-.welcome-cards-grid [data-testid="stColumn"] > div {
-    height: 100% !important;
-}
-[class*="st-key-welcome_card_"] {
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-}
-[class*="st-key-welcome_card_"] .stButton {
-    height: 100% !important;
-    display: flex !important;
-}
-[class*="st-key-welcome_card_"] button {
-    height: 100% !important;
-    min-height: 92px !important;
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    text-align: left !important;
-    padding: 16px 18px !important;
-    border-radius: 12px !important;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
-    gap: 12px !important;
-    transition: all 0.16s ease !important;
-    cursor: pointer !important;
-}
-[class*="st-key-welcome_card_"] button:hover {
-    background: var(--canvas-subtle) !important;
-    border-color: var(--border-strong) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-}
-[class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] {
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    text-align: left !important;
-}
-[class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] strong {
-    display: block !important;
-    font-family: var(--font-sans) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    color: var(--ink-primary) !important;
-    line-height: 1.4 !important;
-    margin-bottom: 4px !important;
-}
-[class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] p {
-    font-size: 13px !important;
-    color: var(--ink-secondary) !important;
-    line-height: 1.5 !important;
-    margin: 0 !important;
-    text-align: left !important;
-}
-[class*="st-key-welcome_card_"] button [data-testid="stIconMaterial"] {
-    flex: 0 0 auto !important;
-    font-size: 20px !important;
-    color: var(--primary-indigo) !important;
-    margin-top: 1px !important;
-}
-.st-key-welcome_card_1 button [data-testid="stIconMaterial"] {
-    color: var(--accent-red) !important;
-}
-
-/* トピックチップ */
-.quick-chip-row {
-    width: 100%;
-    max-width: 680px;
-    margin: 14px auto 30px;
-}
-.quick-chip-row [data-testid="stHorizontalBlock"] {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
 }
@@ -1796,61 +1700,6 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
         height: 44px !important;
         z-index: 999999 !important;
         pointer-events: auto !important;
-    }
-    
-    /* スターターカード：スマホで2×2グリッド（1画面に収める） */
-    .welcome-cards-grid {
-        margin-bottom: 8px !important;
-    }
-    .welcome-cards-grid [data-testid="stHorizontalBlock"] {
-        flex-direction: row !important;
-        gap: 8px !important;
-        margin-bottom: 8px !important;
-    }
-    .welcome-cards-grid [data-testid="stColumn"] {
-        width: 50% !important;
-        max-width: 50% !important;
-        flex: 1 1 calc(50% - 4px) !important;
-    }
-    [class*="st-key-welcome_card_"] button {
-        padding: 10px 10px !important;
-        min-height: 0 !important;
-        height: auto !important;
-    }
-    [class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] strong {
-        font-size: 13px !important;
-        margin-bottom: 2px !important;
-    }
-    [class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] p {
-        font-size: 11px !important;
-        line-height: 1.4 !important;
-        display: -webkit-box !important;
-        -webkit-line-clamp: 2 !important;
-        -webkit-box-orient: vertical !important;
-        overflow: hidden !important;
-    }
-    [class*="st-key-welcome_card_"] button [data-testid="stIconMaterial"] {
-        font-size: 16px !important;
-    }
-
-    /* トピックチップ：スマホで押しやすいピル型配置 */
-    .quick-chip-row {
-        margin: 6px auto 0 !important;
-    }
-    .quick-chip-row [data-testid="stHorizontalBlock"] {
-        flex-wrap: wrap !important;
-        gap: 6px !important;
-    }
-    .quick-chip-row [data-testid="stColumn"] {
-        flex: 1 1 calc(50% - 8px) !important;
-        min-width: 120px !important;
-        max-width: none !important;
-    }
-    [class*="st-key-chip_"] button {
-        font-size: 12px !important;
-        padding: 5px 10px !important;
-        min-height: 32px !important;
-        height: 32px !important;
     }
 
     /* あなたの吹き出し：スマホ画面幅に最適化（88%でゆったり折り返し） */
@@ -4297,73 +4146,18 @@ welcome_slot = None
 if not st.session_state.messages and not quick_prompt:
   welcome_slot = st.empty()
   with welcome_slot.container(key="welcome_wrap"):
-    # ===== ウェルカム画面（YUMIQAスタイル：エンブレム＋大見出し＋4つのスターターカード＋トピックチップ） =====
+    # ===== ウェルカム画面（ChatGPT風ミニマル：エンブレム＋タイトル＋案内文） =====
     _wel_yumiqa_b64 = get_asset_base64("yumiqa_icon.png")
     _wel_img_src = f"data:image/png;base64,{_wel_yumiqa_b64}" if _wel_yumiqa_b64 else "/app/static/icon-192.png"
     st.markdown(f"""
     <div class="welcome-hero">
-        <div class="mato-emblem" style="width: 64px; height: 64px; border-radius: 16px; overflow: hidden; margin: 0 auto 16px; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25);">
-            <img src="{_wel_img_src}" style="width: 100%; height: 100%; object-fit: cover;" alt="YUMIQA">
+        <div class="mato-emblem">
+            <img src="{_wel_img_src}" alt="YUMIQA">
         </div>
         <h1 class="welcome-title">今日の射形について、何を相談しますか？</h1>
-        <p class="welcome-sub">射法八節の気になる点や矢所の傾向を教えてください。練習動画や写真からのフォーム確認にも対応しています。</p>
+        <p class="welcome-sub">射法八節の気になる点や矢所の傾向を教えてください。<br>練習動画や写真からのフォーム確認にも対応しています。</p>
     </div>
     """, unsafe_allow_html=True)
-
-    # 4つのスターターカード（PCは2×2グリッド、スマホは1カラム縦積み）
-    st.markdown('<div class="welcome-cards-grid">', unsafe_allow_html=True)
-    col_r1_1, col_r1_2 = st.columns(2)
-    with col_r1_1:
-        with st.container(key="welcome_card_1"):
-            st.button(
-                "**早気を克服したい**  \n会を3秒以上保つための呼吸法と、角見の意識の置き方を聞く",
-                key="act_hayake", icon=":material/north_east:", icon_position="right",
-                use_container_width=True, on_click=_set_quick_prompt,
-                args=("早気を克服したいです。会を3秒以上保つための呼吸法と、角見の意識の置き方を教えてください。",)
-            )
-    with col_r1_2:
-        with st.container(key="welcome_card_2"):
-            st.button(
-                "**離れで矢が右に外れる**  \n押手・勝手どちらの原因が多いか、セルフチェック方法を確認",
-                key="act_right", icon=":material/adjust:", icon_position="right",
-                use_container_width=True, on_click=_set_quick_prompt,
-                args=("離れで矢が右に抜けることが多いです。押手と勝手どちらの原因が多いか、セルフチェック方法を教えてください。",)
-            )
-
-    col_r2_1, col_r2_2 = st.columns(2)
-    with col_r2_1:
-        with st.container(key="welcome_card_3"):
-            st.button(
-                "**会での肩の収まり**  \n肩根が上がる癖を直し、左右の伸び合いを安定させるコツ",
-                key="act_shoulder", icon=":material/accessibility_new:", icon_position="right",
-                use_container_width=True, on_click=_set_quick_prompt,
-                args=("引分けから会にかけて左肩が上がってしまいます。肩根を沈めて胸を開くコツを教えてください。",)
-            )
-    with col_r2_2:
-        with st.container(key="welcome_card_4"):
-            st.button(
-                "**射形動画をチェック**  \n正面・側面の動画を添付して、射法八節ごとの改善点を整理",
-                key="act_video", icon=":material/videocam:", icon_position="right",
-                use_container_width=True, on_click=_set_quick_prompt,
-                args=("射形動画または写真を分析してもらう際の撮影のコツ（アングルや秒数など）と分析手順を教えてください。",)
-            )
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # クイックトピックチップ（射法八節、手の内・角見、胴造り・残心、昇段審査・礼法）
-    st.markdown('<div class="quick-chip-row">', unsafe_allow_html=True)
-    col_chip1, col_chip2, col_chip3, col_chip4 = st.columns(4)
-    with col_chip1:
-        st.button("射法八節", key="chip_hassetsu", use_container_width=True, on_click=_set_quick_prompt, args=("射法八節の「会」における伸び合いのポイントを教えてください。",))
-    with col_chip2:
-        st.button("手の内・角見", key="chip_tenouchi", use_container_width=True, on_click=_set_quick_prompt, args=("手の内の作り方（天文筋と虎口）の基本を確認したいです。",))
-    with col_chip3:
-        st.button("胴造り・残心", key="chip_dozukuri", use_container_width=True, on_click=_set_quick_prompt, args=("残心で身が崩れないための足踏みと胴造りの意識を教えてください。",))
-    with col_chip4:
-        st.button("昇段審査・礼法", key="chip_shinsa", use_container_width=True, on_click=_set_quick_prompt, args=("弓道審査の学科試験でよく問われる射法の基本をまとめたいです。",))
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # スマホでは入力欄分だけ余白、PCは少し多め
-    st.markdown('<div style="height: clamp(16px, 4vh, 80px);"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
