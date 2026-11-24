@@ -219,7 +219,7 @@ st.html("""
 <link rel="icon" type="image/png" href="/app/static/favicon.png?v=4">
 <link rel="shortcut icon" href="/app/static/favicon.ico?v=4">
 <link rel="apple-touch-icon" href="/app/static/icon-192.png?v=4">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <script>
 (function() {
     function setupPWA() {
@@ -278,13 +278,13 @@ st.html("""
                 var viewportMeta = pDoc.querySelector('meta[name="viewport"]');
                 if (viewportMeta) {
                     var content = viewportMeta.getAttribute('content') || '';
-                    if (!content.includes('viewport-fit=cover')) {
-                        viewportMeta.setAttribute('content', content + ', viewport-fit=cover');
-                    }
+                    if (!content.includes('viewport-fit=cover')) content += ', viewport-fit=cover';
+                    if (!content.includes('interactive-widget=resizes-content')) content += ', interactive-widget=resizes-content';
+                    viewportMeta.setAttribute('content', content);
                 } else {
                     var vm = pDoc.createElement('meta');
                     vm.name = 'viewport';
-                    vm.content = 'width=device-width, initial-scale=1, viewport-fit=cover';
+                    vm.content = 'width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content';
                     pDoc.head.appendChild(vm);
                 }
 
@@ -3583,6 +3583,45 @@ _CTX_MENU_JS = r"""
   updateBottomPad();
   window.addEventListener('resize', updateBottomPad);
   setInterval(updateBottomPad, 800);
+
+  /* ソフトウェアキーボード追従：キーボード表示時に入力欄を持ち上げて常に見えるようにする */
+  function handleKeyboard() {
+    var b = document.querySelector('[data-testid="stBottom"]');
+    if (!b) return;
+    if (window.visualViewport) {
+      var offset = window.innerHeight - window.visualViewport.height;
+      if (offset > 100) {
+        b.style.bottom = Math.round(offset) + 'px';
+        b.style.transition = 'bottom 0.15s ease-out';
+        var activeEl = document.activeElement;
+        if (activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) {
+          activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } else {
+        b.style.bottom = '0px';
+      }
+    }
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', handleKeyboard);
+    window.visualViewport.addEventListener('scroll', handleKeyboard);
+  }
+  document.addEventListener('focusin', function (e) {
+    if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) {
+      setTimeout(function () {
+        handleKeyboard();
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 250);
+    }
+  });
+  document.addEventListener('focusout', function (e) {
+    if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) {
+      setTimeout(function () {
+        var b = document.querySelector('[data-testid="stBottom"]');
+        if (b) b.style.bottom = '0px';
+      }, 150);
+    }
+  });
 
   document.addEventListener('click', hide, true);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
