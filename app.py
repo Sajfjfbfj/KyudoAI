@@ -1247,6 +1247,40 @@ div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
     color: var(--ink-secondary) !important; max-width: 540px; margin: 0 auto 24px !important;
 }
 
+/* スマホ（680px以下）：1画面に収まるコンパクトレイアウト */
+@media (max-width: 680px) {
+    /* ウェルカムエリア全体：スクロールなしで画面内に収める */
+    [data-testid="stMain"] [data-testid="stMainBlockContainer"]:has(.welcome-hero) {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+    }
+    .welcome-hero {
+        margin: 1vh auto 10px !important;
+    }
+    /* アイコン：小さくして縦スペース節約 */
+    .welcome-hero .mato-emblem,
+    .welcome-hero div[style*="border-radius: 16px"] {
+        width: 48px !important;
+        height: 48px !important;
+        margin-bottom: 8px !important;
+    }
+    .welcome-hero img {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    /* タイトル：コンパクト化 */
+    .welcome-title {
+        font-size: 20px !important;
+        margin-bottom: 6px !important;
+        line-height: 1.3 !important;
+    }
+    /* サブタイトル：スマホでは非表示にしてスペース確保 */
+    .welcome-sub {
+        display: none !important;
+    }
+}
+
 /* 4つのスターターカード */
 .welcome-cards-grid { width: 100%; margin-bottom: 32px; }
 .welcome-cards-grid [data-testid="stHorizontalBlock"] {
@@ -1780,35 +1814,48 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
         pointer-events: auto !important;
     }
     
-    /* スターターカード：1カラム縦積みで押しやすく */
+    /* スターターカード：スマホで2×2グリッド（1画面に収める） */
     .welcome-cards-grid {
-        margin-bottom: 48px !important;
+        margin-bottom: 8px !important;
     }
     .welcome-cards-grid [data-testid="stHorizontalBlock"] {
-        flex-direction: column !important;
-        gap: 10px !important;
-        margin-bottom: 10px !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        margin-bottom: 8px !important;
     }
     .welcome-cards-grid [data-testid="stColumn"] {
-        width: 100% !important;
-        max-width: 100% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        flex: 1 1 calc(50% - 4px) !important;
     }
     [class*="st-key-welcome_card_"] button {
-        padding: 12px 14px !important;
-        min-height: 64px !important;
+        padding: 10px 10px !important;
+        min-height: 0 !important;
+        height: auto !important;
     }
     [class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] strong {
-        font-size: 14.5px !important;
+        font-size: 13px !important;
+        margin-bottom: 2px !important;
     }
     [class*="st-key-welcome_card_"] button [data-testid="stMarkdownContainer"] p {
-        font-size: 12.5px !important;
-        line-height: 1.45 !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
     }
-    
+    [class*="st-key-welcome_card_"] button [data-testid="stIconMaterial"] {
+        font-size: 16px !important;
+    }
+
     /* トピックチップ：スマホで押しやすいピル型配置 */
+    .quick-chip-row {
+        margin: 6px auto 0 !important;
+    }
     .quick-chip-row [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
-        gap: 8px !important;
+        gap: 6px !important;
     }
     .quick-chip-row [data-testid="stColumn"] {
         flex: 1 1 calc(50% - 8px) !important;
@@ -1816,10 +1863,10 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
         max-width: none !important;
     }
     [class*="st-key-chip_"] button {
-        font-size: 12.5px !important;
-        padding: 6px 14px !important;
-        min-height: 36px !important;
-        height: 36px !important;
+        font-size: 12px !important;
+        padding: 5px 10px !important;
+        min-height: 32px !important;
+        height: 32px !important;
     }
 
     /* あなたの吹き出し：スマホ画面幅に最適化（88%でゆったり折り返し） */
@@ -4350,7 +4397,8 @@ if not st.session_state.messages and not quick_prompt:
         st.button("昇段審査・礼法", key="chip_shinsa", use_container_width=True, on_click=_set_quick_prompt, args=("弓道審査の学科試験でよく問われる射法の基本をまとめたいです。",))
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('<div style="margin-bottom: 80px;"></div>', unsafe_allow_html=True)
+    # スマホでは入力欄分だけ余白、PCは少し多め
+    st.markdown('<div style="height: clamp(16px, 4vh, 80px);"></div>', unsafe_allow_html=True)
 
 # 過去ログの表示（チャットタイムライン）
 for idx, msg in enumerate(st.session_state.messages):
