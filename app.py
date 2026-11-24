@@ -4381,7 +4381,8 @@ _is_guest = bool(st.session_state.get("is_guest"))
 _guest_left = max(0, GUEST_CHAT_LIMIT - guest_used_count()) if _is_guest else None
 _guest_locked = _is_guest and _guest_left == 0
 
-with st.bottom():
+_bottom_ctx = st.bottom if hasattr(st, "bottom") else st.container()
+with _bottom_ctx:
     # 入力欄から直接指導陣（AIキャラクター）を切り替えられるピルボタン
     _cur_c_in = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
     _cur_inf_in = CHARACTERS.get(_cur_c_in, list(CHARACTERS.values())[0])
