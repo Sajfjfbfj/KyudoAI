@@ -1028,9 +1028,8 @@ section[data-testid="stSidebar"] .st-key-sidebar_new_chat_btn button::after {
         font-size: 15px !important; color: var(--ink-muted) !important;
     }
 }
-/* streamlit.app（Streamlit Cloud）の右下バッジが送信ボタンに重なるのを避けるため、
-   JS が html に付ける kyudo-lift クラスがあるときだけ入力欄を持ち上げる */
-html.kyudo-lift div[data-testid="stBottom"] { padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
+/* バッジ非表示化に伴い、下部の余分な持ち上げ余白（68px）を撤廃して詰める */
+html.kyudo-lift div[data-testid="stBottom"] { padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important; }
 
 /* 履歴の検索欄 */
 section[data-testid="stSidebar"] .st-key-sidebar_search_chats [data-baseweb="input"] {
@@ -3628,22 +3627,15 @@ _CTX_MENU_JS = r"""
     setTimeout(focusInput, 700);
   }
 
-  /* streamlit.app の右下バッジ回避：ホスト名が streamlit.app で、幅が狭い（スマホ）ときだけ入力欄を持ち上げる */
-  function updateLift() {
-    var onCloud = /\.streamlit\.app$/.test(window.location.hostname);
-    var narrow = window.innerWidth <= 700;
-    document.documentElement.classList.toggle('kyudo-lift', onCloud && narrow);
-  }
-  updateLift();
-  window.addEventListener('resize', updateLift);
+  /* 下部バッジ非表示化に伴い持ち上げ不要（常に下部へ詰める） */
+  document.documentElement.classList.remove('kyudo-lift');
 
   /* 最後の行が入力欄の真上に来るように、本文の下余白を入力欄の実測の高さに合わせる */
   function updateBottomPad() {
     var b = document.querySelector('[data-testid="stBottom"]');
     if (!b) return;
     var pos = getComputedStyle(b).position;
-    // カードが被らないよう余裕を大きめ（+48px）にとる
-    var pad = (pos === 'fixed' || pos === 'absolute') ? Math.ceil(b.getBoundingClientRect().height) + 48 : 48;
+    var pad = (pos === 'fixed' || pos === 'absolute') ? Math.ceil(b.getBoundingClientRect().height) + 20 : 24;
     document.documentElement.style.setProperty('--kyudo-main-pad', pad + 'px');
   }
   updateBottomPad();
