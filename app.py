@@ -2827,6 +2827,11 @@ def _flush_cookie_js():
         _save_last_js = "" if _is_g else (
             f"try{{P.localStorage.setItem('yumiqa_last_tok','{set_tok}');"
             f"P.localStorage.setItem('yumiqa_last_u','{_fp_user}');}}catch(e){{}}"
+            f"try{{if(window.top&&window.top.localStorage){{window.top.localStorage.setItem('yumiqa_last_tok','{set_tok}');window.top.localStorage.setItem('yumiqa_last_u','{_fp_user}');}}}}catch(e){{}}"
+            f"try{{var lc1='yumiqa_last_tok={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
+            f"var lc2='yumiqa_last_u={_fp_user}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
+            "if(P.location.protocol==='https:'){lc1+='; Secure';lc2+='; Secure';}"
+            "P.document.cookie=lc1;P.document.cookie=lc2;}catch(e){}"
         )
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.setItem('{LOGIN_COOKIE}','{set_tok}');}}catch(e){{}}"
@@ -2916,64 +2921,82 @@ def render_login_screen(slot=None):
         """, unsafe_allow_html=True)
 
         with st.container(key="login_card"):
-            # 前回ログイン済み（手入力含む）アカウントが端末にあれば、それを参照してワンタップ復帰できるボタンをJSで動的表示
-            st.markdown("""
-            <div id="yumiqa-onetap-saved-wrap" style="display:none; margin-bottom:10px;">
-                <button id="yumiqa-onetap-saved-btn" type="button" style="width:100%; padding:11px 16px; border-radius:12px; border:0; background:#1B365D; color:#fff; font-weight:600; font-size:14.5px; cursor:pointer; box-shadow:0 2px 8px rgba(27,54,93,0.22);">
-                    ✨ 前回のアカウントでワンタップログイン
-                </button>
-            </div>
-            """, unsafe_allow_html=True)
-            components.html("""
-            <script>
-            (function(){
-                function getLS(k){
-                    try{ var v=window.parent.localStorage.getItem(k); if(v) return v; }catch(e){}
-                    try{ if(window.top&&window.top.localStorage){ var v2=window.top.localStorage.getItem(k); if(v2) return v2; } }catch(e){}
-                    return '';
-                }
-                function initSavedBtn(){
-                    try{
-                        var P = window.parent;
-                        var D = P.document;
-                        var tok = getLS('yumiqa_last_tok') || getLS('kyudo_auth');
-                        var u = getLS('yumiqa_last_u');
-                        if(!tok) return;
-                        var wrap = D.getElementById('yumiqa-onetap-saved-wrap');
-                        var btn = D.getElementById('yumiqa-onetap-saved-btn');
-                        if(wrap && btn){
-                            wrap.style.display = 'block';
-                            if(u) btn.textContent = '✨ 「' + u + '」でワンタップログイン';
-                            btn.onclick = function(){
-                                var url = new URL(P.location.href);
-                                url.searchParams.set('auth', tok);
-                                P.location.replace(url.toString());
-                            };
-                        }
-                    }catch(e){}
-                }
-                initSavedBtn();
-                setTimeout(initSavedBtn, 100);
-                setTimeout(initSavedBtn, 400);
-                setTimeout(initSavedBtn, 1000);
-            })();
-            </script>
-            """, height=0)
+            # 1) サーバー側Cookieから手入力済みアカウントの有効な v2 トークンを検出 → 本物のStreamlitボタンで即ワンタップログイン
+            _cookie_last_tok = ""
+            try:
+                _cookie_last_tok = st.context.cookies.get("yumiqa_last_tok", "") or ""
+            except Exception:
+                _cookie_last_tok = ""
+            _saved_u, _saved_is_g = verify_login_token(_cookie_last_tok)
+            _has_native_onetap = bool(_saved_u and not _saved_is_g)
 
-            st.markdown("""
-            <div style="font-size:12px; color:var(--ink-secondary); margin: 4px 0 8px 0;">
-                ※ 一度下の「ID・パスワードでログイン」から入ると、次回以降はこの端末で手入力なし・ワンタップでログインできます。
-            </div>
-            """, unsafe_allow_html=True)
+            if _has_native_onetap:
+                if st.button(f"✨ 「{_saved_u}」でワンタップログイン", key="one_tap_saved_native", type="primary", use_container_width=True):
+                    if slot is not None:
+                        slot.empty()
+                    _complete_login(_saved_u)
+                st.caption("※ 前回この端末でログインしたアカウントにワンタップで入れます")
+            else:
+                # 2) Cookieがない場合（APK初回等）は localStorage の v2 トークンを参照してワンタップボタンを表示
+                st.markdown("""
+                <div id="yumiqa-onetap-saved-wrap" style="display:none; margin-bottom:10px;">
+                    <button id="yumiqa-onetap-saved-btn" type="button" style="width:100%; padding:11px 16px; border-radius:12px; border:0; background:#1B365D; color:#fff; font-weight:600; font-size:14.5px; cursor:pointer; box-shadow:0 2px 8px rgba(27,54,93,0.22);">
+                        ✨ 前回のアカウントでワンタップログイン
+                    </button>
+                </div>
+                """, unsafe_allow_html=True)
+                components.html("""
+                <script>
+                (function(){
+                    function getLS(k){
+                        try{ var v=window.parent.localStorage.getItem(k); if(v) return v; }catch(e){}
+                        try{ if(window.top&&window.top.localStorage){ var v2=window.top.localStorage.getItem(k); if(v2) return v2; } }catch(e){}
+                        return '';
+                    }
+                    function initSavedBtn(){
+                        try{
+                            var P = window.parent;
+                            var D = P.document;
+                            var tok = getLS('yumiqa_last_tok') || getLS('kyudo_auth');
+                            var u = getLS('yumiqa_last_u');
+                            if(!tok || tok.indexOf('v2.') !== 0) return;
+                            var wrap = D.getElementById('yumiqa-onetap-saved-wrap');
+                            var btn = D.getElementById('yumiqa-onetap-saved-btn');
+                            if(wrap && btn){
+                                wrap.style.display = 'block';
+                                if(u) btn.textContent = '✨ 「' + u + '」でワンタップログイン';
+                                btn.onclick = function(){
+                                    var url = new URL(P.location.href);
+                                    url.searchParams.delete('yumiqa_u');
+                                    url.searchParams.delete('yumiqa_fp');
+                                    url.searchParams.set('auth', tok);
+                                    P.location.replace(url.toString());
+                                };
+                            }
+                        }catch(e){}
+                    }
+                    initSavedBtn();
+                    setTimeout(initSavedBtn, 100);
+                    setTimeout(initSavedBtn, 400);
+                    setTimeout(initSavedBtn, 1000);
+                })();
+                </script>
+                """, height=0)
 
-            with st.expander("ID・パスワードでログイン / 新規登録", expanded=True):
+                st.markdown("""
+                <div style="font-size:12px; color:var(--ink-secondary); margin: 4px 0 8px 0;">
+                    ※ ユーザー名とパスワードで一度ログインすると、次回以降はこの端末で手入力なし・ワンタップでログインできます。
+                </div>
+                """, unsafe_allow_html=True)
+
+            with st.expander("ID・パスワードでログイン / 新規登録", expanded=(not _has_native_onetap)):
                 # Expander内でログイン⇄新規登録の切替
                 tab_login, tab_reg = st.tabs(["ログイン", "新規登録"])
                 with tab_login:
                     with st.form("login_form", clear_on_submit=False, border=False):
                         uname = st.text_input("ユーザー名", placeholder="ユーザー名")
                         upass = st.text_input("パスワード", type="password", placeholder="パスワード")
-                        submitted = st.form_submit_button("ログイン", use_container_width=True, type="secondary")
+                        submitted = st.form_submit_button("ログイン", use_container_width=True, type="primary")
                     # パスワードマネージャー対応
                     st.markdown("""<script>(function(){function d(){try{var p=window.parent.document;p.querySelectorAll('input').forEach(function(e){var h=e.getAttribute('placeholder')||'';if(h==='ユーザー名'){e.setAttribute('autocomplete','username');e.setAttribute('name','username');}if(e.type==='password'&&h==='パスワード'){e.setAttribute('autocomplete','current-password');e.setAttribute('name','password');}});p.querySelectorAll('form').forEach(function(f){if(!f.getAttribute('method'))f.setAttribute('method','post');if(!f.getAttribute('action'))f.setAttribute('action','');f.setAttribute('autocomplete','on');});}catch(e){}}d();setTimeout(d,500);setTimeout(d,1500);})();</script>""", unsafe_allow_html=True)
                     if submitted:
