@@ -2823,11 +2823,17 @@ def _flush_cookie_js():
         # ログイン成功トークン＋ユーザーフィンガープリント（app再起動後も自動ログインできるよう両方保存）
         _fp_user = st.session_state.get("logged_in_user", "")
         _fp_val = get_user_credential_fingerprint(_fp_user) if _fp_user else ""
+        _is_g = bool(st.session_state.get("is_guest", False))
+        _save_last_js = "" if _is_g else (
+            f"try{{P.localStorage.setItem('yumiqa_last_tok','{set_tok}');"
+            f"P.localStorage.setItem('yumiqa_last_u','{_fp_user}');}}catch(e){{}}"
+        )
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.setItem('{LOGIN_COOKIE}','{set_tok}');}}catch(e){{}}"
               f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
               "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}"
               f"try{{P.localStorage.setItem('yumiqa_u','{_fp_user}');P.localStorage.setItem('yumiqa_fp','{_fp_val}');}}catch(e){{}}"
+              f"{_save_last_js}"
               f"try{{if(window.AndroidAuth){{window.AndroidAuth.saveAuth('{set_tok}');}}else if(P.AndroidAuth){{P.AndroidAuth.saveAuth('{set_tok}');}}}}catch(e){{}}"
               )
     else:
@@ -2910,8 +2916,45 @@ def render_login_screen(slot=None):
         """, unsafe_allow_html=True)
 
         with st.container(key="login_card"):
+            # 前回ログイン済み（手入力含む）アカウントが端末にあれば、それを参照してワンタップ復帰できるボタンをJSで動的表示
+            st.markdown("""
+            <div id="yumiqa-onetap-saved-wrap" style="display:none; margin-bottom:10px;">
+                <button id="yumiqa-onetap-saved-btn" type="button" style="width:100%; padding:11px 16px; border-radius:12px; border:0; background:#1B365D; color:#fff; font-weight:600; font-size:14.5px; cursor:pointer; box-shadow:0 2px 8px rgba(27,54,93,0.22);">
+                    ✨ 前回のアカウントでワンタップログイン
+                </button>
+            </div>
+            """, unsafe_allow_html=True)
+            components.html("""
+            <script>
+            (function(){
+                function initSavedBtn(){
+                    try{
+                        var P = window.parent;
+                        var D = P.document;
+                        var tok = P.localStorage.getItem('yumiqa_last_tok') || P.localStorage.getItem('kyudo_auth');
+                        var u = P.localStorage.getItem('yumiqa_last_u') || '';
+                        if(!tok) return;
+                        var wrap = D.getElementById('yumiqa-onetap-saved-wrap');
+                        var btn = D.getElementById('yumiqa-onetap-saved-btn');
+                        if(wrap && btn){
+                            wrap.style.display = 'block';
+                            if(u) btn.textContent = '✨ 「' + u + '」でワンタップログイン';
+                            btn.onclick = function(){
+                                var url = new URL(P.location.href);
+                                url.searchParams.set('auth', tok);
+                                P.location.replace(url.toString());
+                            };
+                        }
+                    }catch(e){}
+                }
+                initSavedBtn();
+                setTimeout(initSavedBtn, 300);
+            })();
+            </script>
+            """, height=0)
+
             # 最上部：手入力不要のワンタップ開始ボタン（動画診断含む全機能・永久ログイン維持）
-            if st.button("✨ ワンタップで始める（入力不要・自動ログイン）", key="one_tap_start", type="primary", use_container_width=True):
+            if st.button("✨ 新しくワンタップで始める（入力不要）", key="one_tap_start", type="primary", use_container_width=True):
                 auto_uname = f"archer_{secrets.token_hex(4)}"
                 register_user(auto_uname, secrets.token_urlsafe(16), display_name="弓道家")
                 if slot is not None:
@@ -3520,6 +3563,17 @@ with st.sidebar:
                 🛡️ 動画・画像は分析直後に完全シュレッダー抹消されます。
             </div>
             """, unsafe_allow_html=True)
+
+        # ── 他端末引き継ぎ・ログイン共有（同じ履歴を別端末で見る） ──
+        _cur_login_u = st.session_state.get("logged_in_user", "")
+        if _cur_login_u and not st.session_state.get("is_guest"):
+            st.divider()
+            st.markdown("**📱 他端末で履歴を共有・引き継ぎ**")
+            st.caption(f"現在のログインID: `{_cur_login_u}`")
+            _share_tok = _query_login_token() or issue_login_token(_cur_login_u, is_guest=False)
+            _share_url = f"https://aikyudo-6d3n8m5yhzqubjdnr4bbax.streamlit.app/?auth={_share_tok}"
+            st.caption("下のURLを別スマホ・PCで開くと、手入力なしで同じアカウント＆履歴に入れます。")
+            st.code(_share_url, language=None)
 
         # ── ログアウト（どのタブからでも押せるよう、タブの外に配置） ──
         
