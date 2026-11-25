@@ -3615,7 +3615,6 @@ with st.sidebar:
             st.session_state.authenticated = False
             st.session_state.is_guest = False
             st.session_state.logged_in_user = ""
-            st.session_state.sb_font_size_choice = "大きめ (18px)"
             st.session_state.font_size_choice = "大きめ (18px)"
             st.session_state.messages = []
             if "current_session_id" in st.session_state:
