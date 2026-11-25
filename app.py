@@ -643,7 +643,9 @@ html, body, [class*="css"], .stApp {
 }
 [data-testid="stHeader"] button, [data-testid="stHeader"] a { pointer-events: auto !important; }
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stToolbarActions"],
-[data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
+[data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="manage-app-button"],
+[data-testid="stToolbar"], footer, [class*="viewerBadge"], [class*="profileContainer"],
+a[href*="streamlit.io"] { display: none !important; visibility: hidden !important; pointer-events: none !important; }
 [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] button {
     position: relative; z-index: 1002;
     color: var(--ink-secondary) !important;
@@ -1423,16 +1425,38 @@ div[data-testid="stBottomBlockContainer"]::after {
     padding: 5px 0 0 !important;
 }
 
-/* Gemini & ChatGPT 2026 完全準拠 カード型コンポーザー（入力バー） */
+/* Gemini & ChatGPT 2026 完全準拠 スリム2行カード型コンポーザー（1行目: 入力欄全幅 / 2行目: ＋・キャラ選択・送信） */
 div[data-testid="stChatInput"] {
     background: var(--composer, #f4f4f4) !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 24px !important;
+    border-radius: 22px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
     padding: 6px 10px 6px 10px !important;
     transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease) !important;
     position: relative !important;
     backdrop-filter: blur(12px) !important;
+}
+div[data-testid="stChatInput"] > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px 6px !important;
+}
+div[data-testid="stChatInput"] > div > div:has(textarea) {
+    order: -1 !important;
+    flex: 1 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 24px !important;
+}
+div[data-testid="stChatInput"] > div > div:has([data-testid="stChatInputFileUploadButton"]),
+div[data-testid="stChatInput"] > div > [data-testid="stChatInputFileUploadButton"] {
+    order: 1 !important;
+}
+div[data-testid="stChatInput"] > div > div:has([data-testid="stChatInputSubmitButton"]),
+div[data-testid="stChatInput"] > div > [data-testid="stChatInputSubmitButton"] {
+    order: 3 !important;
+    margin-left: auto !important;
 }
 div[data-testid="stChatInput"]:focus-within {
     border-color: rgba(27, 54, 93, 0.35) !important;
@@ -1450,10 +1474,9 @@ div[data-testid="stChatInput"] [data-baseweb] {
 }
 div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
-    font-size: 15px !important; line-height: 1.5 !important;
-    padding-left: 2px !important;
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
+    font-size: 15px !important; line-height: 1.45 !important;
+    padding: 2px 4px !important;
+    min-height: 24px !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim, #8E8E93) !important; font-size: 15px !important; }
 
@@ -1520,14 +1543,14 @@ div[data-testid="stBottomBlockContainer"]:not(:has([data-testid="stChatInputFile
 .st-key-input_char_pill_row [data-testid="stPopover"] > button {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 5px !important;
+    gap: 4px !important;
     background: rgba(0, 0, 0, 0.04) !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
     border-radius: 9999px !important;
-    padding: 2px 11px !important;
-    min-height: 28px !important;
-    height: 28px !important;
-    font-size: 12px !important;
+    padding: 1px 10px !important;
+    min-height: 26px !important;
+    height: 26px !important;
+    font-size: 11.5px !important;
     font-weight: 550 !important;
     color: var(--ink-secondary) !important;
     box-shadow: none !important;
