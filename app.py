@@ -2834,13 +2834,13 @@ def _flush_cookie_js():
               "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}"
               f"try{{P.localStorage.setItem('yumiqa_u','{_fp_user}');P.localStorage.setItem('yumiqa_fp','{_fp_val}');}}catch(e){{}}"
               f"{_save_last_js}"
-              f"try{{if(window.AndroidAuth){{window.AndroidAuth.saveAuth('{set_tok}');}}else if(P.AndroidAuth){{P.AndroidAuth.saveAuth('{set_tok}');}}}}catch(e){{}}"
+              f"try{{var AA=window.AndroidAuth||P.AndroidAuth||(window.top&&window.top.AndroidAuth);if(AA){{AA.saveAuth('{set_tok}');}}}}catch(e){{}}"
               )
     else:
         js = (f"var P=window.parent;"
               f"try{{P.localStorage.removeItem('{LOGIN_COOKIE}');P.localStorage.removeItem('yumiqa_u');P.localStorage.removeItem('yumiqa_fp');}}catch(e){{}}"
               f"try{{P.document.cookie='{LOGIN_COOKIE}=; path=/; max-age=0; SameSite=Lax';}}catch(e){{}}"
-              f"try{{if(window.AndroidAuth){{window.AndroidAuth.clearAuth();}}else if(P.AndroidAuth){{P.AndroidAuth.clearAuth();}}}}catch(e){{}}"
+              f"try{{var AA=window.AndroidAuth||P.AndroidAuth||(window.top&&window.top.AndroidAuth);if(AA){{AA.clearAuth();}}}}catch(e){{}}"
               )
     with st.container(key="cookie_sync_slot"):
         components.html(f"<script>{js}</script>", height=0)
@@ -2927,12 +2927,17 @@ def render_login_screen(slot=None):
             components.html("""
             <script>
             (function(){
+                function getLS(k){
+                    try{ var v=window.parent.localStorage.getItem(k); if(v) return v; }catch(e){}
+                    try{ if(window.top&&window.top.localStorage){ var v2=window.top.localStorage.getItem(k); if(v2) return v2; } }catch(e){}
+                    return '';
+                }
                 function initSavedBtn(){
                     try{
                         var P = window.parent;
                         var D = P.document;
-                        var tok = P.localStorage.getItem('yumiqa_last_tok') || P.localStorage.getItem('kyudo_auth');
-                        var u = P.localStorage.getItem('yumiqa_last_u') || '';
+                        var tok = getLS('yumiqa_last_tok') || getLS('kyudo_auth');
+                        var u = getLS('yumiqa_last_u');
                         if(!tok) return;
                         var wrap = D.getElementById('yumiqa-onetap-saved-wrap');
                         var btn = D.getElementById('yumiqa-onetap-saved-btn');
@@ -2948,22 +2953,20 @@ def render_login_screen(slot=None):
                     }catch(e){}
                 }
                 initSavedBtn();
-                setTimeout(initSavedBtn, 300);
+                setTimeout(initSavedBtn, 100);
+                setTimeout(initSavedBtn, 400);
+                setTimeout(initSavedBtn, 1000);
             })();
             </script>
             """, height=0)
 
-            # 最上部：手入力不要のワンタップ開始ボタン（動画診断含む全機能・永久ログイン維持）
-            if st.button("✨ 新しくワンタップで始める（入力不要）", key="one_tap_start", type="primary", use_container_width=True):
-                auto_uname = f"archer_{secrets.token_hex(4)}"
-                register_user(auto_uname, secrets.token_urlsafe(16), display_name="弓道家")
-                if slot is not None:
-                    slot.empty()
-                _complete_login(auto_uname)
+            st.markdown("""
+            <div style="font-size:12px; color:var(--ink-secondary); margin: 4px 0 8px 0;">
+                ※ 一度下の「ID・パスワードでログイン」から入ると、次回以降はこの端末で手入力なし・ワンタップでログインできます。
+            </div>
+            """, unsafe_allow_html=True)
 
-            st.caption("※ 次回からはログイン画面なしでそのまま開きます（動画・写真診断も利用可）")
-
-            with st.expander("ID・パスワードでログイン / 新規登録（別端末と共有する場合）", expanded=False):
+            with st.expander("ID・パスワードでログイン / 新規登録", expanded=True):
                 # Expander内でログイン⇄新規登録の切替
                 tab_login, tab_reg = st.tabs(["ログイン", "新規登録"])
                 with tab_login:
