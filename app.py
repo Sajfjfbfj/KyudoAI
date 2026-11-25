@@ -1435,25 +1435,20 @@ div[data-testid="stChatInput"] {
     transition: box-shadow 0.2s var(--ease), background 0.2s var(--ease) !important;
     position: relative !important;
 }
-div[data-testid="stChatInput"] > div {
+div[data-testid="stChatInput"] div:has(> div > [data-testid="stChatInputSubmitButton"]) {
     display: flex !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    gap: 4px 6px !important;
+    gap: 6px 8px !important;
 }
-div[data-testid="stChatInput"] > div > div:has(textarea) {
+div[data-testid="stChatInput"] div:has(> div > [data-testid="stChatInputSubmitButton"]) > div:has([data-testid="stChatInputTextArea"]) {
     order: -1 !important;
     flex: 1 0 100% !important;
     width: 100% !important;
     max-width: 100% !important;
     min-height: 26px !important;
 }
-div[data-testid="stChatInput"] > div > div:has([data-testid="stChatInputFileUploadButton"]),
-div[data-testid="stChatInput"] > div > [data-testid="stChatInputFileUploadButton"] {
-    order: 1 !important;
-}
-div[data-testid="stChatInput"] > div > div:has([data-testid="stChatInputSubmitButton"]),
-div[data-testid="stChatInput"] > div > [data-testid="stChatInputSubmitButton"] {
+div[data-testid="stChatInput"] div:has(> div > [data-testid="stChatInputSubmitButton"]) > div:has(> [data-testid="stChatInputSubmitButton"]) {
     order: 3 !important;
     margin-left: auto !important;
 }
@@ -1520,10 +1515,10 @@ div[data-testid="stChatInput"] button:disabled {
 /* キャラクター（指導陣）選択ピルボタン：Gemini の .bard-mode-switcher と同じ位置（2段目右下・送信ボタンの左隣）に枠線なしゴーストピルとして配置 */
 .st-key-input_char_pill_row {
     position: relative !important;
-    margin-top: -40px !important;
-    margin-bottom: 8px !important;
+    margin-top: -52px !important;
+    margin-bottom: 20px !important;
     margin-left: auto !important;
-    margin-right: 50px !important;
+    margin-right: 66px !important;
     z-index: 20 !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -1532,16 +1527,18 @@ div[data-testid="stChatInput"] button:disabled {
     width: fit-content !important;
     pointer-events: auto !important;
 }
-.st-key-input_char_pill_row [data-testid="stPopover"] {
+div[data-testid="stBottom"] .st-key-input_char_pill_row [data-testid="stPopover"] {
     display: inline-flex !important;
     pointer-events: auto !important;
     margin: 0 !important;
 }
-.st-key-input_char_pill_row [data-testid="stPopover"] > button {
+div[data-testid="stBottom"] .st-key-input_char_pill_row button[data-testid="stPopoverButton"],
+div[data-testid="stBottom"] .st-key-input_char_pill_row [data-testid="stPopover"] > button {
     display: inline-flex !important;
     align-items: center !important;
     gap: 5px !important;
     background: transparent !important;
+    background-color: transparent !important;
     border: 0 !important;
     border-radius: 9999px !important;
     padding: 0 10px !important;
@@ -1555,8 +1552,10 @@ div[data-testid="stChatInput"] button:disabled {
     cursor: pointer !important;
     white-space: nowrap !important;
 }
-.st-key-input_char_pill_row [data-testid="stPopover"] > button:hover {
+div[data-testid="stBottom"] .st-key-input_char_pill_row button[data-testid="stPopoverButton"]:hover,
+div[data-testid="stBottom"] .st-key-input_char_pill_row [data-testid="stPopover"] > button:hover {
     background: rgba(0, 0, 0, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
     color: var(--ink-primary, #1f1f1f) !important;
 }
 
