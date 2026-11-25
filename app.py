@@ -4,6 +4,7 @@ import json
 import re
 import tempfile
 import hashlib
+import hmac
 import shutil
 import html
 import secrets
@@ -2708,30 +2709,83 @@ def _save_login_tokens(d: dict):
 def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
+def _get_auth_secret() -> bytes:
+    """サーバー再起動でも変わらない安定した署名キーを取得"""
+    secret = ""
+    try:
+        secret = st.secrets.get("AUTH_SECRET", "") or st.secrets.get("GEMINI_API_KEY", "")
+    except Exception:
+        secret = ""
+    if not secret:
+        secret = os.environ.get("AUTH_SECRET", "") or os.environ.get("GEMINI_API_KEY", "")
+    if not secret:
+        secret = "yumiqa-kyudo-ai-persistent-secret-v1"
+    return hashlib.sha256(f"yumiqa:{secret}".encode("utf-8")).digest()
+
+def _ensure_restored_user(username: str):
+    """Streamlit Cloud の再起動等で users.json が初期化された場合でもユーザーを自動復元"""
+    uname = (username or "").strip().lower()
+    if not uname:
+        return
+    users = load_users()
+    if uname not in users:
+        pw_hash, salt = hash_password(secrets.token_urlsafe(24))
+        users[uname] = {
+            "password_hash": pw_hash,
+            "salt": salt,
+            "display_name": "弓道家" if uname.startswith("archer_") else uname,
+            "created_at": time.strftime("%Y-%m-%d %H:%M"),
+            "restored": True,
+        }
+        save_users(users)
+
 def issue_login_token(username: str, is_guest: bool = False) -> str:
-    token = secrets.token_urlsafe(32)
     now = time.time()
-    # 期限切れの古いゲストトークン等を掃除（exp==0 は永久有効なので残す）
-    tokens = {k: v for k, v in _load_login_tokens().items() if v.get("exp", 0) == 0 or v.get("exp", 0) > now}
-    # 通常ユーザーは exp=0（無期限・永久維持）。ゲストは1日のみ。
-    exp_time = (now + 86400) if is_guest else 0
-    tokens[_hash_token(token)] = {
-        "user": username,
-        "is_guest": is_guest,
-        "exp": exp_time
-    }
-    _save_login_tokens(tokens)
+    exp_time = int(now + 86400) if is_guest else 0
+    payload = json.dumps({"u": username, "g": bool(is_guest), "exp": exp_time}, separators=(",", ":"))
+    b64_payload = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii").rstrip("=")
+    sig = hmac.new(_get_auth_secret(), b64_payload.encode("ascii"), hashlib.sha256).hexdigest()
+    token = f"v2.{b64_payload}.{sig}"
+    # 互換用ファイルにも保存（失敗してもv2トークン自体は有効）
+    try:
+        tokens = {k: v for k, v in _load_login_tokens().items() if v.get("exp", 0) == 0 or v.get("exp", 0) > now}
+        tokens[_hash_token(token)] = {"user": username, "is_guest": is_guest, "exp": exp_time}
+        _save_login_tokens(tokens)
+    except Exception:
+        pass
     return token
 
 def verify_login_token(token: str):
     """トークンを検証し、(username, is_guest) を返す。無効なら (None, False)"""
     if not token:
         return None, False
+    # 1) 自己完結型 HMAC トークン (v2.<payload>.<sig>)：サーバー再起動・再デプロイ後も永久有効
+    if token.startswith("v2."):
+        try:
+            parts = token.split(".", 2)
+            if len(parts) == 3:
+                _, b64_payload, sig = parts
+                expected_sig = hmac.new(_get_auth_secret(), b64_payload.encode("ascii"), hashlib.sha256).hexdigest()
+                if hmac.compare_digest(sig, expected_sig):
+                    padded = b64_payload + "=" * (-len(b64_payload) % 4)
+                    data = json.loads(base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8"))
+                    u = (data.get("u") or "").strip().lower()
+                    is_guest = bool(data.get("g", False))
+                    exp = data.get("exp", 0)
+                    if exp > 0 and exp <= time.time():
+                        return None, False
+                    if u:
+                        if not is_guest:
+                            _ensure_restored_user(u)
+                        return u, is_guest
+        except Exception:
+            return None, False
+        return None, False
+    # 2) 旧ファイルベーストークン（後方互換）
     entry = _load_login_tokens().get(_hash_token(token))
     if not entry:
         return None, False
     exp = entry.get("exp", 0)
-    # exp > 0 かつ現在時刻を過ぎていたら失効（exp == 0 は無期限・永久有効）
     if exp > 0 and exp <= time.time():
         return None, False
     u = entry.get("user")
@@ -2857,109 +2911,118 @@ def render_login_screen(slot=None):
         """, unsafe_allow_html=True)
 
         with st.container(key="login_card"):
-            if is_login:
-                with st.form("login_form", clear_on_submit=False, border=False):
-                    uname = st.text_input("ユーザー名", placeholder="ユーザー名")
-                    upass = st.text_input("パスワード", type="password", placeholder="パスワード")
-                    submitted = st.form_submit_button("ログイン", use_container_width=True, type="primary")
-                # ブラウザ・スマホのパスワードマネージャー対応：autocomplete 属性を注入
-                st.markdown("""
-                <script>
-                (function patchAutocomplete() {
-                    function doIt() {
-                        try {
-                            var pDoc = window.parent.document;
-                            var allInputs = pDoc.querySelectorAll('input');
-                            allInputs.forEach(function(el) {
-                                var ph = el.getAttribute('placeholder') || '';
-                                if (ph === 'ユーザー名') {
-                                    el.setAttribute('autocomplete', 'username');
-                                    el.setAttribute('name', 'username');
-                                    el.setAttribute('id', 'login-username');
-                                }
-                                if (el.type === 'password' && ph === 'パスワード') {
-                                    el.setAttribute('autocomplete', 'current-password');
-                                    el.setAttribute('name', 'password');
-                                    el.setAttribute('id', 'login-password');
-                                }
-                            });
-                            // フォームタグにもaction/method付与してブラウザが保存ダイアログを出せるようにする
-                            var allForms = pDoc.querySelectorAll('form');
-                            allForms.forEach(function(f) {
-                                if (!f.getAttribute('method')) f.setAttribute('method', 'post');
-                                if (!f.getAttribute('action')) f.setAttribute('action', '');
-                                f.setAttribute('autocomplete', 'on');
-                            });
-                        } catch(e) {}
-                    }
-                    doIt();
-                    setTimeout(doIt, 500);
-                    setTimeout(doIt, 1500);
-                })();
-                </script>
-                """, unsafe_allow_html=True)
-                if submitted:
-                    if uname and upass and authenticate_user(uname, upass):
-                        if slot is not None:
-                            slot.empty()
-                        _complete_login(uname)
-                    else:
-                        st.error("ユーザー名またはパスワードが正しくありません。")
-            else:
-                with st.form("reg_form", clear_on_submit=False, border=False):
-                    reg_name = st.text_input("ユーザー名（英数字3文字以上）", placeholder="例: yamada")
-                    reg_disp = st.text_input("表示名（任意）", placeholder="例: 山田")
-                    reg_pass1 = st.text_input("パスワード（6文字以上）", type="password", placeholder="パスワード")
-                    reg_pass2 = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
-                    submitted = st.form_submit_button("アカウントを作成", use_container_width=True, type="primary")
-                # 新規登録フォームにも autocomplete 属性を付与（スマホがパスワード提案を出せるように）
-                st.markdown("""
-                <script>
-                (function patchRegAutocomplete() {
-                    function doIt() {
-                        try {
-                            var pDoc = window.parent.document;
-                            var allInputs = pDoc.querySelectorAll('input');
-                            allInputs.forEach(function(el) {
-                                var ph = el.getAttribute('placeholder') || '';
-                                if (ph === '例: yamada') {
-                                    el.setAttribute('autocomplete', 'username');
-                                    el.setAttribute('name', 'username');
-                                }
-                                if (ph === 'パスワード' && el.type === 'password') {
-                                    el.setAttribute('autocomplete', 'new-password');
-                                    el.setAttribute('name', 'new-password');
-                                }
-                                if (ph === 'もう一度入力' && el.type === 'password') {
-                                    el.setAttribute('autocomplete', 'new-password');
-                                }
-                            });
-                            var allForms = pDoc.querySelectorAll('form');
-                            allForms.forEach(function(f) {
-                                if (!f.getAttribute('method')) f.setAttribute('method', 'post');
-                                f.setAttribute('autocomplete', 'on');
-                            });
-                        } catch(e) {}
-                    }
-                    doIt();
-                    setTimeout(doIt, 500);
-                    setTimeout(doIt, 1500);
-                })();
-                </script>
-                """, unsafe_allow_html=True)
-                if submitted:
-                    if not reg_name or not reg_pass1:
-                        st.error("ユーザー名とパスワードを入力してください。")
-                    elif reg_pass1 != reg_pass2:
-                        st.error("パスワードが一致しません。")
-                    else:
-                        ok, msg = register_user(reg_name, reg_pass1, reg_disp)
-                        if ok:
+            # 最上部：手入力不要のワンタップ開始ボタン（動画診断含む全機能・永久ログイン維持）
+            if st.button("✨ ワンタップで始める（入力不要・自動ログイン）", key="one_tap_start", type="primary", use_container_width=True):
+                auto_uname = f"archer_{secrets.token_hex(4)}"
+                register_user(auto_uname, secrets.token_urlsafe(16), display_name="弓道家")
+                if slot is not None:
+                    slot.empty()
+                _complete_login(auto_uname)
+
+            st.caption("※ 次回からはログイン画面なしでそのまま開きます（動画・写真診断も利用可）")
+
+            with st.expander("ID・パスワードでログイン / 新規登録（別端末と共有する場合）", expanded=False):
+                if is_login:
+                    with st.form("login_form", clear_on_submit=False, border=False):
+                        uname = st.text_input("ユーザー名", placeholder="ユーザー名")
+                        upass = st.text_input("パスワード", type="password", placeholder="パスワード")
+                        submitted = st.form_submit_button("ログイン", use_container_width=True, type="secondary")
+                    # ブラウザ・スマホのパスワードマネージャー対応：autocomplete 属性を注入
+                    st.markdown("""
+                    <script>
+                    (function patchAutocomplete() {
+                        function doIt() {
+                            try {
+                                var pDoc = window.parent.document;
+                                var allInputs = pDoc.querySelectorAll('input');
+                                allInputs.forEach(function(el) {
+                                    var ph = el.getAttribute('placeholder') || '';
+                                    if (ph === 'ユーザー名') {
+                                        el.setAttribute('autocomplete', 'username');
+                                        el.setAttribute('name', 'username');
+                                        el.setAttribute('id', 'login-username');
+                                    }
+                                    if (el.type === 'password' && ph === 'パスワード') {
+                                        el.setAttribute('autocomplete', 'current-password');
+                                        el.setAttribute('name', 'password');
+                                        el.setAttribute('id', 'login-password');
+                                    }
+                                });
+                                var allForms = pDoc.querySelectorAll('form');
+                                allForms.forEach(function(f) {
+                                    if (!f.getAttribute('method')) f.setAttribute('method', 'post');
+                                    if (!f.getAttribute('action')) f.setAttribute('action', '');
+                                    f.setAttribute('autocomplete', 'on');
+                                });
+                            } catch(e) {}
+                        }
+                        doIt();
+                        setTimeout(doIt, 500);
+                        setTimeout(doIt, 1500);
+                    })();
+                    </script>
+                    """, unsafe_allow_html=True)
+                    if submitted:
+                        if uname and upass and authenticate_user(uname, upass):
                             if slot is not None:
                                 slot.empty()
-                            _complete_login(reg_name)
+                            _complete_login(uname)
                         else:
-                            st.error(msg)
+                            st.error("ユーザー名またはパスワードが正しくありません。")
+                else:
+                    with st.form("reg_form", clear_on_submit=False, border=False):
+                        reg_name = st.text_input("ユーザー名（英数字3文字以上）", placeholder="例: yamada")
+                        reg_disp = st.text_input("表示名（任意）", placeholder="例: 山田")
+                        reg_pass1 = st.text_input("パスワード（6文字以上）", type="password", placeholder="パスワード")
+                        reg_pass2 = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
+                        submitted = st.form_submit_button("アカウントを作成", use_container_width=True, type="secondary")
+                    st.markdown("""
+                    <script>
+                    (function patchRegAutocomplete() {
+                        function doIt() {
+                            try {
+                                var pDoc = window.parent.document;
+                                var allInputs = pDoc.querySelectorAll('input');
+                                allInputs.forEach(function(el) {
+                                    var ph = el.getAttribute('placeholder') || '';
+                                    if (ph === '例: yamada') {
+                                        el.setAttribute('autocomplete', 'username');
+                                        el.setAttribute('name', 'username');
+                                    }
+                                    if (ph === 'パスワード' && el.type === 'password') {
+                                        el.setAttribute('autocomplete', 'new-password');
+                                        el.setAttribute('name', 'new-password');
+                                    }
+                                    if (ph === 'もう一度入力' && el.type === 'password') {
+                                        el.setAttribute('autocomplete', 'new-password');
+                                    }
+                                });
+                                var allForms = pDoc.querySelectorAll('form');
+                                allForms.forEach(function(f) {
+                                    if (!f.getAttribute('method')) f.setAttribute('method', 'post');
+                                    f.setAttribute('autocomplete', 'on');
+                                });
+                            } catch(e) {}
+                        }
+                        doIt();
+                        setTimeout(doIt, 500);
+                        setTimeout(doIt, 1500);
+                    })();
+                    </script>
+                    """, unsafe_allow_html=True)
+                    if submitted:
+                        if not reg_name or not reg_pass1:
+                            st.error("ユーザー名とパスワードを入力してください。")
+                        elif reg_pass1 != reg_pass2:
+                            st.error("パスワードが一致しません。")
+                        else:
+                            ok, msg = register_user(reg_name, reg_pass1, reg_disp)
+                            if ok:
+                                if slot is not None:
+                                    slot.empty()
+                                _complete_login(reg_name)
+                            else:
+                                st.error(msg)
 
         # 画面の切り替え（ログイン ⇄ 新規登録）
         if is_login:
@@ -3019,7 +3082,6 @@ if "authenticated" not in st.session_state:
             st.session_state.font_size_choice = st.session_state.sb_font_size_choice
         elif "auth" in st.query_params or "_kt" in st.query_params:
             st.query_params.clear()
-            st.session_state["_cookie_clear"] = True
         elif not _browser_login_cookie():
             st.session_state["_restore_pending"] = True  # localStorage から復元を試みる
 
