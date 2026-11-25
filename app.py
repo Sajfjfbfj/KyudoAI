@@ -645,7 +645,7 @@ html, body, [class*="css"], .stApp {
 [data-testid="stHeader"] button, [data-testid="stHeader"] a { pointer-events: auto !important; }
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stToolbarActions"],
 [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="manage-app-button"],
-[data-testid="stToolbar"], footer, [class*="viewerBadge"], [class*="profileContainer"],
+footer, [class*="viewerBadge"], [class*="profileContainer"],
 a[href*="streamlit.io"] { display: none !important; visibility: hidden !important; pointer-events: none !important; }
 [data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"] button {
     position: relative; z-index: 1002;
