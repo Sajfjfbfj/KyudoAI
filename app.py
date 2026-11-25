@@ -2922,46 +2922,15 @@ def render_login_screen(slot=None):
             st.caption("※ 次回からはログイン画面なしでそのまま開きます（動画・写真診断も利用可）")
 
             with st.expander("ID・パスワードでログイン / 新規登録（別端末と共有する場合）", expanded=False):
-                if is_login:
+                # Expander内でログイン⇄新規登録の切替
+                tab_login, tab_reg = st.tabs(["ログイン", "新規登録"])
+                with tab_login:
                     with st.form("login_form", clear_on_submit=False, border=False):
                         uname = st.text_input("ユーザー名", placeholder="ユーザー名")
                         upass = st.text_input("パスワード", type="password", placeholder="パスワード")
                         submitted = st.form_submit_button("ログイン", use_container_width=True, type="secondary")
-                    # ブラウザ・スマホのパスワードマネージャー対応：autocomplete 属性を注入
-                    st.markdown("""
-                    <script>
-                    (function patchAutocomplete() {
-                        function doIt() {
-                            try {
-                                var pDoc = window.parent.document;
-                                var allInputs = pDoc.querySelectorAll('input');
-                                allInputs.forEach(function(el) {
-                                    var ph = el.getAttribute('placeholder') || '';
-                                    if (ph === 'ユーザー名') {
-                                        el.setAttribute('autocomplete', 'username');
-                                        el.setAttribute('name', 'username');
-                                        el.setAttribute('id', 'login-username');
-                                    }
-                                    if (el.type === 'password' && ph === 'パスワード') {
-                                        el.setAttribute('autocomplete', 'current-password');
-                                        el.setAttribute('name', 'password');
-                                        el.setAttribute('id', 'login-password');
-                                    }
-                                });
-                                var allForms = pDoc.querySelectorAll('form');
-                                allForms.forEach(function(f) {
-                                    if (!f.getAttribute('method')) f.setAttribute('method', 'post');
-                                    if (!f.getAttribute('action')) f.setAttribute('action', '');
-                                    f.setAttribute('autocomplete', 'on');
-                                });
-                            } catch(e) {}
-                        }
-                        doIt();
-                        setTimeout(doIt, 500);
-                        setTimeout(doIt, 1500);
-                    })();
-                    </script>
-                    """, unsafe_allow_html=True)
+                    # パスワードマネージャー対応
+                    st.markdown("""<script>(function(){function d(){try{var p=window.parent.document;p.querySelectorAll('input').forEach(function(e){var h=e.getAttribute('placeholder')||'';if(h==='ユーザー名'){e.setAttribute('autocomplete','username');e.setAttribute('name','username');}if(e.type==='password'&&h==='パスワード'){e.setAttribute('autocomplete','current-password');e.setAttribute('name','password');}});p.querySelectorAll('form').forEach(function(f){if(!f.getAttribute('method'))f.setAttribute('method','post');if(!f.getAttribute('action'))f.setAttribute('action','');f.setAttribute('autocomplete','on');});}catch(e){}}d();setTimeout(d,500);setTimeout(d,1500);})();</script>""", unsafe_allow_html=True)
                     if submitted:
                         if uname and upass and authenticate_user(uname, upass):
                             if slot is not None:
@@ -2969,48 +2938,16 @@ def render_login_screen(slot=None):
                             _complete_login(uname)
                         else:
                             st.error("ユーザー名またはパスワードが正しくありません。")
-                else:
+
+                with tab_reg:
                     with st.form("reg_form", clear_on_submit=False, border=False):
                         reg_name = st.text_input("ユーザー名（英数字3文字以上）", placeholder="例: yamada")
                         reg_disp = st.text_input("表示名（任意）", placeholder="例: 山田")
                         reg_pass1 = st.text_input("パスワード（6文字以上）", type="password", placeholder="パスワード")
                         reg_pass2 = st.text_input("パスワード（確認）", type="password", placeholder="もう一度入力")
-                        submitted = st.form_submit_button("アカウントを作成", use_container_width=True, type="secondary")
-                    st.markdown("""
-                    <script>
-                    (function patchRegAutocomplete() {
-                        function doIt() {
-                            try {
-                                var pDoc = window.parent.document;
-                                var allInputs = pDoc.querySelectorAll('input');
-                                allInputs.forEach(function(el) {
-                                    var ph = el.getAttribute('placeholder') || '';
-                                    if (ph === '例: yamada') {
-                                        el.setAttribute('autocomplete', 'username');
-                                        el.setAttribute('name', 'username');
-                                    }
-                                    if (ph === 'パスワード' && el.type === 'password') {
-                                        el.setAttribute('autocomplete', 'new-password');
-                                        el.setAttribute('name', 'new-password');
-                                    }
-                                    if (ph === 'もう一度入力' && el.type === 'password') {
-                                        el.setAttribute('autocomplete', 'new-password');
-                                    }
-                                });
-                                var allForms = pDoc.querySelectorAll('form');
-                                allForms.forEach(function(f) {
-                                    if (!f.getAttribute('method')) f.setAttribute('method', 'post');
-                                    f.setAttribute('autocomplete', 'on');
-                                });
-                            } catch(e) {}
-                        }
-                        doIt();
-                        setTimeout(doIt, 500);
-                        setTimeout(doIt, 1500);
-                    })();
-                    </script>
-                    """, unsafe_allow_html=True)
-                    if submitted:
+                        submitted_reg = st.form_submit_button("アカウントを作成", use_container_width=True, type="secondary")
+                    st.markdown("""<script>(function(){function d(){try{var p=window.parent.document;p.querySelectorAll('input').forEach(function(e){var h=e.getAttribute('placeholder')||'';if(h==='例: yamada'){e.setAttribute('autocomplete','username');e.setAttribute('name','username');}if(h==='パスワード'&&e.type==='password'){e.setAttribute('autocomplete','new-password');e.setAttribute('name','new-password');}if(h==='もう一度入力'&&e.type==='password'){e.setAttribute('autocomplete','new-password');}});p.querySelectorAll('form').forEach(function(f){if(!f.getAttribute('method'))f.setAttribute('method','post');f.setAttribute('autocomplete','on');});}catch(e){}}d();setTimeout(d,500);setTimeout(d,1500);})();</script>""", unsafe_allow_html=True)
+                    if submitted_reg:
                         if not reg_name or not reg_pass1:
                             st.error("ユーザー名とパスワードを入力してください。")
                         elif reg_pass1 != reg_pass2:
@@ -3024,15 +2961,6 @@ def render_login_screen(slot=None):
                             else:
                                 st.error(msg)
 
-        # 画面の切り替え（ログイン ⇄ 新規登録）
-        if is_login:
-            if st.button("アカウントをお持ちでない方は 新規登録", key="goto_register", use_container_width=True):
-                st.session_state.auth_mode = "register"
-                st.rerun()
-        else:
-            if st.button("すでにアカウントをお持ちの方は ログイン", key="goto_login", use_container_width=True):
-                st.session_state.auth_mode = "login"
-                st.rerun()
         if st.button(f"ログインせずに使う（チャット{GUEST_CHAT_LIMIT}回まで・ファイル送信不可）", key="guest_login", use_container_width=True):
             if slot is not None:
                 slot.empty()
