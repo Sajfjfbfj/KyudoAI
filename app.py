@@ -1491,16 +1491,25 @@ div[data-testid="stChatInput"] button:disabled {
     transform: none !important;
 }
 
-/* キャラクター（指導陣）選択ピルボタン：Gemini風ツールチップとして入力欄内部（＋ボタンのすぐ右隣）に配置 */
+/* キャラクター（指導陣）選択ピルボタン：親コンテナの底面基準で固定（カクつきゼロ追従） */
 .st-key-input_char_pill_row {
+    position: absolute !important;
+    bottom: calc(26px + env(safe-area-inset-bottom, 0px)) !important;
+    left: calc(24px + 48px) !important;
+    z-index: 10 !important;
     display: inline-flex !important;
     align-items: center !important;
-    margin: 0 0 0 8px !important;
+    margin: 0 !important;
     padding: 0 !important;
     height: 32px !important;
-    vertical-align: middle !important;
-    z-index: 10 !important;
     width: fit-content !important;
+    pointer-events: auto !important;
+}
+@media (max-width: 768px) {
+    .st-key-input_char_pill_row {
+        left: calc(10px + 46px) !important;
+        bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    }
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] {
     display: inline-flex !important;
@@ -3633,33 +3642,37 @@ _CTX_MENU_JS = r"""
   setInterval(updateBottomPad, 800);
 
   /* ソフトウェアキーボード追従：キーボード表示時に入力欄を持ち上げて常に見えるようにする */
+  /* ソフトウェアキーボード追従：カクつきゼロのシルキースムーズ処理 */
+  var isAndroidApp = !!window.AndroidAuth;
+  var rafId = null;
+
   function handleKeyboard() {
+    // APK環境ではOSネイティブのadjustResizeがWebView全体を滑らかに縮小するため、JSの二重変形によるカクつきを防ぐ
+    if (isAndroidApp) return;
+
     var b = document.querySelector('[data-testid="stBottom"]');
     if (!b) return;
+
     if (window.visualViewport) {
-      var offset = window.innerHeight - window.visualViewport.height;
-      if (offset > 60) {
-        b.style.setProperty('transform', 'translateY(-' + Math.round(offset) + 'px)', 'important');
-        b.style.setProperty('transition', 'transform 0.12s ease-out', 'important');
-        var activeEl = document.activeElement;
-        if (activeEl && (activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) {
-          activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(function () {
+        var offset = window.innerHeight - window.visualViewport.height;
+        if (offset > 70) {
+          b.style.setProperty('transform', 'translateY(-' + Math.round(offset) + 'px)', 'important');
+        } else {
+          b.style.setProperty('transform', 'none', 'important');
         }
-      } else {
-        b.style.setProperty('transform', 'none', 'important');
-      }
+      });
     }
   }
+
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', handleKeyboard);
     window.visualViewport.addEventListener('scroll', handleKeyboard);
   }
   document.addEventListener('focusin', function (e) {
     if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) {
-      setTimeout(function () {
-        handleKeyboard();
-        e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 200);
+      handleKeyboard();
     }
   });
   document.addEventListener('focusout', function (e) {
@@ -3667,43 +3680,9 @@ _CTX_MENU_JS = r"""
       setTimeout(function () {
         var b = document.querySelector('[data-testid="stBottom"]');
         if (b) b.style.setProperty('transform', 'none', 'important');
-      }, 150);
+      }, 100);
     }
   });
-
-  /* キャラクター選択ピルボタンを入力欄内の + ボタンの右隣に安全に重ね合わせる（DOM移動しないためReact再描画でも絶対消えない！） */
-  function syncCharPillPosition() {
-    var pill = document.querySelector('.st-key-input_char_pill_row');
-    var chatInput = document.querySelector('[data-testid="stChatInput"]');
-    if (!pill || !chatInput) return;
-
-    // + ボタン（ファイル添付）を探す（なければ下部ツールバーの送信ボタンを基準にする）
-    var uploadBtn = chatInput.querySelector('[data-testid="stChatInputFileUploadButton"]');
-    var submitBtn = chatInput.querySelector('[data-testid="stChatInputSubmitButton"]');
-    var targetEl = uploadBtn || submitBtn;
-    if (!targetEl) return;
-
-    var inputRect = chatInput.getBoundingClientRect();
-    var targetRect = targetEl.getBoundingClientRect();
-
-    var leftPos = uploadBtn
-      ? (targetRect.right + 8)
-      : (inputRect.left + 14);
-    var topPos = targetRect.top + (targetRect.height - 28) / 2;
-
-    pill.style.setProperty('position', 'fixed', 'important');
-    pill.style.setProperty('left', Math.round(leftPos) + 'px', 'important');
-    pill.style.setProperty('top', Math.round(topPos) + 'px', 'important');
-    pill.style.setProperty('z-index', '10000', 'important');
-    pill.style.setProperty('display', 'inline-flex', 'important');
-    pill.style.setProperty('visibility', 'visible', 'important');
-    pill.style.setProperty('margin', '0', 'important');
-    pill.style.setProperty('padding', '0', 'important');
-  }
-  syncCharPillPosition();
-  window.addEventListener('resize', syncCharPillPosition);
-  window.addEventListener('scroll', syncCharPillPosition, true);
-  setInterval(syncCharPillPosition, 100);
 
   document.addEventListener('click', hide, true);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(); });
