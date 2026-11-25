@@ -1400,7 +1400,7 @@ div[data-testid="stBottom"], div[data-testid="stBottom"] > div {
 }
 div[data-testid="stBottom"] {
     background: linear-gradient(180deg, transparent 0%, var(--canvas) 42%) !important;
-    padding: 16px 0 calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)) !important;
     z-index: 9999 !important;
 }
 div[data-testid="stBottomBlockContainer"] {
@@ -1409,24 +1409,27 @@ div[data-testid="stBottomBlockContainer"] {
     margin: 0 auto !important;
     position: relative !important;
 }
+div[data-testid="stBottomBlockContainer"] div[data-testid="stVerticalBlock"] {
+    gap: 0 !important;
+}
 /* 注意書きを入力欄のすぐ下に配置 */
 div[data-testid="stBottomBlockContainer"]::after {
     content: "YUMIQAの助言は稽古の参考情報です。道場の先生・師範のご指導もあわせてご確認ください。";
     display: block !important;
     text-align: center !important;
-    font-size: 11.5px !important;
-    line-height: 1.5 !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
     color: var(--ink-secondary) !important;
-    padding: 8px 0 2px !important;
+    padding: 5px 0 0 !important;
 }
 
 /* Gemini & ChatGPT 2026 完全準拠 カード型コンポーザー（入力バー） */
 div[data-testid="stChatInput"] {
     background: var(--composer, #f4f4f4) !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 28px !important;
+    border-radius: 24px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
-    padding: 12px 14px 10px 14px !important;
+    padding: 6px 10px 6px 10px !important;
     transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease) !important;
     position: relative !important;
     backdrop-filter: blur(12px) !important;
@@ -1447,9 +1450,10 @@ div[data-testid="stChatInput"] [data-baseweb] {
 }
 div[data-testid="stChatInput"] textarea {
     background: transparent !important; color: var(--ink-primary) !important;
-    font-size: 15px !important; line-height: 1.6 !important;
-    padding-left: 0 !important;
-    padding-bottom: 44px !important;
+    font-size: 15px !important; line-height: 1.5 !important;
+    padding-left: 2px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
 }
 div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim, #8E8E93) !important; font-size: 15px !important; }
 
@@ -1491,25 +1495,22 @@ div[data-testid="stChatInput"] button:disabled {
     transform: none !important;
 }
 
-/* キャラクター（指導陣）選択ピルボタン：親コンテナの底面基準で固定（カクつきゼロ追従） */
+/* キャラクター（指導陣）選択ピルボタン：stChatInput直後に配置し、ネガティブマージンで入力欄下部ツールバー内へ完全収納 */
 .st-key-input_char_pill_row {
-    position: absolute !important;
-    bottom: calc(26px + env(safe-area-inset-bottom, 0px)) !important;
-    left: calc(24px + 48px) !important;
-    z-index: 10 !important;
+    position: relative !important;
+    margin-top: -38px !important;
+    margin-bottom: 6px !important;
+    margin-left: 48px !important;
+    z-index: 20 !important;
     display: inline-flex !important;
     align-items: center !important;
-    margin: 0 !important;
     padding: 0 !important;
     height: 32px !important;
     width: fit-content !important;
     pointer-events: auto !important;
 }
-@media (max-width: 768px) {
-    .st-key-input_char_pill_row {
-        left: calc(10px + 46px) !important;
-        bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
-    }
+div[data-testid="stBottomBlockContainer"]:not(:has([data-testid="stChatInputFileUploadButton"])) .st-key-input_char_pill_row {
+    margin-left: 14px !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] {
     display: inline-flex !important;
@@ -1790,16 +1791,16 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
     }
 
     /* 入力エリア（下部固定） */
-    div[data-testid="stBottom"] > div {
-        padding: 0 10px !important;
+    div[data-testid="stBottomBlockContainer"] {
+        padding: 0 12px !important;
     }
     div[data-testid="stChatInput"] {
-        padding: 3px 8px !important;
-        border-radius: 20px !important;
+        padding: 6px 10px !important;
+        border-radius: 22px !important;
     }
     div[data-testid="stChatInput"] textarea {
         font-size: 16px !important;
-        line-height: 1.5 !important;
+        line-height: 1.45 !important;
     }
 
     /* 回答末尾のバー（コピー・読み上げ・⋮）：スマホでも綺麗に1行整列 */
@@ -4420,21 +4421,6 @@ _guest_locked = _is_guest and _guest_left == 0
 
 _bottom_ctx = st.bottom if hasattr(st, "bottom") else st.container()
 with _bottom_ctx:
-    # 入力欄から直接指導陣（AIキャラクター）を切り替えられるピルボタン
-    _cur_c_in = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
-    _cur_inf_in = CHARACTERS.get(_cur_c_in, list(CHARACTERS.values())[0])
-
-    with st.container(key="input_char_pill_row"):
-        with st.popover(f"{_cur_inf_in['icon']} {_cur_c_in.split('（')[0]}", use_container_width=False):
-            st.caption("指導陣（AIモデル）を選択")
-            for cname, c_info_item in CHARACTERS.items():
-                st.button(
-                    f"{'✓ ' if cname == _cur_c_in else '　 '}{c_info_item['icon']} {cname}",
-                    key=f"input_sel_{cname}", use_container_width=True,
-                    on_click=switch_ai_character, args=(cname,),
-                )
-                st.caption(c_info_item["desc"])
-
     if _is_guest:
         if _guest_locked:
             st.info(f"ゲストのチャットは{GUEST_CHAT_LIMIT}回までです。続けるには、ログインまたは新規登録をしてください。")
@@ -4457,6 +4443,22 @@ with _bottom_ctx:
             accept_file=True,
             file_type=["mp4", "mov", "avi", "webm", "jpg", "jpeg", "png"]
         )
+
+    # 入力欄から直接指導陣（AIキャラクター）を切り替えられるピルボタン（stChatInput直後に配置して下部ツールバー内に収納）
+    if not _guest_locked:
+        _cur_c_in = st.session_state.get("current_selected_char", list(CHARACTERS.keys())[0])
+        _cur_inf_in = CHARACTERS.get(_cur_c_in, list(CHARACTERS.values())[0])
+
+        with st.container(key="input_char_pill_row"):
+            with st.popover(f"{_cur_inf_in['icon']} {_cur_c_in.split('（')[0]}", use_container_width=False):
+                st.caption("指導陣（AIモデル）を選択")
+                for cname, c_info_item in CHARACTERS.items():
+                    st.button(
+                        f"{'✓ ' if cname == _cur_c_in else '　 '}{c_info_item['icon']} {cname}",
+                        key=f"input_sel_{cname}", use_container_width=True,
+                        on_click=switch_ai_character, args=(cname,),
+                    )
+                    st.caption(c_info_item["desc"])
 
 # 注意書きは CSS（stBottomBlockContainer::before）で入力欄の直上に固定表示
 
