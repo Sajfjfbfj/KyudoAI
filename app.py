@@ -1250,71 +1250,43 @@ div[data-baseweb="popover"] li[role="option"][aria-selected="true"] {
 }
 .welcome-hero {
     text-align: center;
-    margin: clamp(40px, 12vh, 120px) auto 0;
-    max-width: 640px;
+    margin: clamp(40px, 14vh, 140px) auto 0;
+    max-width: 680px;
     padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 .welcome-title {
-    font-family: var(--font-serif) !important;
-    font-size: clamp(22px, 3.2vw, 30px) !important;
+    font-family: var(--font-serif), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: clamp(22px, 3.4vw, 32px) !important;
     font-weight: 600 !important; line-height: 1.4 !important;
-    letter-spacing: -0.2px !important; color: var(--ink-primary) !important;
+    letter-spacing: -0.3px !important; color: var(--ink-primary) !important;
     margin: 0 0 14px !important;
 }
 .welcome-sub {
-    font-size: 14px !important; line-height: 1.75 !important;
+    font-size: 14.5px !important; line-height: 1.75 !important;
     color: var(--ink-secondary) !important;
-    max-width: 500px; margin: 0 auto !important;
+    max-width: 520px; margin: 0 auto !important;
 }
 @media (max-width: 680px) {
     .welcome-hero {
-        margin: clamp(28px, 10vh, 70px) auto 0 !important;
+        margin: clamp(24px, 10vh, 60px) auto 0 !important;
     }
     .mato-emblem {
         width: 56px !important; height: 56px !important;
-        border-radius: 15px !important;
+        border-radius: 16px !important;
         margin-bottom: 16px !important;
     }
     .welcome-title {
-        font-size: 20px !important;
+        font-size: 21px !important;
         margin-bottom: 10px !important;
     }
     .welcome-sub {
-        font-size: 13px !important;
+        font-size: 13.5px !important;
         line-height: 1.65 !important;
     }
-}
-    align-items: center !important;
-    gap: 10px !important;
-}
-.quick-chip-row [data-testid="stColumn"] {
-    flex: 0 1 auto !important;
-    min-width: 110px !important;
-    max-width: 150px !important;
-    width: auto !important;
-}
-[class*="st-key-chip_"] button {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 9999px !important;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-hairline) !important;
-    color: var(--ink-primary) !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    padding: 6px 18px !important;
-    min-height: 36px !important;
-    height: 36px !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
-    transition: all 0.15s ease !important;
-    white-space: nowrap !important;
-}
-[class*="st-key-chip_"] button:hover {
-    background: var(--surface-3) !important;
-    border-color: var(--border-strong) !important;
-    color: var(--ink-primary) !important;
-    transform: translateY(-1px) !important;
 }
 
 /* ---------- 会話（GPU合成レイヤーによる超スムーズなストリーミング描画） ---------- */
@@ -1326,45 +1298,47 @@ div[data-testid="stChatMessage"] {
     transform: translateZ(0) !important;
 }
 
-/* あなた：右寄せのやわらかい吹き出し（可読性と行間を最適化） */
+/* あなた：右寄せのやわらかい吹き出し（ChatGPT / Claude 公式準拠） */
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
     max-width: 78% !important; width: fit-content !important;
     margin-left: auto !important; margin-right: 0 !important;
-    background: var(--user-bubble) !important;
-    border: 1px solid var(--border-hairline) !important;
-    border-radius: 18px 18px 4px 18px !important;
-    padding: 12px 18px !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+    background: var(--user-bubble, #F4F4F4) !important;
+    border: none !important;
+    border-radius: 20px 20px 4px 20px !important;
+    padding: 10px 18px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
 }
 div[data-testid="stChatMessage"] [data-testid="stChatMessageAvatarUser"] { display: none !important; }
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) p,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) span,
 div[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"] * {
     color: var(--ink-primary) !important;
+    font-size: 15px !important;
     line-height: 1.65 !important;
 }
 
-/* AI：地に直接。枠なし、行間をゆったり */
+/* AI：地に直接。枠なし、最高峰のタイポグラフィ */
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) {
-    padding: 4px 0 !important;
+    padding: 6px 0 !important;
 }
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) [data-testid^="stChatMessageAvatar"] {
-    width: 32px !important; height: 32px !important;
+    width: 30px !important; height: 30px !important;
     border-radius: 50% !important;
     background: var(--primary-indigo) !important;
     color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(27, 54, 93, 0.2) !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
 }
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) p,
 div[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) li {
-    color: var(--ink-primary) !important; font-size: 16px !important; line-height: 1.75 !important;
+    color: var(--ink-primary) !important; font-size: 15.5px !important; line-height: 1.78 !important;
 }
 
-/* 回答内の見出しは ChatGPT 並みに控えめなサイズへ */
-div[data-testid="stChatMessage"] h1 { font-size: 22px !important; margin: 18px 0 8px !important; }
-div[data-testid="stChatMessage"] h2 { font-size: 19px !important; margin: 16px 0 6px !important; }
-div[data-testid="stChatMessage"] h3 { font-size: 17px !important; margin: 14px 0 4px !important; }
-div[data-testid="stChatMessage"] h4 { font-size: 16px !important; margin: 12px 0 4px !important; }
+/* 回答内の見出しは ChatGPT 並みに洗練されたメリハリへ */
+div[data-testid="stChatMessage"] h1 { font-size: 20px !important; font-weight: 700 !important; margin: 18px 0 8px !important; }
+div[data-testid="stChatMessage"] h2 { font-size: 18px !important; font-weight: 650 !important; margin: 16px 0 6px !important; }
+div[data-testid="stChatMessage"] h3 { font-size: 16.5px !important; font-weight: 600 !important; margin: 14px 0 4px !important; }
+div[data-testid="stChatMessage"] h4 { font-size: 15.5px !important; font-weight: 600 !important; margin: 12px 0 4px !important; }
 
 .char-badge {
     display: inline-flex; align-items: center; gap: 8px;
@@ -1446,19 +1420,21 @@ div[data-testid="stBottomBlockContainer"]::after {
     padding: 8px 0 2px !important;
 }
 
-/* Gemini風 カード型入力ボックス */
+/* Gemini & ChatGPT 2026 完全準拠 カード型コンポーザー（入力バー） */
 div[data-testid="stChatInput"] {
-    background: var(--composer, #f0f4f9) !important;
-    border: 1px solid var(--border-hairline) !important;
+    background: var(--composer, #f4f4f4) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
     border-radius: 28px !important;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05), var(--shadow-float) !important;
-    padding: 10px 14px 8px 14px !important;
-    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+    padding: 12px 14px 10px 14px !important;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease) !important;
     position: relative !important;
+    backdrop-filter: blur(12px) !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    border-color: var(--primary-indigo) !important;
-    box-shadow: 0 0 0 1.5px var(--primary-indigo), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(27, 54, 93, 0.35) !important;
+    box-shadow: 0 0 0 1.5px rgba(27, 54, 93, 0.3), 0 6px 24px rgba(27, 54, 93, 0.08) !important;
+    background: var(--surface-1, #ffffff) !important;
 }
 div[data-testid="stChatInput"] [data-baseweb="textarea"],
 div[data-testid="stChatInput"] [data-baseweb="base-input"],
@@ -1475,22 +1451,45 @@ div[data-testid="stChatInput"] textarea {
     padding-left: 0 !important;
     padding-bottom: 44px !important;
 }
-div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim) !important; }
-div[data-testid="stChatInput"] button {
-    background: transparent !important; color: var(--ink-muted) !important;
-    border: 0 !important; border-radius: 999px !important; transition: all 0.15s ease !important;
-}
-div[data-testid="stChatInput"] button:hover { background: var(--surface-3) !important; color: var(--ink-primary) !important; }
+div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim, #8E8E93) !important; font-size: 15px !important; }
 
-/* 送信ボタン：プライマリインディゴ（#1B365D）の円形ボタン */
+/* ツールバー内のアイコンボタン共通（添付＋ボタン、マイクなど） */
+div[data-testid="stChatInput"] button {
+    background: transparent !important; color: var(--ink-secondary) !important;
+    border: 0 !important; border-radius: 999px !important;
+    width: 32px !important; height: 32px !important; min-height: 32px !important;
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    transition: all 0.18s ease !important;
+}
+div[data-testid="stChatInput"] button:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: var(--ink-primary) !important;
+}
+
+/* 送信ボタン：完全な円形、プライマリインディゴ（#1B365D）、ホバースケール */
 div[data-testid="stChatInputSubmitButton"] button, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"] {
-    background: var(--primary-indigo) !important; color: #ffffff !important;
-    border-radius: 999px !important;
+    background: var(--primary-indigo, #1B365D) !important;
+    color: #ffffff !important;
+    border-radius: 50% !important;
+    width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important;
+    box-shadow: 0 2px 6px rgba(27, 54, 93, 0.25) !important;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.18s ease, opacity 0.18s ease !important;
 }
 div[data-testid="stChatInputSubmitButton"] button:hover, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:hover {
-    background: var(--primary-indigo) !important; color: #ffffff !important; opacity: 0.9 !important;
+    background: #142847 !important;
+    color: #ffffff !important;
+    transform: scale(1.06) !important;
 }
-div[data-testid="stChatInput"] button:disabled { background: transparent !important; color: var(--ink-dim) !important; }
+div[data-testid="stChatInputSubmitButton"] button:active, div[data-testid="stChatInput"] button[data-testid="stChatInputSubmitButton"]:active {
+    transform: scale(0.94) !important;
+}
+div[data-testid="stChatInput"] button:disabled {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: rgba(0, 0, 0, 0.25) !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+}
 
 /* キャラクター（指導陣）選択ピルボタン：Gemini風ツールチップとして入力欄内部（＋ボタンのすぐ右隣）に配置 */
 .st-key-input_char_pill_row {
@@ -1511,24 +1510,24 @@ div[data-testid="stChatInput"] button:disabled { background: transparent !import
 .st-key-input_char_pill_row [data-testid="stPopover"] > button {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    background: var(--surface-2, rgba(0, 0, 0, 0.05)) !important;
-    border: 1px solid var(--border-subtle) !important;
+    gap: 5px !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
     border-radius: 9999px !important;
-    padding: 2px 10px !important;
+    padding: 2px 11px !important;
     min-height: 28px !important;
     height: 28px !important;
-    font-size: 11.5px !important;
-    font-weight: 600 !important;
+    font-size: 12px !important;
+    font-weight: 550 !important;
     color: var(--ink-secondary) !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-    transition: all 0.15s ease !important;
+    box-shadow: none !important;
+    transition: all 0.18s ease !important;
     cursor: pointer !important;
     white-space: nowrap !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] > button:hover {
-    background: var(--surface-3) !important;
-    border-color: var(--border-strong) !important;
+    background: rgba(0, 0, 0, 0.08) !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
     color: var(--ink-primary) !important;
 }
 
