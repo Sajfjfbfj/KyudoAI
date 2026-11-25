@@ -1425,16 +1425,15 @@ div[data-testid="stBottomBlockContainer"]::after {
     padding: 5px 0 0 !important;
 }
 
-/* Gemini & ChatGPT 2026 完全準拠 スリム2行カード型コンポーザー（1行目: 入力欄全幅 / 2行目: ＋・キャラ選択・送信） */
+/* Google Gemini 公式 UI 完全模倣 カード型コンポーザー（#FFFFFF 浮遊カード・境界線なし・2段構成・右下にモデル切替ピル） */
 div[data-testid="stChatInput"] {
-    background: var(--composer, #f4f4f4) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 22px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
-    padding: 6px 10px 6px 10px !important;
-    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s var(--ease) !important;
+    background: var(--composer, #ffffff) !important;
+    border: 0 !important;
+    border-radius: 32px !important;
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.14), 0 0 16px 0 rgba(31, 31, 31, 0.06) !important;
+    padding: 10px 12px 8px 12px !important;
+    transition: box-shadow 0.2s var(--ease), background 0.2s var(--ease) !important;
     position: relative !important;
-    backdrop-filter: blur(12px) !important;
 }
 div[data-testid="stChatInput"] > div {
     display: flex !important;
@@ -1447,7 +1446,7 @@ div[data-testid="stChatInput"] > div > div:has(textarea) {
     flex: 1 0 100% !important;
     width: 100% !important;
     max-width: 100% !important;
-    min-height: 24px !important;
+    min-height: 26px !important;
 }
 div[data-testid="stChatInput"] > div > div:has([data-testid="stChatInputFileUploadButton"]),
 div[data-testid="stChatInput"] > div > [data-testid="stChatInputFileUploadButton"] {
@@ -1459,9 +1458,9 @@ div[data-testid="stChatInput"] > div > [data-testid="stChatInputSubmitButton"] {
     margin-left: auto !important;
 }
 div[data-testid="stChatInput"]:focus-within {
-    border-color: rgba(27, 54, 93, 0.35) !important;
-    box-shadow: 0 0 0 1.5px rgba(27, 54, 93, 0.3), 0 6px 24px rgba(27, 54, 93, 0.08) !important;
-    background: var(--surface-1, #ffffff) !important;
+    border: 0 !important;
+    box-shadow: 0 4px 16px -2px rgba(11, 87, 208, 0.16), 0 0 2px 0 rgba(11, 87, 208, 0.22) !important;
+    background: var(--composer, #ffffff) !important;
 }
 div[data-testid="stChatInput"] [data-baseweb="textarea"],
 div[data-testid="stChatInput"] [data-baseweb="base-input"],
@@ -1473,12 +1472,12 @@ div[data-testid="stChatInput"] [data-baseweb] {
     background: transparent !important; background-color: transparent !important; box-shadow: none !important;
 }
 div[data-testid="stChatInput"] textarea {
-    background: transparent !important; color: var(--ink-primary) !important;
-    font-size: 15px !important; line-height: 1.45 !important;
-    padding: 2px 4px !important;
-    min-height: 24px !important;
+    background: transparent !important; color: var(--ink-primary, #1f1f1f) !important;
+    font-size: 16px !important; line-height: 24px !important;
+    padding: 2px 6px 6px 6px !important;
+    min-height: 26px !important;
 }
-div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim, #8E8E93) !important; font-size: 15px !important; }
+div[data-testid="stChatInput"] textarea::placeholder { color: var(--ink-dim, #5f6368) !important; font-size: 16px !important; }
 
 /* ツールバー内のアイコンボタン共通（添付＋ボタン、マイクなど） */
 div[data-testid="stChatInput"] button {
@@ -1518,12 +1517,13 @@ div[data-testid="stChatInput"] button:disabled {
     transform: none !important;
 }
 
-/* キャラクター（指導陣）選択ピルボタン：stChatInput直後に配置し、ネガティブマージンで入力欄下部ツールバー内へ完全収納 */
+/* キャラクター（指導陣）選択ピルボタン：Gemini の .bard-mode-switcher と同じ位置（2段目右下・送信ボタンの左隣）に枠線なしゴーストピルとして配置 */
 .st-key-input_char_pill_row {
     position: relative !important;
-    margin-top: -38px !important;
-    margin-bottom: 6px !important;
-    margin-left: 48px !important;
+    margin-top: -40px !important;
+    margin-bottom: 8px !important;
+    margin-left: auto !important;
+    margin-right: 50px !important;
     z-index: 20 !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -1531,9 +1531,6 @@ div[data-testid="stChatInput"] button:disabled {
     height: 32px !important;
     width: fit-content !important;
     pointer-events: auto !important;
-}
-div[data-testid="stBottomBlockContainer"]:not(:has([data-testid="stChatInputFileUploadButton"])) .st-key-input_char_pill_row {
-    margin-left: 14px !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] {
     display: inline-flex !important;
@@ -1543,25 +1540,24 @@ div[data-testid="stBottomBlockContainer"]:not(:has([data-testid="stChatInputFile
 .st-key-input_char_pill_row [data-testid="stPopover"] > button {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    background: rgba(0, 0, 0, 0.04) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    gap: 5px !important;
+    background: transparent !important;
+    border: 0 !important;
     border-radius: 9999px !important;
-    padding: 1px 10px !important;
-    min-height: 26px !important;
-    height: 26px !important;
-    font-size: 11.5px !important;
-    font-weight: 550 !important;
-    color: var(--ink-secondary) !important;
+    padding: 0 10px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: var(--ink-secondary, #444746) !important;
     box-shadow: none !important;
-    transition: all 0.18s ease !important;
+    transition: background 0.18s ease, color 0.18s ease !important;
     cursor: pointer !important;
     white-space: nowrap !important;
 }
 .st-key-input_char_pill_row [data-testid="stPopover"] > button:hover {
-    background: rgba(0, 0, 0, 0.08) !important;
-    border-color: rgba(0, 0, 0, 0.15) !important;
-    color: var(--ink-primary) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: var(--ink-primary, #1f1f1f) !important;
 }
 
 /* ---------- ボタン・フォーム ---------- */
@@ -1813,17 +1809,17 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
         padding: 4px 2px !important;
     }
 
-    /* 入力エリア（下部固定） */
+    /* 入力エリア（下部固定・Gemini モバイル準拠） */
     div[data-testid="stBottomBlockContainer"] {
         padding: 0 12px !important;
     }
     div[data-testid="stChatInput"] {
-        padding: 6px 10px !important;
-        border-radius: 22px !important;
+        padding: 10px 12px 8px 12px !important;
+        border-radius: 28px !important;
     }
     div[data-testid="stChatInput"] textarea {
         font-size: 16px !important;
-        line-height: 1.45 !important;
+        line-height: 24px !important;
     }
 
     /* 回答末尾のバー（コピー・読み上げ・⋮）：スマホでも綺麗に1行整列 */
