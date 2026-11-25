@@ -777,7 +777,8 @@ h3 { font-size: 17px !important; }
 h4 { font-size: 16px !important; }
 strong { color: var(--ink-primary) !important; font-weight: 600 !important; }
 hr, [data-testid="stDivider"] hr { border-color: var(--border-hairline) !important; }
-a { color: var(--link) !important; text-underline-offset: 3px; }
+a:not(#yumiqa-onetap-saved-btn) { color: var(--link) !important; text-underline-offset: 3px; }
+a#yumiqa-onetap-saved-btn, a#yumiqa-onetap-saved-btn:visited, a#yumiqa-onetap-saved-btn:hover { color: #ffffff !important; text-decoration: none !important; }
 
 div[data-testid="stMarkdownContainer"] code {
     background: var(--surface-3) !important;
