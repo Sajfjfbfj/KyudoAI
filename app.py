@@ -2940,7 +2940,7 @@ def render_login_screen(slot=None):
                 # 2) Cookieがない場合（APK初回等）は localStorage の v2 トークンを参照してワンタップボタンを表示
                 st.markdown("""
                 <div id="yumiqa-onetap-saved-wrap" style="display:none; margin-bottom:10px; position:relative; z-index:100; pointer-events:auto;">
-                    <a id="yumiqa-onetap-saved-btn" href="#" target="_top" style="display:block; width:100%; box-sizing:border-box; text-align:center; text-decoration:none; padding:12px 16px; border-radius:12px; border:0; background:#1B365D; color:#fff; font-weight:600; font-size:14.5px; cursor:pointer; box-shadow:0 2px 8px rgba(27,54,93,0.22); touch-action:manipulation; pointer-events:auto;">
+                    <a id="yumiqa-onetap-saved-btn" href="#" target="_self" style="display:block; width:100%; box-sizing:border-box; text-align:center; text-decoration:none; padding:12px 16px; border-radius:12px; border:0; background:#1B365D; color:#fff; font-weight:600; font-size:14.5px; cursor:pointer; box-shadow:0 2px 8px rgba(27,54,93,0.22); touch-action:manipulation; pointer-events:auto;">
                         ✨ 前回のアカウントでワンタップログイン
                     </a>
                 </div>
@@ -2963,22 +2963,11 @@ def render_login_screen(slot=None):
                             var wrap = D.getElementById('yumiqa-onetap-saved-wrap');
                             var btn = D.getElementById('yumiqa-onetap-saved-btn');
                             if(wrap && btn){
-                                var baseHref = 'https://aikyudo-6d3n8m5yhzqubjdnr4bbax.streamlit.app/';
-                                try{
-                                    var topHref = (window.top && window.top.location) ? window.top.location.href : P.location.href;
-                                    var uo = new URL(topHref);
-                                    if(!/\\/\\~\\/\\+\\//.test(uo.pathname)){
-                                        uo.searchParams.delete('yumiqa_u');
-                                        uo.searchParams.delete('yumiqa_fp');
-                                        uo.searchParams.set('auth', tok);
-                                        baseHref = uo.toString();
-                                    } else {
-                                        baseHref = uo.origin + '/?auth=' + encodeURIComponent(tok);
-                                    }
-                                }catch(e){
-                                    baseHref = 'https://aikyudo-6d3n8m5yhzqubjdnr4bbax.streamlit.app/?auth=' + encodeURIComponent(tok);
-                                }
-                                btn.setAttribute('href', baseHref);
+                                var uo = new URL(P.location.href);
+                                uo.searchParams.delete('yumiqa_u');
+                                uo.searchParams.delete('yumiqa_fp');
+                                uo.searchParams.set('auth', tok);
+                                btn.setAttribute('href', uo.toString());
                                 if(u) btn.textContent = '✨ 「' + u + '」でワンタップログイン';
                                 wrap.style.display = 'block';
                             }
