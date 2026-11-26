@@ -22,5 +22,9 @@ __pycache__/
 *.pyd
 .Python
 
-# Android Build project
-yumiqa_android/
+# Android local configuration and build output
+yumiqa_android/.gradle/
+yumiqa_android/build/
+yumiqa_android/app/build/
+yumiqa_android/local.properties
+yumiqa_android/yumiqa.keystore

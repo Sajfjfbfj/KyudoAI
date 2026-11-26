@@ -1,0 +1,72 @@
+name: Build Android APK
+
+on:
+  push:
+    paths:
+      - 'yumiqa_android/**'
+      - '.github/workflows/android_build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK Platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK and optional signed release APK
+        working-directory: yumiqa_android
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          gradle --no-daemon :app:assembleDebug
+
+          configured_values=0
+          for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
+            if [ -n "$value" ]; then
+              configured_values=$((configured_values + 1))
+            fi
+          done
+
+          if [ "$configured_values" -ne 0 ] && [ "$configured_values" -ne 4 ]; then
+            echo "Configure all four Android signing secrets, or leave all of them empty." >&2
+            exit 1
+          fi
+
+          if [ "$configured_values" -eq 4 ]; then
+            keystore_path="$RUNNER_TEMP/yumiqa-release.keystore"
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+            export ANDROID_KEYSTORE_FILE="$keystore_path"
+            echo "ANDROID_KEYSTORE_FILE=$keystore_path" >> "$GITHUB_ENV"
+            gradle --no-daemon :app:assembleRelease
+          else
+            echo "Signed release skipped. Configure Android signing secrets to produce an updateable release APK." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: YUMIQA-Android-APKs
+          path: yumiqa_android/app/build/outputs/apk/**/*.apk
+          if-no-files-found: error

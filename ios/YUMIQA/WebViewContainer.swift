@@ -50,15 +50,18 @@ struct WebViewContainer: UIViewRepresentable {
         webView.backgroundColor = UIColor(red: 0.98, green: 0.97, blue: 0.95, alpha: 1.0)
 
         let savedToken = UserDefaults.standard.string(forKey: Self.authTokenKey) ?? ""
-        let initialString: String
-        if !savedToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-           let encoded = savedToken.trimmingCharacters(in: .whitespacesAndNewlines).addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-            initialString = "\(Self.appURL)?auth=\(encoded)"
-        } else {
-            initialString = Self.appURL
+        var initialURL = URL(string: Self.appURL)
+        let cleanToken = savedToken.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !cleanToken.isEmpty, var components = URLComponents(string: Self.appURL) {
+            components.queryItems = (components.queryItems ?? []) + [
+                URLQueryItem(name: "auth", value: cleanToken)
+            ]
+            if let authURL = components.url {
+                initialURL = authURL
+            }
         }
 
-        if let url = URL(string: initialString) {
+        if let url = initialURL {
             webView.load(URLRequest(url: url))
         }
         return webView

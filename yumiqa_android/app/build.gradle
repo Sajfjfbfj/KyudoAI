@@ -1,0 +1,64 @@
+plugins {
+    id 'com.android.application'
+}
+
+def releaseSigningValues = [
+    storeFile: System.getenv('ANDROID_KEYSTORE_FILE'),
+    storePassword: System.getenv('ANDROID_KEYSTORE_PASSWORD'),
+    keyAlias: System.getenv('ANDROID_KEY_ALIAS'),
+    keyPassword: System.getenv('ANDROID_KEY_PASSWORD')
+]
+def configuredReleaseSigningValues = releaseSigningValues.values().count { it }
+if (configuredReleaseSigningValues != 0 && configuredReleaseSigningValues != releaseSigningValues.size()) {
+    throw new GradleException('Release signing requires ANDROID_KEYSTORE_FILE, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, and ANDROID_KEY_PASSWORD.')
+}
+def hasReleaseSigning = configuredReleaseSigningValues == releaseSigningValues.size()
+
+android {
+    namespace 'com.yumiqa.app'
+    compileSdk 35
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(releaseSigningValues.storeFile)
+                storePassword releaseSigningValues.storePassword
+                keyAlias releaseSigningValues.keyAlias
+                keyPassword releaseSigningValues.keyPassword
+            }
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.yumiqa.app"
+        minSdk 24
+        targetSdk 35
+        versionCode 5
+        versionName "1.0.4"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            applicationIdSuffix ""
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.activity:activity:1.9.3'
+}

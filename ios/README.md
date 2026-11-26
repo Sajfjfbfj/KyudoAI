@@ -7,6 +7,13 @@ Android APK (`MainActivity.java`) と同じ仕様の iOS (`WKWebView` / SwiftUI)
 - `UserDefaults` + `iOSAuth` ブリッジによる自動ログイン・ワンタップログイン維持
 - Streamlit Cloud 下部バッジの非表示化
 
+## 配布方法と制約
+- Android/iOSのビルド手順・配布制約は [`docs/mobile-distribution.md`](../docs/mobile-distribution.md) を参照してください。
+- `.github/workflows/ios_build.yml` は未署名IPAをビルドし、GitHub ActionsのArtifactsと `ios-latest` Releaseへ出力します。
+- 未署名IPAはSideloadly等で署名して個人端末にインストールする用途です。無料Apple IDで署名したアプリは通常7日ごとの再署名が必要です。
+- TestFlight/App Store向けの署名・提出はこのワークフローでは行いません。macOS上のXcodeとApple Developer Teamで署名し、App Store Connectへ提出してください。
+- iOSアプリはWeb版をWKWebViewで表示します。Web版の公開URLとネットワーク接続が必要です。
+
 ## Windows だけで iPhone に入れる方法（Mac 不要・無料 Apple ID 可）
 1. GitHub の **Releases（`ios-latest`）** または **Actions → Build iOS App (Unsigned) → Artifacts** から `YUMIQA-unsigned.ipa` をダウンロードします。
 2. Windows PC に以下をインストールします（Microsoft Store 版ではなく Apple 公式インストーラー版を使用）：
