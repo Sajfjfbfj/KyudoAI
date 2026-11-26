@@ -210,16 +210,16 @@ st.set_page_config(
 
 # ── PWA メタタグ＆ServiceWorker注入（ホーム画面追加・スプラッシュ対応） ──
 st.html("""
-<link rel="manifest" href="/app/static/manifest.json?v=4">
+<link rel="manifest" href="/app/static/manifest.json?v=5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="YUMIQA">
 <meta name="application-name" content="YUMIQA">
 <meta name="theme-color" content="#101D35">
-<link rel="icon" type="image/png" href="/app/static/favicon.png?v=4">
-<link rel="shortcut icon" href="/app/static/favicon.ico?v=4">
-<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=4">
+<link rel="icon" type="image/png" href="/app/static/favicon.png?v=5">
+<link rel="shortcut icon" href="/app/static/favicon.ico?v=5">
+<link rel="apple-touch-icon" href="/app/static/icon-192.png?v=5">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <script>
 (function() {
@@ -246,8 +246,8 @@ st.html("""
         });
 
         // YUMIQA アプリアイコン・ファビコン
-        var iconUrl = '/app/static/icon-192.png?v=4';
-        var favUrl = '/app/static/favicon.png?v=4';
+        var iconUrl = '/app/static/icon-192.png?v=5';
+        var favUrl = '/app/static/favicon.png?v=5';
         var fav = pDoc.createElement('link');
         fav.rel = 'icon';
         fav.type = 'image/png';
@@ -262,7 +262,7 @@ st.html("""
         // 新しい Manifest を <head> の先頭に挿入
         var manifestLink = pDoc.createElement('link');
         manifestLink.rel = 'manifest';
-        manifestLink.href = '/app/static/manifest.json?v=4';
+        manifestLink.href = '/app/static/manifest.json?v=5';
         pDoc.head.insertBefore(manifestLink, pDoc.head.firstChild);
 
         pDoc.title = 'YUMIQA｜AI弓道分析';
@@ -336,7 +336,7 @@ st.html("""
         window.addEventListener('orientationchange', updateDeviceSafeArea);
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/app/static/sw.js?v=4').catch(function(e){});
+            navigator.serviceWorker.register('/app/static/sw.js?v=5').catch(function(e){});
         }
     }
     setupPWA();
@@ -344,7 +344,7 @@ st.html("""
     setTimeout(setupPWA, 1000);
 })();
 </script>
-""")
+""", unsafe_allow_javascript=True)
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── 文字サイズ設定定義（アカウントと紐付け対応） ──────────────────
