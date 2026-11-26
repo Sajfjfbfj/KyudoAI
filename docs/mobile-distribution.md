@@ -32,3 +32,7 @@ gradle --no-daemon :app:assembleDebug
 `.github/workflows/ios_build.yml` は未署名IPAをビルドし、GitHub ActionsのArtifactsと `ios-latest` Releaseへ出力します。未署名IPAはSideloadly等で署名して個人端末にインストールする用途です。無料Apple IDで署名したアプリは通常7日ごとの再署名が必要です。
 
 TestFlight / App Store向けの署名と提出は自動化していません。macOS上のXcodeとApple Developer Teamで署名し、App Store Connectへ提出してください。アプリは公開中のWeb版をWebViewで表示するため、ネットワーク接続が必要です。
+
+## Webアプリとしてインストール
+
+Streamlit Community Cloud の通常URL (`/`) は Streamlit の外枠を表示するため、Chrome のインストール名・アイコンも Streamlit のものになります。YUMIQA の名前とアイコンでインストールする場合は、アプリ本体のURL (`/~/+/`) を開いてからブラウザーのインストール操作を行ってください。このパスは Streamlit Cloud の内部ルートのため、将来変更される可能性があります。
