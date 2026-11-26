@@ -1,6 +1,10 @@
 name: Build iOS App (Unsigned)
 
 on:
+  push:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios_build.yml'
   workflow_dispatch:
 
 jobs:
@@ -28,7 +32,7 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            CONFIGURATION_BUILD_DIR=build \
+            CONFIGURATION_BUILD_DIR="${{ github.workspace }}/ios/build" \
             build
 
       - name: Package unsigned IPA payload
