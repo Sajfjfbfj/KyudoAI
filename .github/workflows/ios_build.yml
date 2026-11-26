@@ -1,0 +1,45 @@
+name: Build iOS App (Unsigned)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Build unsigned iOS app
+        working-directory: ios
+        run: |
+          xcodebuild -project YUMIQA.xcodeproj \
+            -scheme YUMIQA \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CONFIGURATION_BUILD_DIR=build \
+            build
+
+      - name: Package unsigned IPA payload
+        working-directory: ios/build
+        run: |
+          mkdir -p Payload
+          cp -r YUMIQA.app Payload/
+          zip -r YUMIQA-unsigned.ipa Payload
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YUMIQA-iOS-unsigned
+          path: ios/build/YUMIQA-unsigned.ipa

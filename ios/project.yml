@@ -1,0 +1,22 @@
+name: YUMIQA
+options:
+  bundleIdPrefix: com.yumiqa
+  deploymentTarget:
+    iOS: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.4"
+    CURRENT_PROJECT_VERSION: "5"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  YUMIQA:
+    type: application
+    platform: iOS
+    sources:
+      - path: YUMIQA
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yumiqa.app
+        INFOPLIST_FILE: YUMIQA/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
