@@ -223,6 +223,36 @@ st.html("""
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <script>
 (function() {
+    if (!window.__yumiqaMobileChatBlurBound) {
+        window.__yumiqaMobileChatBlurBound = true;
+        function isTouchDevice() {
+            return (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+                   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+        }
+        function blurChatInputAfterSubmit() {
+            window.setTimeout(function() {
+                var active = document.activeElement;
+                if (active && active.matches('[data-testid="stChatInput"] textarea')) {
+                    active.blur();
+                }
+            }, 80);
+        }
+        document.addEventListener('click', function(event) {
+            if (!isTouchDevice()) return;
+            var submitButton = event.target.closest &&
+                               event.target.closest('[data-testid="stChatInputSubmitButton"]');
+            if (submitButton) blurChatInputAfterSubmit();
+        }, true);
+        document.addEventListener('keydown', function(event) {
+            if (!isTouchDevice() || event.key !== 'Enter' || event.shiftKey ||
+                event.isComposing || event.keyCode === 229) return;
+            var input = event.target;
+            if (!input || input.tagName !== 'TEXTAREA' ||
+                !input.closest('[data-testid="stChatInput"]')) return;
+            blurChatInputAfterSubmit();
+        }, true);
+    }
+
     function setupPWA() {
         var pDoc = window.parent.document;
         if (!pDoc || !pDoc.head) return;
@@ -3935,9 +3965,7 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
         local_ans = get_local_response(user_input, char_name)
         if is_regenerate:
             local_ans = f"（別の視点からのアドバイス）\n{local_ans}\n\n呼吸のリズムと身体の軸の意識を変えて稽古を重ねてみてください。"
-        for char in local_ans:
-            time.sleep(0.015)
-            yield char
+        yield local_ans
         return
 
     try:
@@ -4008,9 +4036,21 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
                         temperature=temp_setting,
                     )
                 )
+                text_buffer = []
+                buffered_length = 0
+                last_yield = time.monotonic()
                 for chunk in response:
                     if chunk.text:
-                        yield chunk.text
+                        text_buffer.append(chunk.text)
+                        buffered_length += len(chunk.text)
+                        now = time.monotonic()
+                        if buffered_length >= 32 or now - last_yield >= 0.06:
+                            yield "".join(text_buffer)
+                            text_buffer.clear()
+                            buffered_length = 0
+                            last_yield = now
+                if text_buffer:
+                    yield "".join(text_buffer)
                 return
             except Exception:
                 continue
@@ -4018,8 +4058,7 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
 
         # モデル試行失敗時のフォールバック
         local_ans = get_local_response(user_input, char_name)
-        for char in local_ans:
-            yield char
+        yield local_ans
     except Exception as e:
         yield f"⚠️ 応答ストリーミング中にエラーが発生しました: {str(e)}"
 
@@ -4493,7 +4532,6 @@ if "pending_regen" in st.session_state:
     })
     if "current_session_id" in st.session_state:
         save_current_session(st.session_state.current_session_id, st.session_state.messages)
-    st.rerun()
 
 
 
@@ -4664,11 +4702,11 @@ if text_to_send or files_to_send:
                 full_reply = f"⚠️ エラーが発生しました: {str(e)}"
                 st.markdown(full_reply)
 
-            # 並行実行していたメモリ更新の結果（終わっていなければ最大数秒だけ待つ）
+            # バックグラウンド処理が完了済みの場合だけ結果を表示し、回答後の待ち時間を作らない
             new_mem_items = []
-            if mem_future is not None:
+            if mem_future is not None and mem_future.done():
                 try:
-                    new_mem_items = mem_future.result(timeout=8) or []
+                    new_mem_items = mem_future.result() or []
                 except Exception:
                     new_mem_items = []
             if new_mem_items:
@@ -4690,12 +4728,12 @@ if text_to_send or files_to_send:
         # 会話を即時自動保存（最初の質問なら、裏で生成していたスマートタイトルを使う）
         if "current_session_id" in st.session_state:
             smart_title = None
-            if title_future is not None:
+            if title_future is not None and title_future.done():
                 try:
-                    smart_title = title_future.result(timeout=8)
+                    smart_title = title_future.result()
                 except Exception:
                     smart_title = None
             save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
         _pool.shutdown(wait=False)
-
-        st.rerun()
+        if _is_first_q:
+            st.rerun()
