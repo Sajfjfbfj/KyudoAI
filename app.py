@@ -3958,6 +3958,13 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
     # APIキーがない、またはエラー時のローカル知識ベース応答
     return get_local_response(user_input, char_name)
 
+def _yield_typewriter_chunks(text: str, chunk_size: int = 8, delay: float = 0.025):
+    for start in range(0, len(text), chunk_size):
+        yield text[start:start + chunk_size]
+        if start + chunk_size < len(text):
+            time.sleep(delay)
+
+
 def generate_response_stream(user_input: str, char_name: str, api_key: str, is_regenerate: bool = False):
     """ChatGPT風：リアルタイムに文字が流れるストリーミング応答ジェネレーター"""
     current_char = CHARACTERS[char_name]
@@ -3965,7 +3972,7 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
         local_ans = get_local_response(user_input, char_name)
         if is_regenerate:
             local_ans = f"（別の視点からのアドバイス）\n{local_ans}\n\n呼吸のリズムと身体の軸の意識を変えて稽古を重ねてみてください。"
-        yield local_ans
+        yield from _yield_typewriter_chunks(local_ans)
         return
 
     try:
@@ -4027,7 +4034,10 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
 
         model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
         temp_setting = 0.88 if is_regenerate else 0.7
+        last_err = None
         for m_name in model_candidates:
+            text_buffer = []
+            candidate_had_text = False
             try:
                 response = client.models.generate_content_stream(
                     model=m_name,
@@ -4036,11 +4046,11 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
                         temperature=temp_setting,
                     )
                 )
-                text_buffer = []
                 buffered_length = 0
                 last_yield = time.monotonic()
                 for chunk in response:
                     if chunk.text:
+                        candidate_had_text = True
                         text_buffer.append(chunk.text)
                         buffered_length += len(chunk.text)
                         now = time.monotonic()
@@ -4049,16 +4059,23 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
                             text_buffer.clear()
                             buffered_length = 0
                             last_yield = now
+                if candidate_had_text:
+                    if text_buffer:
+                        yield "".join(text_buffer)
+                    return
+                last_err = RuntimeError("Geminiから回答が返されませんでした。")
+            except Exception as e:
                 if text_buffer:
                     yield "".join(text_buffer)
-                return
-            except Exception:
-                continue
+                if candidate_had_text:
+                    yield f"\n\n⚠️ 回答の途中でGeminiとの通信が途切れました: {e}"
+                    return
+                last_err = e
 
-
-        # モデル試行失敗時のフォールバック
+        if last_err:
+            yield f"⚠️ Geminiで回答を生成できなかったため、ローカル参考回答を表示します。原因: {last_err}\n\n"
         local_ans = get_local_response(user_input, char_name)
-        yield local_ans
+        yield from _yield_typewriter_chunks(local_ans)
     except Exception as e:
         yield f"⚠️ 応答ストリーミング中にエラーが発生しました: {str(e)}"
 
@@ -4225,13 +4242,45 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     )
     return fig
 
+def _visible_analysis_chunks(response, raw_chunks):
+    marker = "```json"
+    pending = ""
+    json_started = False
+
+    for chunk in response:
+        text = chunk.text
+        if not text:
+            continue
+        raw_chunks.append(text)
+        if json_started:
+            continue
+
+        pending += text
+        marker_index = pending.find(marker)
+        if marker_index >= 0:
+            visible_text = pending[:marker_index]
+            if visible_text:
+                yield visible_text
+            json_started = True
+            continue
+
+        safe_length = len(pending) - len(marker) + 1
+        if safe_length > 0:
+            yield pending[:safe_length]
+            pending = pending[safe_length:]
+
+    if not json_started and pending:
+        yield pending
+
+
 # 動画・画像分析関数
-def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: str):
+def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: str, stream_output):
     if not api_key:
-        return "⚠️ 動画・画像の本格分析にはGemini APIキーが必要です。サイドバーにAPIキーを設定してください。（現在設定されていれば自動で解析されます）", None, None
+        message = "⚠️ 動画・画像の本格分析にはGemini APIキーが必要です。サイドバーにAPIキーを設定してください。（現在設定されていれば自動で解析されます）"
+        stream_output.write_stream(_yield_typewriter_chunks(message))
+        return message, None, None
 
     client = genai.Client(api_key=api_key)
-    current_char = CHARACTERS[char_name]
     
     # 一時ファイルに保存
     file_ext = os.path.splitext(uploaded_file.name)[1].lower()
@@ -4323,59 +4372,65 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 }}
 ```
 """
-        with st.spinner(f"{char_name}が筋肉の連動・3D骨格アライメントを立体解析中..."):
-            model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
-            res_text = None
-            last_err = None
-            for m_name in model_candidates:
-                try:
-                    response = client.models.generate_content(
-                        model=m_name,
-                        contents=[gemini_file, analysis_prompt]
-                    )
-                    if response.text:
-                        res_text = response.text
-                        break
-                except Exception as e:
-                    last_err = e
-                    continue
-            if not res_text and last_err:
-                raise last_err
-
-            # JSONブロックの抽出
-            muscle_data = None
-            posture_data = None
-            clean_text = res_text
-            
+        model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
+        res_text = None
+        clean_text = ""
+        last_err = None
+        for m_name in model_candidates:
+            raw_chunks = []
             try:
-                json_match = re.search(r'```json\s*(\{.*?\})\s*```', res_text, re.DOTALL)
-                if json_match:
-                    parsed_json = json.loads(json_match.group(1))
-                    muscle_data = parsed_json.get("muscle_scores")
-                    posture_data = parsed_json.get("posture_3d")
-                    # テキスト本文からJSONブロックを除去して綺麗にする
-                    clean_text = res_text.replace(json_match.group(0), "").strip()
-            except Exception:
-                pass
-                
-            # デフォルト値のフォールバック
-            if not muscle_data:
-                muscle_data = {
-                    "首肩の脱力(僧帽筋)": 72,
-                    "背中の引き込み(広背筋)": 78,
-                    "胸郭の広がり(深呼吸)": 68,
-                    "体幹・丹田の安定": 80,
-                    "手の内の柔らかさ": 70,
-                    "十文字の伸び合い": 75
-                }
-            if not posture_data:
-                posture_data = {
-                    "trunk_tilt_pitch": 1.0,
-                    "trunk_tilt_roll": 0.0,
-                    "shoulder_draw_level": 0.0
-                }
+                response = client.models.generate_content_stream(
+                    model=m_name,
+                    contents=[gemini_file, analysis_prompt]
+                )
+                clean_text = stream_output.write_stream(
+                    _visible_analysis_chunks(response, raw_chunks)
+                ).strip()
+                res_text = "".join(raw_chunks)
+                if res_text:
+                    break
+            except Exception as e:
+                if raw_chunks:
+                    raise
+                last_err = e
 
-            return clean_text, muscle_data, posture_data
+        if not res_text and last_err:
+            raise last_err
+        if not res_text:
+            raise RuntimeError("AIから分析結果が返されませんでした。")
+
+        # JSONブロックの抽出
+        muscle_data = None
+        posture_data = None
+        try:
+            json_match = re.search(r'```json\s*(\{.*?\})\s*```', res_text, re.DOTALL)
+            if json_match:
+                parsed_json = json.loads(json_match.group(1))
+                muscle_data = parsed_json.get("muscle_scores")
+                posture_data = parsed_json.get("posture_3d")
+                if not clean_text:
+                    clean_text = res_text.replace(json_match.group(0), "").strip()
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+        # デフォルト値のフォールバック
+        if not muscle_data:
+            muscle_data = {
+                "首肩の脱力(僧帽筋)": 72,
+                "背中の引き込み(広背筋)": 78,
+                "胸郭の広がり(深呼吸)": 68,
+                "体幹・丹田の安定": 80,
+                "手の内の柔らかさ": 70,
+                "十文字の伸び合い": 75
+            }
+        if not posture_data:
+            posture_data = {
+                "trunk_tilt_pitch": 1.0,
+                "trunk_tilt_roll": 0.0,
+                "shoulder_draw_level": 0.0
+            }
+
+        return clean_text, muscle_data, posture_data
 
     finally:
         # 【個人情報保護】一時ファイルをゼロフィル＆乱数で物理シュレッダー抹消
@@ -4387,6 +4442,24 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                 client.files.delete(name=gemini_file.name)
             except Exception:
                 pass
+
+
+def render_analysis_visualizations(muscle_data, posture_data, key_suffix):
+    if not muscle_data or not posture_data:
+        return
+
+    st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
+    col_g1, col_g2 = st.columns([1, 1])
+    with col_g1:
+        st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
+        radar_fig = create_muscle_radar_chart(muscle_data)
+        st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{key_suffix}")
+    with col_g2:
+        st.markdown("**🧍‍♂️ 3D立体骨格（マウスで360°回転可能）**")
+        skeleton_fig = create_3d_kyudo_skeleton(posture_data)
+        st.plotly_chart(skeleton_fig, use_container_width=True, key=f"skeleton_chart_{key_suffix}")
+    st.divider()
+
 
 # ==================== チャット統合型メイン画面 ====================
 
@@ -4448,17 +4521,9 @@ for idx, msg in enumerate(st.session_state.messages):
 
                 # 3D立体骨格 ＆ 筋活動レーダーチャートがメッセージに含まれる場合
                 if "muscle_data" in msg and "posture_data" in msg:
-                    st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
-                    col_g1, col_g2 = st.columns([1, 1])
-                    with col_g1:
-                        st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
-                        radar_fig = create_muscle_radar_chart(msg["muscle_data"])
-                        st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{idx}")
-                    with col_g2:
-                        st.markdown("**🧍‍♂️ 3D立体骨格（マウスで360°回転可能）**")
-                        skeleton_fig = create_3d_kyudo_skeleton(msg["posture_data"])
-                        st.plotly_chart(skeleton_fig, use_container_width=True, key=f"skeleton_chart_{idx}")
-                    st.divider()
+                    render_analysis_visualizations(
+                        msg["muscle_data"], msg["posture_data"], idx
+                    )
 
                 st.markdown(msg["content"])
 
@@ -4647,30 +4712,38 @@ if text_to_send or files_to_send:
             """, unsafe_allow_html=True)
             st.markdown(user_msg_text)
 
-        # 動画分析
-        try:
-            with st.spinner(f"🎬 動画をアップロード中・{selected_char}が解析準備中..."):
+        # 動画・画像分析の回答も、同じ吹き出し内で生成しながら表示する
+        c_info = CHARACTERS.get(selected_char, char_info)
+        avatar_path = os.path.join(ASSETS_DIR, c_info.get("avatar_file", "")) if c_info.get("avatar_file") else ""
+        analysis_avatar = avatar_path if avatar_path and os.path.exists(avatar_path) else c_info["icon"]
+        muscle_data = None
+        posture_data = None
+        with st.chat_message("assistant", avatar=analysis_avatar) as analysis_output:
+            st.markdown(f'<span class="char-badge {c_info["badge_class"]}">{c_info["icon"]} {selected_char}</span>', unsafe_allow_html=True)
+            try:
                 analysis_text, muscle_data, posture_data = analyze_media_file(
-                    attached_media, text_to_send, selected_char, active_api_key
+                    attached_media, text_to_send, selected_char, active_api_key, analysis_output
                 )
-            st.session_state.messages.append({
-                "role": "assistant",
-                "char": selected_char,
-                "content": analysis_text,
-                "muscle_data": muscle_data,
-                "posture_data": posture_data
-            })
-        except Exception as e:
-            err_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
-            st.session_state.messages.append({
-                "role": "assistant",
-                "char": selected_char,
-                "content": err_text
-            })
+                render_analysis_visualizations(
+                    muscle_data, posture_data, f"live_{len(st.session_state.messages)}"
+                )
+            except Exception as e:
+                analysis_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
+                analysis_output.error(analysis_text)
+            render_chatgpt_toolbar(analysis_text)
+
+        assistant_message = {
+            "role": "assistant",
+            "char": selected_char,
+            "content": analysis_text
+        }
+        if muscle_data and posture_data:
+            assistant_message["muscle_data"] = muscle_data
+            assistant_message["posture_data"] = posture_data
+        st.session_state.messages.append(assistant_message)
 
         if "current_session_id" in st.session_state:
             save_current_session(st.session_state.current_session_id, st.session_state.messages)
-        st.rerun()
 
     # B. 通常のテキスト質問の場合（ChatGPT風リアルタイム・ストリーミング）
     else:
@@ -4735,5 +4808,3 @@ if text_to_send or files_to_send:
                     smart_title = None
             save_current_session(st.session_state.current_session_id, st.session_state.messages, custom_title=smart_title)
         _pool.shutdown(wait=False)
-        if _is_first_q:
-            st.rerun()
