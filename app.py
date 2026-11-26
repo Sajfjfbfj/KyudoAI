@@ -4383,9 +4383,14 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                     model=m_name,
                     contents=[gemini_file, analysis_prompt]
                 )
-                clean_text = stream_output.write_stream(
-                    _visible_analysis_chunks(response, raw_chunks)
-                ).strip()
+                visible_chunks = _visible_analysis_chunks(response, raw_chunks)
+                write_stream = getattr(stream_output, "write_stream", None)
+                if callable(write_stream):
+                    clean_text = write_stream(visible_chunks).strip()
+                else:
+                    clean_text = "".join(visible_chunks).strip()
+                    if clean_text:
+                        stream_output.markdown(clean_text)
                 res_text = "".join(raw_chunks)
                 if res_text:
                     break
@@ -4729,7 +4734,7 @@ if text_to_send or files_to_send:
                 )
             except Exception as e:
                 analysis_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
-                analysis_output.error(analysis_text)
+                st.error(analysis_text)
             render_chatgpt_toolbar(analysis_text)
 
         assistant_message = {
