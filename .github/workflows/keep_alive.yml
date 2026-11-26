@@ -2,8 +2,8 @@ name: Keep Streamlit App Awake
 
 on:
   schedule:
-    # 6時間ごとにアクセスして Streamlit Community Cloud のスリープを防止
-    - cron: '0 */6 * * *'
+    # 1時間ごとにアクセスして Streamlit Community Cloud のスリープを防止
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
