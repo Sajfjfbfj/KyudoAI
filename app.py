@@ -3041,6 +3041,9 @@ def render_login_screen(slot=None):
             <div style="font-size: 11px; color: var(--ink-muted); margin-top: 6px;">
                 ※ストア申請不要で直接スマホにインストールできます
             </div>
+            <div style="font-size: 11px; color: var(--ink-muted); margin-top: 4px;">
+                🍎 iPhoneの方：Safariの共有ボタン →「ホーム画面に追加」でアプリとして使えます
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
