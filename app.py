@@ -4275,9 +4275,15 @@ def _visible_analysis_chunks(response, raw_chunks):
 
 # 動画・画像分析関数
 def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: str, stream_output):
+    output = stream_output if stream_output is not None else st
     if not api_key:
         message = "⚠️ 動画・画像の本格分析にはGemini APIキーが必要です。サイドバーにAPIキーを設定してください。（現在設定されていれば自動で解析されます）"
-        stream_output.write_stream(_yield_typewriter_chunks(message))
+        chunks = _yield_typewriter_chunks(message)
+        write_stream = getattr(output, "write_stream", None)
+        if callable(write_stream):
+            write_stream(chunks)
+        else:
+            output.markdown("".join(chunks))
         return message, None, None
 
     client = genai.Client(api_key=api_key)
@@ -4384,13 +4390,13 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                     contents=[gemini_file, analysis_prompt]
                 )
                 visible_chunks = _visible_analysis_chunks(response, raw_chunks)
-                write_stream = getattr(stream_output, "write_stream", None)
+                write_stream = getattr(output, "write_stream", None)
                 if callable(write_stream):
                     clean_text = write_stream(visible_chunks).strip()
                 else:
                     clean_text = "".join(visible_chunks).strip()
                     if clean_text:
-                        stream_output.markdown(clean_text)
+                        output.markdown(clean_text)
                 res_text = "".join(raw_chunks)
                 if res_text:
                     break
