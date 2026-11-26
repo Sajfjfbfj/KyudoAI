@@ -1,0 +1,53 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    # 6時間ごとにアクセスして Streamlit Community Cloud のスリープを防止
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-awake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Playwright Chromium
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      - name: Wake up and keep Streamlit app active
+        run: |
+          python - <<'EOF'
+          from playwright.sync_api import sync_playwright
+
+          URL = "https://aikyudo-6d3n8m5yhzqubjdnr4bbax.streamlit.app/"
+
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              page = browser.new_page()
+              page.goto(URL, wait_until="domcontentloaded", timeout=60000)
+              page.wait_for_timeout(5000)
+
+              # スリープ復帰ボタンが表示されていたら自動クリック
+              wake_btn = page.locator("button:has-text('Yes, get this app back up!')")
+              if wake_btn.count() > 0:
+                  print("Wake-up button found. Clicking...")
+                  wake_btn.first.click()
+                  page.wait_for_timeout(25000)
+
+              # Streamlit アプリの iframe が読み込まれるまで待機して WebSocket を確立
+              try:
+                  page.wait_for_selector("iframe[title='streamlitApp']", timeout=45000)
+                  print("Streamlit app iframe loaded successfully.")
+              except Exception as e:
+                  print(f"Iframe wait note: {e}")
+
+              page.wait_for_timeout(8000)
+              browser.close()
+          EOF
