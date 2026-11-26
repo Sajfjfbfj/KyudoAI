@@ -11,6 +11,8 @@ jobs:
   build-ios:
     runs-on: macos-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,3 +49,11 @@ jobs:
         with:
           name: YUMIQA-iOS-unsigned
           path: ios/build/YUMIQA-unsigned.ipa
+
+      - name: Publish unsigned IPA to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-latest
+          name: YUMIQA iOS (Unsigned IPA)
+          body: "GitHub Actions (macOS) で自動ビルドした未署名 IPA です。Windows の Sideloadly 等で iPhone にインストールできます。"
+          files: ios/build/YUMIQA-unsigned.ipa
