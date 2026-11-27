@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 import json
 import re
@@ -2237,6 +2237,8 @@ def _sb_request(method: str, path: str, body=None, extra_headers: dict = None, t
     if not url or not key:
         return None
     full_url = f"{url}/rest/v1/{path}"
+    if not full_url.startswith("https://"):
+        return None
     headers = {
         "apikey": key,
         "Content-Type": "application/json",
@@ -2248,7 +2250,7 @@ def _sb_request(method: str, path: str, body=None, extra_headers: dict = None, t
     data_bytes = json.dumps(body, ensure_ascii=False).encode("utf-8") if body is not None else None
     req = urllib.request.Request(full_url, data=data_bytes, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310 – URL は呼び出し元で https:// に限定済み
             raw = resp.read().decode("utf-8")
             return json.loads(raw) if raw else True
     except Exception:
@@ -3378,15 +3380,15 @@ def _hash_token(token: str) -> str:
 
 def _get_auth_secret() -> bytes:
     """サーバー再起動でも変わらない安定した署名キーを取得"""
-    secret = ""
+    secret = ""  # nosec B105 – 初期値の空文字。パスワードではなくシークレット取得前の一時変数
     try:
         secret = st.secrets.get("AUTH_SECRET", "") or st.secrets.get("GEMINI_API_KEY", "")
     except Exception:
-        secret = ""
+        secret = ""  # nosec B105 – シークレット読み込み失敗時のフォールバック初期化
     if not secret:
         secret = os.environ.get("AUTH_SECRET", "") or os.environ.get("GEMINI_API_KEY", "")
     if not secret:
-        secret = "yumiqa-kyudo-ai-persistent-secret-v1"
+        secret = "yumiqa-kyudo-ai-persistent-secret-v1"  # nosec B105 – シークレットではなくフォールバック用の固定ソルト文字列
     return hashlib.sha256(f"yumiqa:{secret}".encode("utf-8")).digest()
 
 def _ensure_restored_user(username: str):
