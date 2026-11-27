@@ -4256,20 +4256,20 @@ def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
         showlegend=False
     ))
 
-    # 口割を専用マーカーで強調描画（赤系ダイヤモンド・大きめ）
+    # 口割を専用マーカーで描画（赤系ダイヤモンド・他関節と同等サイズ）
     kw = joints["Kuchiwari"]
     fig.add_trace(go.Scatter3d(
         x=[kw[0]], y=[kw[1]], z=[kw[2]],
         mode='markers+text',
         marker=dict(
-            size=12,
+            size=6,
             color='#e11d48',
             symbol='diamond',
-            line=dict(color='#fff1f2', width=2)
+            line=dict(color='#fff1f2', width=1)
         ),
         text=["口割"],
         textposition="bottom center",
-        textfont=dict(size=12, color='#e11d48', family='sans-serif'),
+        textfont=dict(size=10, color='#e11d48', family='sans-serif'),
         hovertext="口割：矢が上唇〜人中に触れる基準点<br>毎回同じ高さに収めることで矢所が安定",
         hoverinfo='text',
         showlegend=True,
