@@ -1674,11 +1674,35 @@ div[data-testid="stExpander"] {
     background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
     border-radius: var(--radius-lg) !important;
 }
-div[data-testid="stAlert"] {
-    background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
-    border-left: 3px solid var(--shu) !important; border-radius: var(--radius-md) !important;
+div[data-testid="stAlert"],
+div[data-testid="stAlert"] > div,
+div[data-testid="stAlertContainer"],
+div[data-testid="stNotification"],
+div[role="alert"],
+div[data-testid="stPopoverBody"] div[data-testid="stAlert"],
+div[data-testid="stPopoverBody"] div[data-testid="stAlertContainer"],
+div[data-testid="stPopoverBody"] div[role="alert"] {
+    background: var(--surface-3) !important;
+    background-color: var(--surface-3) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--ink-primary) !important;
 }
-div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
+div[data-testid="stAlert"] {
+    border: 1px solid var(--border-hairline) !important;
+    border-left: 3px solid var(--shu) !important;
+    border-radius: var(--radius-md) !important;
+}
+div[data-testid="stAlert"] p,
+div[data-testid="stAlert"] span,
+div[data-testid="stAlert"] div,
+div[data-testid="stAlertContainer"] p,
+div[data-testid="stAlertContainer"] span,
+div[role="alert"] p,
+div[role="alert"] span,
+div[data-testid="stPopoverBody"] div[data-testid="stAlert"] p,
+div[data-testid="stPopoverBody"] div[role="alert"] p {
+    color: var(--ink-primary) !important;
+}
 .stSpinner > div { border-top-color: var(--shu) !important; }
 .stPlotlyChart {
     background: var(--surface-2) !important; border: 1px solid var(--border-hairline) !important;
