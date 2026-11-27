@@ -4154,8 +4154,8 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         "L_Wrist": [0.95, 0.0, 1.41],
         # 妻手（右腕：弦を引く側・会）
         "R_Shoulder": [-0.22, 0.0, 1.45],
-        "R_Elbow": [-0.58, -0.05, 1.42 + elbow_offset],
-        "R_Wrist": [-0.35, 0.08, 1.38], # 頬付け・口割の位置
+        "R_Elbow": [-0.58, 0.10, 1.42 + elbow_offset],
+        "R_Wrist": [-0.35, 0.30, 1.38], # 頬付け・口割の位置
         # 下半身（足踏み・胴造り）
         "L_Hip": [0.14, 0.0, 0.90],
         "L_Foot": [0.46, 0.0, 0.0],
@@ -4275,9 +4275,15 @@ def _visible_analysis_chunks(response, raw_chunks):
 
 # 動画・画像分析関数
 def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: str, stream_output):
+    output = stream_output if stream_output is not None else st
     if not api_key:
         message = "⚠️ 動画・画像の本格分析にはGemini APIキーが必要です。サイドバーにAPIキーを設定してください。（現在設定されていれば自動で解析されます）"
-        stream_output.write_stream(_yield_typewriter_chunks(message))
+        chunks = _yield_typewriter_chunks(message)
+        write_stream = getattr(output, "write_stream", None)
+        if callable(write_stream):
+            write_stream(chunks)
+        else:
+            output.markdown("".join(chunks))
         return message, None, None
 
     client = genai.Client(api_key=api_key)
@@ -4383,9 +4389,14 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
                     model=m_name,
                     contents=[gemini_file, analysis_prompt]
                 )
-                clean_text = stream_output.write_stream(
-                    _visible_analysis_chunks(response, raw_chunks)
-                ).strip()
+                visible_chunks = _visible_analysis_chunks(response, raw_chunks)
+                write_stream = getattr(output, "write_stream", None)
+                if callable(write_stream):
+                    clean_text = write_stream(visible_chunks).strip()
+                else:
+                    clean_text = "".join(visible_chunks).strip()
+                    if clean_text:
+                        output.markdown(clean_text)
                 res_text = "".join(raw_chunks)
                 if res_text:
                     break
@@ -4729,7 +4740,7 @@ if text_to_send or files_to_send:
                 )
             except Exception as e:
                 analysis_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
-                analysis_output.error(analysis_text)
+                st.error(analysis_text)
             render_chatgpt_toolbar(analysis_text)
 
         assistant_message = {
