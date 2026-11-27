@@ -4176,7 +4176,14 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         "R_Foot": [-0.46, 0.0, 0.0],
         # 弓の上下末端
         "Bow_Top": [0.95 * arm_scale, 0.0, 2.25],
-        "Bow_Bottom": [0.95 * arm_scale, 0.0, 0.15]
+        "Bow_Bottom": [0.95 * arm_scale, 0.0, 0.15],
+        # 口割: 矢が上唇〜人中に触れる点（顔の正面中央・上唇高さ）
+        # 矢（L_Wrist〜R_Wrist）の直線上に乗るようにx=0.0での高さを算出
+        "Kuchiwari": [
+            0.0,
+            0.0,
+            round(1.41 + (0.95 * arm_scale / (0.95 * arm_scale + 0.18)) * (1.55 - 1.41), 3)
+        ]
     }
     
     # 骨格リンク定義
@@ -4200,8 +4207,9 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         # 弓幹
         ("Bow_Bottom", "L_Wrist", "#8a6bb0", 4),
         ("L_Wrist", "Bow_Top", "#8a6bb0", 4),
-        # 矢（L_Wrist から R_Wrist への水平ベクトル）
-        ("L_Wrist", "R_Wrist", "#b8912f", 5),
+        # 矢（L_Wrist から 口割 → R_Wrist への水平ベクトル）
+        ("L_Wrist", "Kuchiwari", "#b8912f", 5),
+        ("Kuchiwari", "R_Wrist", "#b8912f", 5),
         # 弦（Bow_Top -> R_Wrist -> Bow_Bottom）
         ("Bow_Top", "R_Wrist", "#a8a29e", 2),
         ("R_Wrist", "Bow_Bottom", "#a8a29e", 2)
@@ -4223,20 +4231,43 @@ def create_3d_kyudo_skeleton(posture_params: dict):
             showlegend=False
         ))
         
-    # 関節ポイントの描画
-    jx = [pt[0] for pt in joints.values()]
-    jy = [pt[1] for pt in joints.values()]
-    jz = [pt[2] for pt in joints.values()]
-    
+    # 関節ポイントの描画（口割は別途強調表示するので除外）
+    joint_keys_all = list(joints.keys())
+    joint_keys_body = [k for k in joint_keys_all if k != "Kuchiwari"]
+    labels_body = ["頭", "頸", "胸", "丹田", "押手肩", "押手肘", "角見(押手)", "妻手肩", "妻手肘", "取懸け", "左腰", "左足", "右腰", "右足", "弓(本)", "弓(末)"]
+    jx = [joints[k][0] for k in joint_keys_body]
+    jy = [joints[k][1] for k in joint_keys_body]
+    jz = [joints[k][2] for k in joint_keys_body]
+
     fig.add_trace(go.Scatter3d(
         x=jx, y=jy, z=jz,
         mode='markers+text',
         marker=dict(size=6, color='#2b4c7e'),
-        text=["頭", "頸", "胸", "丹田", "押手肩", "押手肘", "角見(押手)", "妻手肩", "妻手肘", "取懸け", "左腰", "左足", "右腰", "右足", "弓(本)", "弓(末)"],
+        text=labels_body,
         textposition="top center",
         textfont=dict(size=10, color='rgba(120,113,108,1)'),
         hoverinfo='text',
         showlegend=False
+    ))
+
+    # 口割を専用マーカーで強調描画（赤系ダイヤモンド・大きめ）
+    kw = joints["Kuchiwari"]
+    fig.add_trace(go.Scatter3d(
+        x=[kw[0]], y=[kw[1]], z=[kw[2]],
+        mode='markers+text',
+        marker=dict(
+            size=12,
+            color='#e11d48',
+            symbol='diamond',
+            line=dict(color='#fff1f2', width=2)
+        ),
+        text=["口割"],
+        textposition="bottom center",
+        textfont=dict(size=12, color='#e11d48', family='sans-serif'),
+        hovertext="口割：矢が上唇〜人中に触れる基準点<br>毎回同じ高さに収めることで矢所が安定",
+        hoverinfo='text',
+        showlegend=True,
+        name="口割（矢の高さ基準点）"
     ))
     
     fig.update_layout(
