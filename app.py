@@ -1,4 +1,4 @@
-import os
+﻿import os
 import time
 import json
 import re
@@ -2108,26 +2108,26 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] button {{
 
 # ==================== 弓道に関する科学的論文・生体力学（バイオメカニクス）研究データベース ====================
 KYUDO_SCIENTIFIC_EVIDENCE = """
-【弓道の科学的論文・生体力学（バイオメカニクス）研究知見データベース】
-1. 筋電図（EMG）による筋活動・運動連鎖研究（筑波大・鹿屋体育大・日本武道学会等）
-   - 「僧帽筋（首・肩）の抑制」: 会〜離れにかけて僧帽筋上部や三角筋前部の放電が増加（力み）すると、肩の浮き上がりと離れのブレ（緩み離れ・引きブレ）に直結する。熟練射手は会において僧帽筋上部を有意に脱力（リラックス）させている。
-   - 「広背筋・菱形筋・前鋸筋（背中の深層筋）」: 熟練射手は引分け〜会〜離れにかけて、肩甲骨を下制・内転させる深層筋（背中下部〜脇の下）を持続的等尺性収縮（アイソメトリック）させて伸び合いを創出する。
-   - 「腕部と手の内」: 上腕三頭筋（二の腕の裏側）の張りを保ちつつ、前腕屈筋群（指先・手の内の握り締め筋）を極限まで弛緩させることで、不随意かつ鋭い離れ（離れようとせず自然に離れる現象）が発現する。
+【弓道の科学的論文・生体力学（バイオメカニクス）研究知見データベース（学術機関・査読論文準拠）】
+1. 筋電図（EMG）による筋活動・引分けスキル研究（日本武道学会『武道学研究』・日本体育学会・『スポーツ産業学研究』等）
+   - 「僧帽筋上部の抑制と引分けスキル」（日本体育学会：谷口・藤原ら等）: 熟練者は引分け〜会にかけて、肩をすくめる僧帽筋上部の過剰な放電を抑えつつ、肩甲骨を下げて背骨側へ引き込む深層筋（広背筋・菱形筋・前鋸筋・棘下筋）を協調して活動させている。初心者は三角筋前部や僧帽筋上部が優位になりやすく、肩の浮きと離れのブレ（緩み離れ・引きブレ）に直結する。
+   - 「勝手（妻手）のひねりと発射技術」（スポーツ産業学研究：細谷・岡田・宮地・大山ら等）: 会から離れにかけての妻手（右手）は、単なる後方引きではなく前腕の適度な回内（ひねり）と肘の矢筋方向への伸び合いが不可欠であり、上腕三頭筋の張りを保ちつつ手先の屈筋群の力みを抜くことで「ゆるみ」のない鋭い離れが発現する。
+   - 「手の内の働きと前腕筋群」（武道学研究『筋電図からみた弓道の「手の内の働き」』等）: 押手（左手）は手全体で握り締める（前腕屈筋群の過緊張）のではなく、角見（親指の根元）と小指側の締めによる骨格的支えを使うことで、離れ直前の無駄な筋緊張を最小化できる。
 
-2. 重心動揺・床反力（フォースプレート）力学研究
-   - 「足踏み・胴造りの鉛直軸」: 熟練者の床反力中心（COP）は、会〜離れの間、左右比率50:50、前後比率は母指球（足親指の付け根）に約60〜65%加重で安定する。踵（かかと）体重になると離れの反作用で上半身が後傾（のけぞり・腰折れ）し、矢が的の上や後ろに抜ける。
-   - 「三重十文字の柱構造」: 足底面・腰（骨盤）・肩（胸郭）の3つの軸が鉛直平面上で平行に揃うことで、弓の反発力（15〜25kgの外力負荷）を骨格の柱構造で床反力へと流し、無駄な筋肉疲労を防ぐ。
+2. 重心動揺・床反力（フォースプレート）・三重十文字の力学研究（日本機械学会・日本武道学会等）
+   - 「足踏み・胴造りの床反力中心（CoP）と微小揺らぎ」: 熟練者の会〜離れにおける床反力中心（CoP）は左右均等（約50:50）、前後方向は母指球寄り（約60〜65%）で身体動揺が極めて小さく保たれる。踵体重になると離れの反作用で上半身が後傾し、矢所が上や後ろに抜ける。
+   - 「三重十文字と矢筋の幾何学的調和」: 足踏み・腰（骨盤）・両肩の3軸が鉛直平面で平行に揃い、真上（俯瞰）から見ても両肩・矢筋（角見〜口割〜取り懸け）・妻手肘が一直線に近い張合いに収まることで、15〜25kgの弓の反発力を骨格の柱構造で床反力へ逃がすことができる。
 
 3. 手の内・物理トルク（偶力）・アーチャーズパラドックス力学
-   - 「角見（左手親指根部）の作用力積」: 矢が弦を離れるまでのわずか約0.02秒間に、角見が弓の中心軸を的前方向へ押しつつ外側へ回す回転モーメント（トルク）を発生させる。これにより、矢が弓体と擦れる摩擦抵抗（アーチャーズパラドックスのしなり衝突）を最小化し、矢飛びの初速と直進性を向上させる。
-   - 「握り込みの弊害」: 手の平全体で弓を強く握り締めると、離れ直後の弓の自由振動が阻害され、矢羽や矢尻が弓体を激しく叩いて矢が的の前下に失速する。
+   - 「角見の作用力積（約0.02秒の回転モーメント）」: 離れの瞬間（約0.02秒間）に角見が弓の中心軸を的前方向へ押しつつ外側へ回すトルクを発生させることで、矢が弓体と擦れる摩擦衝突（アーチャーズパラドックス）を最小化し、矢勢・直進性を高める。
+   - 「握り込みの弊害」: 手の平全体で強く握り締めると離れ直後の弓の自由振動・弓返りが阻害され、矢羽や矢尻が弓体を叩いて失速・前下への矢所乱れを招く。
 
-4. 呼吸・自律神経系・脳科学（心拍変動・早気メカニクス）
-   - 「丹田呼吸と迷走神経刺激」: 引分け〜会にかけて息を細く長く吐き下腹（丹田・腹横筋）に納める呼気性息合いは、副交感神経（迷走神経）を活性化し、緊張による心拍急上昇や筋硬直を抑え、会の静止安定時間を有意に延長する。
-   - 「早気（ターゲット・パニック）の神経科学」: 視覚情報（的や矢の高さ・頬付けの接触刺激）が大脳皮質の抑制回路をバイパスし、無意識の運動発火（勝手な離れ）を引き起こす条件反射の誤作動。克服には「会で2秒数える」などの認知・言語的抑制介入や、的を見ない巻藁での筋感覚再学習が科学的に極めて有効。
+4. 呼吸・心拍変動・イップス（早気・もたれ）の神経筋制御研究（『臨床神経学』・生理心理学研究等）
+   - 「呼吸同期と自律神経（逆U字仮説・心拍変動）」: 試合等の緊張場面では交感神経優位により心拍急上昇・筋硬直が起きやすいが、打起し〜引分け〜会にかけて息を細く長く下腹（丹田）へ納める呼気コントロールを行うことで副交感神経が働き、会の静止安定時間と再現性が有意に向上する。
+   - 「早気・もたれの拮抗筋共収縮メカニズム」（臨床神経学『弓道における異常な運動「もたれ」は動作特異性局所ジストニアの特徴を有している』等）: もたれ・早気などのイップス症状では、動作に必要な筋と逆方向の拮抗筋が同時に収縮（共収縮）し、運動制御の自動プログラムが一時的にロックまたは誤発火する。克服には筋力任せの矯正ではなく、的を外した巻藁での意識分離・認知言語的介入（会での秒数カウント等）による神経筋再学習が有効とされる。
 
 5. 矢の弾道学・スパイン（剛性）整合性
-   - 射出時、矢は弦からの急激な圧縮力によって水平方向に「くの字」にしなりながら飛翔する（アーチャーズパラドックス）。弓力に対して矢のスパイン（たわみ強度）が硬すぎると矢は的の左へ、柔らかすぎると右へ逸れる。
+   - 射出時、矢は弦からの急激な圧縮力によって水平方向に「くの字」にしなりながら飛翔する（アーチャーズパラドックス）。弓力に対して矢のスパインが硬すぎると矢は的の左へ、柔らかすぎると右へ逸れる。
 """
 
 # キャラクター設定
@@ -2402,6 +2402,173 @@ def sync_user_cloud_data(username: str, force: bool = False):
                 pass
 
     st.session_state["_sb_synced_user"] = uname
+
+
+# ==================== 解答・解析改善用の匿名学習ログ蓄積 ====================
+LEARNING_LOGS_FILE = os.path.join(os.path.dirname(__file__), "data", "learning_logs.json")
+
+def _load_local_learning_logs() -> list[dict]:
+    if not os.path.exists(LEARNING_LOGS_FILE):
+        return []
+    try:
+        with open(LEARNING_LOGS_FILE, "r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+def _save_local_learning_logs(logs: list[dict]):
+    os.makedirs(os.path.dirname(LEARNING_LOGS_FILE), exist_ok=True)
+    try:
+        with open(LEARNING_LOGS_FILE, "w", encoding="utf-8") as fp:
+            json.dump(logs[-300:], fp, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def save_learning_log(
+    log_id: str,
+    mode: str,
+    char_name: str,
+    query_summary: str,
+    muscle_scores: dict = None,
+    posture_3d: dict = None,
+    feedback: str = "",
+    feedback_note: str = "",
+):
+    """解答・解析の品質向上のための匿名統計ログを蓄積（動画や個人情報は保存しない）"""
+    if not log_id:
+        return
+    now_str = time.strftime("%Y-%m-%d %H:%M")
+    row = {
+        "log_id": log_id,
+        "created_at": now_str,
+        "mode": mode,
+        "char_name": char_name,
+        "query_summary": (query_summary or "").strip()[:180],
+        "muscle_scores": muscle_scores,
+        "posture_3d": posture_3d,
+        "feedback": feedback,
+        "feedback_note": (feedback_note or "").strip()[:200],
+    }
+    logs = _load_local_learning_logs()
+    logs = [r for r in logs if r.get("log_id") != log_id]
+    logs.append(row)
+    _save_local_learning_logs(logs)
+
+    if is_supabase_enabled():
+        _sb_request(
+            "POST",
+            "yumiqa_learning_logs?on_conflict=log_id",
+            body=row,
+            extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+        )
+
+def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""):
+    """ユーザーの👍/👎フィードバックを学習ログへ反映"""
+    if not log_id:
+        return
+    logs = _load_local_learning_logs()
+    updated = False
+    for r in logs:
+        if r.get("log_id") == log_id:
+            r["feedback"] = feedback
+            if feedback_note:
+                r["feedback_note"] = feedback_note.strip()[:200]
+            updated = True
+            break
+    if not updated:
+        logs.append({
+            "log_id": log_id,
+            "created_at": time.strftime("%Y-%m-%d %H:%M"),
+            "mode": "chat",
+            "char_name": "",
+            "query_summary": "",
+            "muscle_scores": None,
+            "posture_3d": None,
+            "feedback": feedback,
+            "feedback_note": (feedback_note or "").strip()[:200],
+        })
+    _save_local_learning_logs(logs)
+
+    if is_supabase_enabled():
+        q = urllib.parse.quote(log_id, safe="")
+        patch_body = {"feedback": feedback}
+        if feedback_note:
+            patch_body["feedback_note"] = feedback_note.strip()[:200]
+        res = _sb_request("PATCH", f"yumiqa_learning_logs?log_id=eq.{q}", body=patch_body)
+        if res is None:
+            # まだレコードがない場合はupsert
+            save_learning_log(log_id, "chat", "", "", feedback=feedback, feedback_note=feedback_note)
+
+def build_learning_feedback_hint() -> str:
+    """蓄積された過去のフィードバック傾向（主に改善要望や高評価ポイント）を回答生成ヒントとして返す"""
+    notes = []
+    if is_supabase_enabled():
+        res = _sb_request(
+            "GET",
+            "yumiqa_learning_logs?feedback=eq.bad&feedback_note=neq.&order=created_at.desc&limit=3&select=feedback_note",
+        )
+        if isinstance(res, list):
+            notes = [r.get("feedback_note", "").strip() for r in res if r.get("feedback_note")]
+    if not notes:
+        logs = _load_local_learning_logs()
+        notes = [
+            r.get("feedback_note", "").strip()
+            for r in reversed(logs)
+            if r.get("feedback") == "bad" and r.get("feedback_note")
+        ][:3]
+    if not notes:
+        return ""
+    joined = " / ".join(notes)
+    return f"\n【過去の射手フィードバックから得た改善ポイント（参考にし、より分かりやすく具体的に答えてください）】\n{joined}\n"
+
+
+def _handle_feedback_click(log_id: str, feedback: str, note_key: str = ""):
+    """👍/👎フィードバックを学習ログとセッション履歴へ反映するコールバック"""
+    note = ""
+    if note_key:
+        note = str(st.session_state.get(note_key, "") or "").strip()
+    if log_id:
+        update_learning_feedback(log_id, feedback, note)
+        for m in st.session_state.get("messages", []):
+            if m.get("log_id") == log_id:
+                m["feedback"] = feedback
+                if note:
+                    m["feedback_note"] = note[:200]
+                break
+        if "current_session_id" in st.session_state:
+            save_current_session(st.session_state.current_session_id, st.session_state.messages)
+    st.session_state["_fb_toast_msg"] = "フィードバックありがとうございます！今後の改善に活かします。"
+
+
+def render_feedback_buttons(log_id: str, current_feedback: str, key_prefix: str):
+    """回答に対する👍/👎フィードバックUIを描画"""
+    if not log_id:
+        return
+    c_good, c_bad, _ = st.columns([0.11, 0.13, 0.76])
+    with c_good:
+        good_label = "👍 済" if current_feedback == "good" else "👍"
+        st.button(
+            good_label,
+            key=f"fb_good_{key_prefix}",
+            help="この回答・解析が参考になった",
+            on_click=_handle_feedback_click,
+            args=(log_id, "good", ""),
+        )
+    with c_bad:
+        bad_label = "👎 済" if current_feedback == "bad" else "👎"
+        with st.popover(bad_label, key=f"fb_bad_pop_{key_prefix}"):
+            st.caption("改善点があれば教えてください（任意）")
+            note_key = f"fb_note_{key_prefix}"
+            st.text_input("例：専門用語が難しい／もっと具体的に", key=note_key, label_visibility="collapsed", placeholder="例：もっと具体的に教えてほしい")
+            st.button(
+                "送信する",
+                key=f"fb_bad_send_{key_prefix}",
+                type="primary",
+                use_container_width=True,
+                on_click=_handle_feedback_click,
+                args=(log_id, "bad", note_key),
+            )
 
 
 # ==================== ユーザー認証・アカウント管理（ChatGPT風完全ログイン） ====================
@@ -4376,9 +4543,11 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
                     "射手に新しい気づきを与える新鮮な切り口で温かくアドバイスしてください。\n"
                 )
 
+            feedback_hint = build_learning_feedback_hint()
             prompt_text = (
                 f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
                 f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
+                f"{feedback_hint}"
                 f"{memory_section}"
                 f"{custom_instructions}"
                 f"{char_switch_note}"
@@ -4483,9 +4652,11 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
                 "射手に新しい気づきを与える新鮮な切り口で温かくアドバイスしてください。\n"
             )
 
+        feedback_hint = build_learning_feedback_hint()
         prompt_text = (
             f"【弓道の科学的論文・生体力学研究文献知見（必読・回答の科学的根拠）】\n"
             f"{KYUDO_SCIENTIFIC_EVIDENCE}\n\n"
+            f"{feedback_hint}"
             f"{memory_section}"
             f"{custom_instructions}"
             f"{char_switch_note}"
@@ -4861,6 +5032,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
         memory_section = build_memory_prompt_section(st.session_state.get("logged_in_user", "default"))
         custom_instructions = build_custom_instructions_prompt(st.session_state.get("logged_in_user", "default"))
+        feedback_hint = build_learning_feedback_hint()
 
         # 立体バイオメカニクス＆筋肉感知コーチングプロンプト
         analysis_prompt = f"""
@@ -4869,7 +5041,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 ただし、回答文の中で生体力学・骨格・筋肉に関する説明（解剖学的な内容）は、身体の専門知識がない射手でも直感的にイメージできる日常の言葉に言い換えて伝えてください。弓道の専門用語（角見・会・離れ・胴造りなど）はそのまま使ってかまいません。
 
 {KYUDO_SCIENTIFIC_EVIDENCE}
-
+{feedback_hint}
 {memory_section}
 {custom_instructions}
 外見のポーズだけでなく、**「深層筋（インナーマッスル）が使えているか」「表層筋（僧帽筋などの首肩）が力みすぎてブレーキになっていないか」**を立体的に感知・推定してください。
@@ -5144,6 +5316,11 @@ for idx, msg in enumerate(st.session_state.messages):
                                         st.rerun()
                 else:
                     render_chatgpt_toolbar(msg.get("content", ""))
+                if msg.get("log_id"):
+                    render_feedback_buttons(msg.get("log_id", ""), msg.get("feedback", ""), f"hist_{idx}")
+
+if st.session_state.get("_fb_toast_msg"):
+    st.toast(st.session_state.pop("_fb_toast_msg"))
 
 # ==================== ChatGPT完全再現：再生成リアルタイム・ストリーミング描画 ====================
 # ゲストは「再生成」も1回として数える（上限に達していれば実行しない）
@@ -5171,11 +5348,19 @@ if "pending_regen" in st.session_state:
                 full_reply = f"⚠️ エラーが発生しました: {str(e)}"
                 st.markdown(full_reply)
             render_chatgpt_toolbar(full_reply)
-
+            _log_id_regen = f"regen_{st.session_state.get('current_session_id', 'x')}_{len(st.session_state.messages)}"
+            render_feedback_buttons(_log_id_regen, "", f"live_regen_{len(st.session_state.messages)}")
+    save_learning_log(
+        log_id=_log_id_regen,
+        mode="chat",
+        char_name=target_char,
+        query_summary=(target_text or "")[:180],
+    )
     st.session_state.messages.append({
         "role": "assistant",
         "char": target_char,
-        "content": full_reply
+        "content": full_reply,
+        "log_id": _log_id_regen,
     })
     if "current_session_id" in st.session_state:
         save_current_session(st.session_state.current_session_id, st.session_state.messages)
@@ -5313,11 +5498,22 @@ if text_to_send or files_to_send:
                 analysis_text = f"⚠️ 分析中にエラーが発生しました: {str(e)}"
                 st.error(analysis_text)
             render_chatgpt_toolbar(analysis_text)
+            _log_id_analyze = f"analyze_{st.session_state.get('current_session_id', 'x')}_{len(st.session_state.messages)}"
+            render_feedback_buttons(_log_id_analyze, "", f"live_analyze_{len(st.session_state.messages)}")
+        save_learning_log(
+            log_id=_log_id_analyze,
+            mode="analyze",
+            char_name=selected_char,
+            query_summary=(text_to_send or "")[:180],
+            muscle_scores=muscle_data if muscle_data else None,
+            posture_3d=posture_data if posture_data else None,
+        )
 
         assistant_message = {
             "role": "assistant",
             "char": selected_char,
-            "content": analysis_text
+            "content": analysis_text,
+            "log_id": _log_id_analyze,
         }
         if muscle_data and posture_data:
             assistant_message["muscle_data"] = muscle_data
@@ -5370,11 +5566,22 @@ if text_to_send or files_to_send:
 
             # アクションツールバー（コピー・読み上げ）
             render_chatgpt_toolbar(full_reply)
+            _log_id_chat = f"chat_{st.session_state.get('current_session_id', 'x')}_{len(st.session_state.messages)}"
+            render_feedback_buttons(_log_id_chat, "", f"live_chat_{len(st.session_state.messages)}")
+
+        # 学習ログ（匿名統計）保存
+        save_learning_log(
+            log_id=_log_id_chat,
+            mode="chat",
+            char_name=selected_char,
+            query_summary=text_to_send[:180],
+        )
 
         asst_msg = {
             "role": "assistant",
             "char": selected_char,
-            "content": full_reply
+            "content": full_reply,
+            "log_id": _log_id_chat,
         }
         if new_mem_items:
             asst_msg["memory_items"] = new_mem_items

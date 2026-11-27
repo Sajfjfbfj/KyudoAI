@@ -31,3 +31,21 @@ CREATE INDEX IF NOT EXISTS idx_yumiqa_user_data_user_cat
 -- ベータ版では RLS を無効のままにするか、全許可ポリシーを設定します。
 ALTER TABLE public.yumiqa_users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.yumiqa_user_data DISABLE ROW LEVEL SECURITY;
+
+-- 3. 解答改善・解析改善用の匿名学習ログテーブル
+CREATE TABLE IF NOT EXISTS public.yumiqa_learning_logs (
+    log_id TEXT PRIMARY KEY,
+    created_at TEXT DEFAULT '',
+    mode TEXT DEFAULT 'chat',
+    char_name TEXT DEFAULT '',
+    query_summary TEXT DEFAULT '',
+    muscle_scores JSONB DEFAULT NULL,
+    posture_3d JSONB DEFAULT NULL,
+    feedback TEXT DEFAULT '',
+    feedback_note TEXT DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_yumiqa_learning_logs_feedback
+    ON public.yumiqa_learning_logs (feedback, created_at);
+
+ALTER TABLE public.yumiqa_learning_logs DISABLE ROW LEVEL SECURITY;
