@@ -4141,8 +4141,20 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     tilt_pitch = float(posture_params.get("trunk_tilt_pitch", 0.0)) # 前後傾き
     tilt_roll = float(posture_params.get("trunk_tilt_roll", 0.0))   # 左右傾き
     elbow_offset = float(posture_params.get("shoulder_draw_level", 0.0)) * 0.02 # 妻手肘の上下
-    
-    # 3Dキーポイント座標 (x: 左右, y: 前後, z: 上下)
+
+    # 人によって骨格が違う → 腕の長さ・肩幅スケール係数を推定
+    # shoulder_draw_level: 大きいほど高引き（肩より上に引く体型）
+    # draw_length_ratio: 引き尺の長さ（腕が長い人ほど取りかけが遠くなる）
+    draw_level = float(posture_params.get("shoulder_draw_level", 0.0))
+    # 腕の長さ比（-50〜+50 → 0.85〜1.15スケール）
+    arm_scale = 1.0 + float(posture_params.get("draw_length_ratio", 0.0)) * 0.003
+
+    # -----------------------------------------------------------
+    # 3Dキーポイント座標系: x=左右(+右), y=前後(-が射手の前面/的方向), z=天地
+    # カメラは y マイナス側（射手正面斜め）から見ている
+    # 動画観察: 取りかけは耳〜頬の横・顔面と同じ奥行き(y≈0)
+    #           妻手肘は肩の斜め後方(y≈+0.20)に張り出す
+    # -----------------------------------------------------------
     joints = {
         "Head": [0.0 + tilt_roll*0.01, 0.0 + tilt_pitch*0.01, 1.70],
         "Neck": [0.0 + tilt_roll*0.008, 0.0 + tilt_pitch*0.008, 1.50],
@@ -4150,20 +4162,21 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         "Pelvis": [0.0, 0.0, 0.95],
         # 押手（左腕：弓を押す側）
         "L_Shoulder": [0.22, 0.0, 1.45],
-        "L_Elbow": [0.58, 0.0, 1.43],
-        "L_Wrist": [0.95, 0.0, 1.41],
+        "L_Elbow": [0.58 * arm_scale, 0.0, 1.43],
+        "L_Wrist": [0.95 * arm_scale, 0.0, 1.41],
         # 妻手（右腕：弦を引く側・会）
+        # 動画参照: 取りかけは顔の真横（頬〜耳）・顔と同奥行き・目高さ付近
         "R_Shoulder": [-0.22, 0.0, 1.45],
-        "R_Elbow": [-0.65, 0.30, 1.44 + elbow_offset],
-        "R_Wrist": [-0.12, -0.05, 1.46], # 頬付け・口割の位置
+        "R_Elbow": [-0.55 * arm_scale, 0.20, 1.44 + elbow_offset],  # 肩より外側・斜め後方
+        "R_Wrist": [-0.18, 0.0, 1.55],  # 顔の横(耳〜頬)・顔面と同奥行き・目の高さ
         # 下半身（足踏み・胴造り）
         "L_Hip": [0.14, 0.0, 0.90],
         "L_Foot": [0.46, 0.0, 0.0],
         "R_Hip": [-0.14, 0.0, 0.90],
         "R_Foot": [-0.46, 0.0, 0.0],
         # 弓の上下末端
-        "Bow_Top": [0.95, 0.0, 2.25],
-        "Bow_Bottom": [0.95, 0.0, 0.15]
+        "Bow_Top": [0.95 * arm_scale, 0.0, 2.25],
+        "Bow_Bottom": [0.95 * arm_scale, 0.0, 0.15]
     }
     
     # 骨格リンク定義
