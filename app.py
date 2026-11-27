@@ -5097,6 +5097,16 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 {custom_instructions}
 外見のポーズだけでなく、**「深層筋（インナーマッスル）が使えているか」「表層筋（僧帽筋などの首肩）が力みすぎてブレーキになっていないか」**を立体的に感知・推定してください。
 
+【撮影アングル自動判定と「真上（俯瞰）撮影」への完全対応】
+まず動画・画像の撮影方向（正面・斜め・真横・**真上からの俯瞰撮影**）を自動判定してください。
+特に**真上（上方・俯瞰）から撮影された動画・画像**の場合は、以下の視点で精密に解析してください：
+1. 真上アングルで直接正確に観察できる「水平面（XY平面）の幾何学」を最優先で評価する：
+   - 足踏み（両足）〜腰（骨盤）〜両肩の回旋ズレ（胴造りの捻じれ・三重十文字の水平重なり、および的に対して開きすぎる「開き胴」や正対しすぎる「詰まり」の有無）
+   - 矢筋（押手の角見〜口割付近〜妻手の取懸け）と両肩を結ぶライン（肩線）が一直線に調和しているか、前後にズレていないか（`oshide_angle_y`, `torikake_depth` に精密反映）
+   - 左右の肘の納まり：特に妻手肘が肩線の延長線上に深く入っているか、前方に浮いていないか、また押手肘が的方向に伸びつつ内に入りすぎていないか（`elbow_back_depth` に精密反映）
+   - 離れ〜残心の矢道・弦道および拳の軌跡：矢・弦が真っ直ぐ運行しているか、離れた瞬間に右手が体に巻き付く・左手が前に突っ込む・手元が暴れる（緩みや捻じれ）動きがないか
+2. 一方、真上からは高さ方向（口割の高さや肩の上下差 `shoulder_draw_level`・`height_scale`）が直接見えにくいため、頭部の向きや肩甲骨の動きから補助推定し、無理に断定せず「上から見た特徴」として誠実に解説してください。
+
 
 【射手からのコメント・気になっている点】
 {user_note if user_note else "特になし（全体的な射形・筋肉の使い方を見てほしい）"}
@@ -5138,7 +5148,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 --------------------------------------------------
 【必須出力：末尾に以下のJSONブロックを必ず記載してください】
 推定した筋活動スコア（0〜100）と3D姿勢パラメータ（体格・前後ズレ含む）を以下のJSONフォーマットで出力してください。
-※height_scale(身長比0.85〜1.15, 標準1.0), shoulder_width_scale(肩幅比0.85〜1.15, 標準1.0), draw_length_ratio(腕の長さ/矢束補正-20〜+20), torikake_depth/elbow_back_depth/oshide_angle_y(上視点での前後ズレ-10〜+10)も動画・画像から推定してください。
+※camera_angle("front" / "side" / "top" / "oblique" のいずれか、真上・俯瞰撮影なら必ず "top"), height_scale(身長比0.85〜1.15, 標準1.0), shoulder_width_scale(肩幅比0.85〜1.15, 標準1.0), draw_length_ratio(腕の長さ/矢束補正-20〜+20), torikake_depth/elbow_back_depth/oshide_angle_y(上視点での前後ズレ-10〜+10)も動画・画像から推定してください。
 ```json
 {{
   "muscle_scores": {{
@@ -5150,6 +5160,7 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
     "十文字の伸び合い": 78
   }},
   "posture_3d": {{
+    "camera_angle": "front",
     "trunk_tilt_pitch": 1.5,
     "trunk_tilt_roll": 0.5,
     "shoulder_draw_level": -2.0,
@@ -5299,17 +5310,30 @@ def render_analysis_visualizations(muscle_data, posture_data, key_suffix):
     radar_fig = create_muscle_radar_chart(muscle_data)
     st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{key_suffix}")
 
+    _cam_angle = str(posture_data.get("camera_angle", "front")).lower()
     st.markdown("**🧍‍♂️ 3D立体骨格アライメント（全身＆真上からの2視点・マウスで360°回転可能）**")
-    st.caption("身長・肩幅・腕の長さを考慮したモデルです。左で全体の高さ・口割・足踏みを、右（真上）で矢筋と肩線・肘の張り出しを確認できます。")
+    if _cam_angle == "top":
+        st.info("🎥 検出アングル：**真上（俯瞰）撮影** — 矢筋・肩線・妻手肘の前後アライメントと胴造りの捻じれを重点解析しています。")
+    st.caption("身長・肩幅・腕の長さを考慮したモデルです。正面で全体の高さ・口割・足踏みを、真上（俯瞰）で矢筋と肩線・肘の張り出しを確認できます。")
     col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        st.markdown("📐 **正面・全体ビュー（全身・口割・三重十文字）**")
-        skeleton_front_fig = create_3d_kyudo_skeleton(posture_data, view_mode="front")
-        st.plotly_chart(skeleton_front_fig, use_container_width=True, key=f"skeleton_chart_{key_suffix}")
-    with col_s2:
-        st.markdown("🔝 **真上（俯瞰）ビュー（矢筋・肩線・妻手肘の位置）**")
-        skeleton_top_fig = create_3d_kyudo_skeleton(posture_data, view_mode="top")
-        st.plotly_chart(skeleton_top_fig, use_container_width=True, key=f"skeleton_top_chart_{key_suffix}")
+    if _cam_angle == "top":
+        with col_s1:
+            st.markdown("🔝 **真上（俯瞰）ビュー（撮影アングル一致・重点解析）**")
+            skeleton_top_fig = create_3d_kyudo_skeleton(posture_data, view_mode="top")
+            st.plotly_chart(skeleton_top_fig, use_container_width=True, key=f"skeleton_top_chart_{key_suffix}")
+        with col_s2:
+            st.markdown("📐 **正面・全体ビュー（補助推定モデル）**")
+            skeleton_front_fig = create_3d_kyudo_skeleton(posture_data, view_mode="front")
+            st.plotly_chart(skeleton_front_fig, use_container_width=True, key=f"skeleton_chart_{key_suffix}")
+    else:
+        with col_s1:
+            st.markdown("📐 **正面・全体ビュー（全身・口割・三重十文字）**")
+            skeleton_front_fig = create_3d_kyudo_skeleton(posture_data, view_mode="front")
+            st.plotly_chart(skeleton_front_fig, use_container_width=True, key=f"skeleton_chart_{key_suffix}")
+        with col_s2:
+            st.markdown("🔝 **真上（俯瞰）ビュー（矢筋・肩線・妻手肘の位置）**")
+            skeleton_top_fig = create_3d_kyudo_skeleton(posture_data, view_mode="top")
+            st.plotly_chart(skeleton_top_fig, use_container_width=True, key=f"skeleton_top_chart_{key_suffix}")
     st.divider()
 
 
