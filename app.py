@@ -2962,7 +2962,18 @@ def _build_card_section(username: str) -> str:
 def build_memory_prompt_section(username: str) -> str:
     """AIに渡すカルテ・過去の相談テーマ。そのユーザー本人の設定（メモリーON/OFF、過去の会話の参照）に従う"""
     cfg = load_user_settings(username)
-    out = ""
+    is_guest = bool(st.session_state.get("is_guest"))
+    if not is_guest and username and username not in ("default", "archer"):
+        out = (
+            f"【相談者のID・呼び名】\n"
+            f"この射手のID名は「{username}」です。"
+            f"呼びかける際は「〇〇さん」「○○さん」などの伏せ字・プレースホルダーは絶対に使わず、「{username}さん」と呼びかけてください。\n\n"
+        )
+    else:
+        out = (
+            "【相談者の呼び名】\n"
+            "呼びかける際は「〇〇さん」「○○さん」などの伏せ字・プレースホルダーは絶対に使わず、自然な二人称で語りかけてください。\n\n"
+        )
     if cfg["memory_enabled"]:
         out += _build_card_section(username)
     if cfg["ref_history"]:
@@ -4114,10 +4125,8 @@ with st.sidebar:
     st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
 
     # ── 最下部：ユーザープロフィール ────────────────────────────
-    users_db = load_users()
-    cur_uinfo = users_db.get(st.session_state.get("logged_in_user", ""), {})
-    disp_name = "ゲスト" if st.session_state.get("is_guest") else cur_uinfo.get("display_name", "runtyoma")
     cur_user = st.session_state.get("logged_in_user", "default")
+    disp_name = "ゲスト" if st.session_state.get("is_guest") else (cur_user if cur_user and cur_user != "default" else "archer")
     user_id_num = f"{abs(hash(cur_user)) % 10000:04d}"
 
     # アカウントと設定・射手カルテを1つのボタンに統合（サイドバーの最下部に固定）
