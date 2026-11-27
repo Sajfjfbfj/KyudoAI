@@ -4154,8 +4154,8 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         "L_Wrist": [0.95, 0.0, 1.41],
         # 妻手（右腕：弦を引く側・会）
         "R_Shoulder": [-0.22, 0.0, 1.45],
-        "R_Elbow": [-0.58, 0.10, 1.42 + elbow_offset],
-        "R_Wrist": [-0.35, 0.30, 1.38], # 頬付け・口割の位置
+        "R_Elbow": [-0.65, 0.30, 1.44 + elbow_offset],
+        "R_Wrist": [-0.12, -0.05, 1.46], # 頬付け・口割の位置
         # 下半身（足踏み・胴造り）
         "L_Hip": [0.14, 0.0, 0.90],
         "L_Foot": [0.46, 0.0, 0.0],
