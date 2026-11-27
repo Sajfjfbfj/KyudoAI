@@ -2079,7 +2079,10 @@ def _get_supabase_config() -> tuple[str, str]:
         url = os.environ.get("SUPABASE_URL", "").strip()
     if not key:
         key = os.environ.get("SUPABASE_KEY", "").strip()
-    return url.rstrip("/"), key
+    url = url.rstrip("/")
+    if url.endswith("/rest/v1"):
+        url = url[:-8].rstrip("/")
+    return url, key
 
 def is_supabase_enabled() -> bool:
     url, key = _get_supabase_config()
@@ -2092,9 +2095,10 @@ def _sb_request(method: str, path: str, body=None, extra_headers: dict = None, t
     full_url = f"{url}/rest/v1/{path}"
     headers = {
         "apikey": key,
-        "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
     }
+    if not key.startswith("sb_"):
+        headers["Authorization"] = f"Bearer {key}"
     if extra_headers:
         headers.update(extra_headers)
     data_bytes = json.dumps(body, ensure_ascii=False).encode("utf-8") if body is not None else None
