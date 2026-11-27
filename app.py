@@ -4136,18 +4136,21 @@ def create_muscle_radar_chart(muscle_scores: dict):
     )
     return fig
 
-def create_3d_kyudo_skeleton(posture_params: dict):
+def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
     # 傾きパラメータの取得（デフォルト安全値）
     tilt_pitch = float(posture_params.get("trunk_tilt_pitch", 0.0)) # 前後傾き
     tilt_roll = float(posture_params.get("trunk_tilt_roll", 0.0))   # 左右傾き
     elbow_offset = float(posture_params.get("shoulder_draw_level", 0.0)) * 0.02 # 妻手肘の上下
 
-    # 人によって骨格が違う → 腕の長さ・肩幅スケール係数を推定
-    # shoulder_draw_level: 大きいほど高引き（肩より上に引く体型）
-    # draw_length_ratio: 引き尺の長さ（腕が長い人ほど取りかけが遠くなる）
-    draw_level = float(posture_params.get("shoulder_draw_level", 0.0))
-    # 腕の長さ比（-50〜+50 → 0.85〜1.15スケール）
-    arm_scale = 1.0 + float(posture_params.get("draw_length_ratio", 0.0)) * 0.003
+    # 人によって骨格・身長・肩幅・腕の長さが違うため体格パラメータを反映
+    height_scale = max(0.80, min(1.25, float(posture_params.get("height_scale", 1.0))))
+    shoulder_width_scale = max(0.80, min(1.25, float(posture_params.get("shoulder_width_scale", 1.0))))
+    arm_scale = max(0.80, min(1.25, 1.0 + float(posture_params.get("draw_length_ratio", 0.0)) * 0.003))
+
+    # 上からの視点（俯瞰）で重要になる前後ズレのパラメータ
+    torikake_depth = float(posture_params.get("torikake_depth", 0.0)) * 0.02       # 取り懸けの前後ズレ
+    elbow_back_depth = float(posture_params.get("elbow_back_depth", 0.0)) * 0.02   # 妻手肘の後ろ張り出し補正
+    oshide_angle_y = float(posture_params.get("oshide_angle_y", 0.0)) * 0.02       # 押手の前後ズレ
 
     # -----------------------------------------------------------
     # 3Dキーポイント座標系: x=左右(+右), y=前後(-が射手の前面/的方向), z=天地
@@ -4155,35 +4158,37 @@ def create_3d_kyudo_skeleton(posture_params: dict):
     # 動画観察: 取りかけは耳〜頬の横・顔面と同じ奥行き(y≈0)
     #           妻手肘は肩の斜め後方(y≈+0.20)に張り出す
     # -----------------------------------------------------------
+    l_wrist_pos = [0.95 * arm_scale, oshide_angle_y, 1.41 * height_scale]
+    r_wrist_pos = [-0.18 * shoulder_width_scale, torikake_depth, 1.55 * height_scale]
+
+    # 口割: 矢（L_Wrist〜R_Wrist）の直線上に乗るようにx=0.0での位置を算出
+    t_kw = l_wrist_pos[0] / (l_wrist_pos[0] - r_wrist_pos[0]) if (l_wrist_pos[0] - r_wrist_pos[0]) != 0 else 0.84
+    kw_y = l_wrist_pos[1] + t_kw * (r_wrist_pos[1] - l_wrist_pos[1])
+    kw_z = l_wrist_pos[2] + t_kw * (r_wrist_pos[2] - l_wrist_pos[2])
+
     joints = {
-        "Head": [0.0 + tilt_roll*0.01, 0.0 + tilt_pitch*0.01, 1.70],
-        "Neck": [0.0 + tilt_roll*0.008, 0.0 + tilt_pitch*0.008, 1.50],
-        "Chest": [0.0 + tilt_roll*0.005, 0.0 + tilt_pitch*0.005, 1.35],
-        "Pelvis": [0.0, 0.0, 0.95],
+        "Head": [0.0 + tilt_roll*0.01, 0.0 + tilt_pitch*0.01, 1.70 * height_scale],
+        "Neck": [0.0 + tilt_roll*0.008, 0.0 + tilt_pitch*0.008, 1.50 * height_scale],
+        "Chest": [0.0 + tilt_roll*0.005, 0.0 + tilt_pitch*0.005, 1.35 * height_scale],
+        "Pelvis": [0.0, 0.0, 0.95 * height_scale],
         # 押手（左腕：弓を押す側）
-        "L_Shoulder": [0.22, 0.0, 1.45],
-        "L_Elbow": [0.58 * arm_scale, 0.0, 1.43],
-        "L_Wrist": [0.95 * arm_scale, 0.0, 1.41],
+        "L_Shoulder": [0.22 * shoulder_width_scale, 0.0, 1.45 * height_scale],
+        "L_Elbow": [0.58 * arm_scale, oshide_angle_y * 0.5, 1.43 * height_scale],
+        "L_Wrist": l_wrist_pos,
         # 妻手（右腕：弦を引く側・会）
-        # 動画参照: 取りかけは顔の真横（頬〜耳）・顔と同奥行き・目高さ付近
-        "R_Shoulder": [-0.22, 0.0, 1.45],
-        "R_Elbow": [-0.55 * arm_scale, 0.20, 1.44 + elbow_offset],  # 肩より外側・斜め後方
-        "R_Wrist": [-0.18, 0.0, 1.55],  # 顔の横(耳〜頬)・顔面と同奥行き・目の高さ
+        "R_Shoulder": [-0.22 * shoulder_width_scale, 0.0, 1.45 * height_scale],
+        "R_Elbow": [-0.55 * arm_scale, 0.20 + elbow_back_depth, (1.44 + elbow_offset) * height_scale],
+        "R_Wrist": r_wrist_pos,
         # 下半身（足踏み・胴造り）
-        "L_Hip": [0.14, 0.0, 0.90],
-        "L_Foot": [0.46, 0.0, 0.0],
-        "R_Hip": [-0.14, 0.0, 0.90],
-        "R_Foot": [-0.46, 0.0, 0.0],
+        "L_Hip": [0.14 * shoulder_width_scale, 0.0, 0.90 * height_scale],
+        "L_Foot": [0.46 * height_scale, 0.0, 0.0],
+        "R_Hip": [-0.14 * shoulder_width_scale, 0.0, 0.90 * height_scale],
+        "R_Foot": [-0.46 * height_scale, 0.0, 0.0],
         # 弓の上下末端
-        "Bow_Top": [0.95 * arm_scale, 0.0, 2.25],
-        "Bow_Bottom": [0.95 * arm_scale, 0.0, 0.15],
-        # 口割: 矢が上唇〜人中に触れる点（顔の正面中央・上唇高さ）
-        # 矢（L_Wrist〜R_Wrist）の直線上に乗るようにx=0.0での高さを算出
-        "Kuchiwari": [
-            0.0,
-            0.0,
-            round(1.41 + (0.95 * arm_scale / (0.95 * arm_scale + 0.18)) * (1.55 - 1.41), 3)
-        ]
+        "Bow_Top": [0.95 * arm_scale, oshide_angle_y, 2.25 * height_scale],
+        "Bow_Bottom": [0.95 * arm_scale, oshide_angle_y, 0.15 * height_scale],
+        # 口割: 矢が上唇〜人中に触れる基準点
+        "Kuchiwari": [0.0, round(kw_y, 3), round(kw_z, 3)]
     }
     
     # 骨格リンク定義
@@ -4270,19 +4275,55 @@ def create_3d_kyudo_skeleton(posture_params: dict):
         name="口割（矢の高さ基準点）"
     ))
     
+    # 真上（俯瞰）ビュー時は肩・矢筋の基準ライン（y=0）を点線で補助表示
+    if view_mode == "top":
+        x_limit = max(1.1, 1.05 * arm_scale)
+        fig.add_trace(go.Scatter3d(
+            x=[-x_limit, x_limit],
+            y=[0.0, 0.0],
+            z=[1.45 * height_scale, 1.45 * height_scale],
+            mode='lines',
+            line=dict(color='rgba(148, 163, 184, 0.6)', width=2, dash='dash'),
+            hoverinfo='none',
+            showlegend=True,
+            name="基準線（的・肩の一直線）"
+        ))
+
+    x_range_max = max(1.25, 1.15 * arm_scale)
+    z_range_max = max(2.45, 2.35 * height_scale)
+
+    if view_mode == "top":
+        camera_cfg = dict(
+            eye=dict(x=0.0, y=-0.05, z=2.75),
+            center=dict(x=0.0, y=0.0, z=0.0),
+            up=dict(x=0.0, y=1.0, z=0.0)
+        )
+    else:
+        camera_cfg = dict(
+            eye=dict(x=0.85, y=-2.75, z=0.20),
+            center=dict(x=0.0, y=0.0, z=-0.05),
+            up=dict(x=0.0, y=0.0, z=1.0)
+        )
+
     fig.update_layout(
         scene=dict(
-            xaxis=dict(title='左右', range=[-1.1, 1.1], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
-            yaxis=dict(title='前後', range=[-0.6, 0.6], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
-            zaxis=dict(title='天地', range=[-0.1, 2.3], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
-            camera=dict(
-                eye=dict(x=1.3, y=-1.5, z=0.8) # 斜め前からの自然な視点
-            ),
-            aspectratio=dict(x=1.4, y=0.8, z=1.5)
+            xaxis=dict(title='左右', range=[-x_range_max, x_range_max], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
+            yaxis=dict(title='前後', range=[-0.75, 0.75], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
+            zaxis=dict(title='天地', range=[-0.15, z_range_max], backgroundcolor='rgba(0,0,0,0)', gridcolor='rgba(120,113,108,0.25)', linecolor='rgba(120,113,108,0.25)', color='rgba(120,113,108,0.95)'),
+            camera=camera_cfg,
+            aspectratio=dict(x=1.25, y=0.75, z=1.35)
         ),
         paper_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=5, r=5, t=5, b=5),
-        height=360
+        margin=dict(l=5, r=5, t=30, b=5),
+        height=480,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.01,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=10)
+        )
     )
     return fig
 
@@ -4381,12 +4422,13 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
    まず、安定している関節のアライメントや、美しく使えている深層筋（背中や丹田など）を具体的に褒めてください。
 
 2. 🧬【3D筋肉活動＆骨格連動の立体観察（見えた事実）】
-   八節（特に引分け〜会〜離れ）において、以下の筋肉・関節が3次元的にどう動いているか解説してください。生体力学・筋肉・骨格に関する内容は身体の専門知識がない人でも直感的にわかる日常の言葉（「背中の下半分で弓の重みを受け止める感じ」「肩甲骨を背中の中心に引き寄せるイメージ」など）に言い換えてください。弓道の専門用語はそのまま使ってかまいません。
+   八節（特に引分け〜会〜離れ）において、射手の**身長・肩幅・腕の長さ・首の長さなど個人の骨格差**を踏まえたうえで、以下の筋肉・関節が3次元的にどう動いているか解説してください。生体力学・筋肉・骨格に関する内容は身体の専門知識がない人でも直感的にわかる日常の言葉（「背中の下半分で弓の重みを受け止める感じ」「肩甲骨を背中の中心に引き寄せるイメージ」など）に言い換えてください。弓道の専門用語はそのまま使ってかまいません。
    ・首・肩（僧帽筋）：力んで肩が上がっていないか（首のすくみ）
    ・背中・肩甲骨（広背筋・前鋸筋）：肩甲骨を下げて引き絞る深層筋が働いているか
    ・胸郭（胸骨・肋骨）：息を吸い込みすぎて胸が固まっていないか
    ・体幹・下腹（丹田・腹横筋）：三重十文字（足・腰・肩）の鉛直軸が立っているか
-   ・押手の手の内と妻手の肘：角見（親指の根元）の押し出しと、妻手肘の高さ・引き込みベクトルの釣り合い
+   ・押手の手の内と妻手の肘・口割：角見の押し出しと、個人の骨格に合った口割の高さ・妻手肘の引き込みベクトルの釣り合い
+   ・🔝【真上（俯瞰）からの矢筋・肩線チェック】：もし射手の真上から見下ろしたとき、足踏み〜腰〜両肩のラインと、矢筋（角見〜口割〜取り懸け）・妻手肘の後ろへの張り出しが前後にズレず一直線に調和しているか（前後の捩じれ・詰まりがないか）も立体的に解説してください。
 
 3. 🤔【自分の身体感覚への問いかけ（自省のヒント）】
    射手自身がその瞬間、体の中で何を感じていたかを振り返る問いかけを投げかけてください。
@@ -4403,7 +4445,8 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 
 --------------------------------------------------
 【必須出力：末尾に以下のJSONブロックを必ず記載してください】
-推定した筋活動スコア（0〜100）と3D姿勢パラメータを以下のJSONフォーマットで出力してください。
+推定した筋活動スコア（0〜100）と3D姿勢パラメータ（体格・前後ズレ含む）を以下のJSONフォーマットで出力してください。
+※height_scale(身長比0.85〜1.15, 標準1.0), shoulder_width_scale(肩幅比0.85〜1.15, 標準1.0), draw_length_ratio(腕の長さ/矢束補正-20〜+20), torikake_depth/elbow_back_depth/oshide_angle_y(上視点での前後ズレ-10〜+10)も動画・画像から推定してください。
 ```json
 {{
   "muscle_scores": {{
@@ -4417,7 +4460,13 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
   "posture_3d": {{
     "trunk_tilt_pitch": 1.5,
     "trunk_tilt_roll": 0.5,
-    "shoulder_draw_level": -2.0
+    "shoulder_draw_level": -2.0,
+    "height_scale": 1.0,
+    "shoulder_width_scale": 1.0,
+    "draw_length_ratio": 0.0,
+    "torikake_depth": 0.0,
+    "elbow_back_depth": 0.0,
+    "oshide_angle_y": 0.0
   }}
 }}
 ```
@@ -4482,7 +4531,13 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
             posture_data = {
                 "trunk_tilt_pitch": 1.0,
                 "trunk_tilt_roll": 0.0,
-                "shoulder_draw_level": 0.0
+                "shoulder_draw_level": 0.0,
+                "height_scale": 1.0,
+                "shoulder_width_scale": 1.0,
+                "draw_length_ratio": 0.0,
+                "torikake_depth": 0.0,
+                "elbow_back_depth": 0.0,
+                "oshide_angle_y": 0.0
             }
 
         return clean_text, muscle_data, posture_data
@@ -4504,15 +4559,21 @@ def render_analysis_visualizations(muscle_data, posture_data, key_suffix):
         return
 
     st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
-    col_g1, col_g2 = st.columns([1, 1])
-    with col_g1:
-        st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
-        radar_fig = create_muscle_radar_chart(muscle_data)
-        st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{key_suffix}")
-    with col_g2:
-        st.markdown("**🧍‍♂️ 3D立体骨格（マウスで360°回転可能）**")
-        skeleton_fig = create_3d_kyudo_skeleton(posture_data)
-        st.plotly_chart(skeleton_fig, use_container_width=True, key=f"skeleton_chart_{key_suffix}")
+    st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
+    radar_fig = create_muscle_radar_chart(muscle_data)
+    st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{key_suffix}")
+
+    st.markdown("**🧍‍♂️ 3D立体骨格アライメント（全身＆真上からの2視点・マウスで360°回転可能）**")
+    st.caption("身長・肩幅・腕の長さを考慮したモデルです。左で全体の高さ・口割・足踏みを、右（真上）で矢筋と肩線・肘の張り出しを確認できます。")
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.markdown("📐 **正面・全体ビュー（全身・口割・三重十文字）**")
+        skeleton_front_fig = create_3d_kyudo_skeleton(posture_data, view_mode="front")
+        st.plotly_chart(skeleton_front_fig, use_container_width=True, key=f"skeleton_chart_{key_suffix}")
+    with col_s2:
+        st.markdown("🔝 **真上（俯瞰）ビュー（矢筋・肩線・妻手肘の位置）**")
+        skeleton_top_fig = create_3d_kyudo_skeleton(posture_data, view_mode="top")
+        st.plotly_chart(skeleton_top_fig, use_container_width=True, key=f"skeleton_top_chart_{key_suffix}")
     st.divider()
 
 
