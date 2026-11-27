@@ -2515,24 +2515,33 @@ def save_learning_log(
     _save_local_learning_logs(logs)
 
     if is_supabase_enabled():
-        _sb_request(
+        res = _sb_request(
             "POST",
             "yumiqa_learning_logs?on_conflict=log_id",
             body=row,
-            extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+            extra_headers={"Prefer": "resolution=merge-duplicates,return=representation"},
         )
+        return res is not None
+    return True
 
-def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""):
-    """ユーザーの👍/👎フィードバックを学習ログへ反映"""
+def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = "", query_summary: str = "", char_name: str = "") -> bool:
+    """ユーザーの👍/👎フィードバックを学習ログへ確実に反映（クラウド＋ローカル）"""
     if not log_id:
-        return
+        return False
+    clean_note = (feedback_note or "").strip()[:200]
     logs = _load_local_learning_logs()
     updated = False
+    existing_query = query_summary
+    existing_char = char_name
     for r in logs:
         if r.get("log_id") == log_id:
             r["feedback"] = feedback
-            if feedback_note:
-                r["feedback_note"] = feedback_note.strip()[:200]
+            if clean_note:
+                r["feedback_note"] = clean_note
+            if not existing_query:
+                existing_query = r.get("query_summary", "")
+            if not existing_char:
+                existing_char = r.get("char_name", "")
             updated = True
             break
     if not updated:
@@ -2540,78 +2549,90 @@ def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""
             "log_id": log_id,
             "created_at": time.strftime("%Y-%m-%d %H:%M"),
             "mode": "chat",
-            "char_name": "",
-            "query_summary": "",
+            "char_name": existing_char,
+            "query_summary": (existing_query or "").strip()[:180],
             "muscle_scores": None,
             "posture_3d": None,
             "feedback": feedback,
-            "feedback_note": (feedback_note or "").strip()[:200],
+            "feedback_note": clean_note,
         })
     _save_local_learning_logs(logs)
 
     if is_supabase_enabled():
         q = urllib.parse.quote(log_id, safe="")
         patch_body = {"feedback": feedback}
-        if feedback_note:
-            patch_body["feedback_note"] = feedback_note.strip()[:200]
-        res = _sb_request("PATCH", f"yumiqa_learning_logs?log_id=eq.{q}", body=patch_body)
-        if res is None:
-            # まだレコードがない場合はupsert
-            save_learning_log(log_id, "chat", "", "", feedback=feedback, feedback_note=feedback_note)
+        if clean_note:
+            patch_body["feedback_note"] = clean_note
+        res = _sb_request(
+            "PATCH",
+            f"yumiqa_learning_logs?log_id=eq.{q}",
+            body=patch_body,
+            extra_headers={"Prefer": "return=representation"},
+        )
+        # 該当行が0件（[]）またはエラー（None）のときは新規 Upsert する
+        if not isinstance(res, list) or len(res) == 0:
+            return bool(save_learning_log(
+                log_id,
+                "chat",
+                existing_char,
+                existing_query,
+                feedback=feedback,
+                feedback_note=clean_note,
+            ))
+        return True
+    return True
 
 def build_learning_feedback_hint() -> str:
-    """蓄積された過去のフィードバック傾向（👎の改善要望・不評傾向と👍の高評価パターン）を常に回答生成ヒントとして返す"""
+    """蓄積された過去のフィードバック傾向（👎の改善要望・不評傾向と👍の高評価傾向）を常に回答生成ヒントとして返す"""
     bad_notes = []
     bad_topics = []
-    good_patterns = []
+    good_topics = []
 
     if is_supabase_enabled():
         res_bad = _sb_request(
             "GET",
-            "yumiqa_learning_logs?feedback=eq.bad&order=created_at.desc&limit=5&select=feedback_note,prompt_preview",
+            "yumiqa_learning_logs?feedback=eq.bad&order=created_at.desc&limit=5&select=feedback_note,query_summary",
         )
         if isinstance(res_bad, list):
             for r in res_bad:
                 note = (r.get("feedback_note") or "").strip()
-                q_prev = (r.get("prompt_preview") or "").strip()
+                q_sum = (r.get("query_summary") or "").strip()
                 if note:
                     bad_notes.append(note)
-                elif q_prev:
-                    bad_topics.append(q_prev[:60])
+                elif q_sum:
+                    bad_topics.append(q_sum[:60])
 
         res_good = _sb_request(
             "GET",
-            "yumiqa_learning_logs?feedback=eq.good&order=created_at.desc&limit=3&select=prompt_preview,answer_preview",
+            "yumiqa_learning_logs?feedback=eq.good&order=created_at.desc&limit=3&select=query_summary,char_name",
         )
         if isinstance(res_good, list):
             for r in res_good:
-                q_prev = (r.get("prompt_preview") or "").strip()
-                a_prev = (r.get("answer_preview") or "").strip()
-                if q_prev and a_prev:
-                    good_patterns.append(f"質問「{q_prev[:40]}」への回答スタイル（{a_prev[:60]}…）")
+                q_sum = (r.get("query_summary") or "").strip()
+                if q_sum:
+                    good_topics.append(q_sum[:50])
 
-    if not bad_notes and not bad_topics and not good_patterns:
+    if not bad_notes and not bad_topics and not good_topics:
         logs = _load_local_learning_logs()
         for r in reversed(logs):
             fb = r.get("feedback")
             note = (r.get("feedback_note") or "").strip()
-            q_prev = (r.get("prompt_preview") or "").strip()
-            a_prev = (r.get("answer_preview") or "").strip()
+            q_sum = (r.get("query_summary") or "").strip()
             if fb == "bad":
                 if note and len(bad_notes) < 5:
                     bad_notes.append(note)
-                elif q_prev and len(bad_topics) < 3:
-                    bad_topics.append(q_prev[:60])
-            elif fb == "good" and q_prev and a_prev and len(good_patterns) < 3:
-                good_patterns.append(f"質問「{q_prev[:40]}」への回答スタイル（{a_prev[:60]}…）")
+                elif q_sum and len(bad_topics) < 3:
+                    bad_topics.append(q_sum[:60])
+            elif fb == "good" and q_sum and len(good_topics) < 3:
+                good_topics.append(q_sum[:50])
 
     parts = []
     if bad_notes:
         parts.append("・過去の👎改善要望（必ず修正・反映すること）: " + " / ".join(bad_notes))
     if bad_topics:
         parts.append("・過去に👎評価が付いた質問テーマ（より丁寧・具体的に解説し、根拠を明確にすること）: " + " / ".join(bad_topics))
-    if good_patterns:
-        parts.append("・過去に👍高評価を得た回答傾向（この分かりやすさと親身さを維持すること）: " + " / ".join(good_patterns))
+    if good_topics:
+        parts.append("・過去に👍高評価を得た質問テーマ（同様の分かりやすさと親身さ・科学的根拠のバランスを維持すること）: " + " / ".join(good_topics))
 
     if not parts:
         return ""
@@ -2666,23 +2687,34 @@ def _handle_feedback_click(log_id: str, feedback: str, note_key: str = ""):
     if note_key:
         note = str(st.session_state.get(note_key, "") or "").strip()
     if log_id:
-        update_learning_feedback(log_id, feedback, note)
-        for m in st.session_state.get("messages", []):
+        msgs = st.session_state.get("messages", [])
+        q_summary = ""
+        c_name = ""
+        for idx_m, m in enumerate(msgs):
             if m.get("log_id") == log_id:
                 m["feedback"] = feedback
                 if note:
                     m["feedback_note"] = note[:200]
+                c_name = m.get("char_name", "") or ""
+                if idx_m > 0 and msgs[idx_m - 1].get("role") == "user":
+                    q_summary = str(msgs[idx_m - 1].get("content", "") or "")[:180]
                 break
+        ok = update_learning_feedback(log_id, feedback, note, query_summary=q_summary, char_name=c_name)
         if "current_session_id" in st.session_state:
-            save_current_session(st.session_state.current_session_id, st.session_state.messages)
-    st.session_state["_fb_toast_msg"] = "フィードバックありがとうございます！今後の改善に活かします。"
+            save_current_session(st.session_state.current_session_id, msgs)
+        if ok:
+            st.session_state["_fb_toast_msg"] = "✅ フィードバックを送信しました！今後の回答改善に活かします。"
+        else:
+            st.session_state["_fb_toast_msg"] = "⚠️ フィードバックをローカルに保存しました（クラウド送信に失敗しました）。"
+    else:
+        st.session_state["_fb_toast_msg"] = "フィードバックありがとうございます！"
 
 
 def render_feedback_buttons(log_id: str, current_feedback: str, key_prefix: str):
     """回答に対する👍/👎フィードバックUIを描画"""
     if not log_id:
         return
-    c_good, c_bad, _ = st.columns([0.11, 0.13, 0.76])
+    c_good, c_bad, c_status = st.columns([0.11, 0.13, 0.76])
     with c_good:
         good_label = "👍 済" if current_feedback == "good" else "👍"
         st.button(
@@ -2695,17 +2727,28 @@ def render_feedback_buttons(log_id: str, current_feedback: str, key_prefix: str)
     with c_bad:
         bad_label = "👎 済" if current_feedback == "bad" else "👎"
         with st.popover(bad_label, key=f"fb_bad_pop_{key_prefix}"):
-            st.caption("改善点があれば教えてください（任意）")
-            note_key = f"fb_note_{key_prefix}"
-            st.text_input("例：専門用語が難しい／もっと具体的に", key=note_key, label_visibility="collapsed", placeholder="例：もっと具体的に教えてほしい")
-            st.button(
-                "送信する",
-                key=f"fb_bad_send_{key_prefix}",
-                type="primary",
-                use_container_width=True,
-                on_click=_handle_feedback_click,
-                args=(log_id, "bad", note_key),
-            )
+            with st.form(key=f"fb_bad_form_{key_prefix}", border=False):
+                st.caption("改善点があれば教えてください（任意）")
+                note_key = f"fb_note_{key_prefix}"
+                st.text_input(
+                    "改善点",
+                    key=note_key,
+                    label_visibility="collapsed",
+                    placeholder="例：もっと具体的に教えてほしい",
+                )
+                submitted = st.form_submit_button(
+                    "送信する",
+                    type="primary",
+                    use_container_width=True,
+                )
+            if submitted:
+                _handle_feedback_click(log_id, "bad", note_key)
+                st.rerun()
+    with c_status:
+        if current_feedback == "good":
+            st.caption("✅ 高評価として学習ログに送信済み")
+        elif current_feedback == "bad":
+            st.caption("✅ 改善要望として学習ログに送信済み")
 
 
 # ==================== ユーザー認証・アカウント管理（ChatGPT風完全ログイン） ====================
