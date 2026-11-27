@@ -4748,7 +4748,15 @@ def create_muscle_radar_chart(muscle_scores: dict):
     categories_closed = categories + [categories[0]]
     values_closed = values + [values[0]]
     
+    benchmark_values = [85] * len(categories_closed)
     fig = go.Figure()
+    fig.add_trace(go.Scatterpolar(
+        r=benchmark_values,
+        theta=categories_closed,
+        fill='none',
+        line=dict(color='rgba(16, 185, 129, 0.78)', width=2, dash='dash'),
+        name='熟練者EMG研究基準（目安85）'
+    ))
     fig.add_trace(go.Scatterpolar(
         r=values_closed,
         theta=categories_closed,
@@ -4756,7 +4764,7 @@ def create_muscle_radar_chart(muscle_scores: dict):
         fillcolor='rgba(91, 132, 196, 0.22)',
         line=dict(color='#5b84c4', width=2.5),
         marker=dict(size=6, color='#5b84c4'),
-        name='筋活動バランス'
+        name='今回の推定筋活動バランス'
     ))
     
     fig.update_layout(
@@ -4777,9 +4785,17 @@ def create_muscle_radar_chart(muscle_scores: dict):
         ),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=35, r=35, t=25, b=25),
-        height=340,
-        showlegend=False
+        margin=dict(l=35, r=35, t=40, b=25),
+        height=360,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.06,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=11)
+        )
     )
     return fig
 
@@ -4923,7 +4939,7 @@ def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
         name="口割（矢の高さ基準点）"
     ))
     
-    # 真上（俯瞰）ビュー時は肩・矢筋の基準ライン（y=0）を点線で補助表示
+    # 真上（俯瞰）ビュー時は肩・矢筋の基準ライン（y=0）、正面ビュー時は三重十文字の鉛直基準軸を表示
     if view_mode == "top":
         x_limit = max(1.1, 1.05 * arm_scale)
         fig.add_trace(go.Scatter3d(
@@ -4931,10 +4947,21 @@ def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
             y=[0.0, 0.0],
             z=[1.45 * height_scale, 1.45 * height_scale],
             mode='lines',
-            line=dict(color='rgba(148, 163, 184, 0.6)', width=2, dash='dash'),
+            line=dict(color='rgba(148, 163, 184, 0.65)', width=2, dash='dash'),
             hoverinfo='none',
             showlegend=True,
             name="基準線（的・肩の一直線）"
+        ))
+    else:
+        fig.add_trace(go.Scatter3d(
+            x=[0.0, 0.0],
+            y=[0.0, 0.0],
+            z=[0.0, 1.82 * height_scale],
+            mode='lines',
+            line=dict(color='rgba(16, 185, 129, 0.55)', width=2, dash='dash'),
+            hoverinfo='none',
+            showlegend=True,
+            name="三重十文字・鉛直基準軸"
         ))
 
     x_range_max = max(1.25, 1.15 * arm_scale)
@@ -5208,6 +5235,50 @@ def render_analysis_visualizations(muscle_data, posture_data, key_suffix):
         return
 
     st.markdown("#### 🧬 3D立体骨格アライメント ＆ 筋活動バランス")
+    st.caption("📚 解析基準：日本武道学会『武道学研究』・日本体育学会・『スポーツ産業学研究』等の弓道生体力学（筋電図EMG・床反力CoP・三重十文字）研究知見")
+
+    # 弓道バイオメカニクス指標サマリー
+    _pitch = float(posture_data.get("trunk_tilt_pitch", 0.0))
+    _roll = float(posture_data.get("trunk_tilt_roll", 0.0))
+    _sh_lvl = float(posture_data.get("shoulder_draw_level", 0.0))
+    _oshide_y = float(posture_data.get("oshide_angle_y", 0.0))
+    _torikake_y = float(posture_data.get("torikake_depth", 0.0))
+    _elbow_y = float(posture_data.get("elbow_back_depth", 0.0))
+
+    if abs(_pitch) <= 2.0 and abs(_roll) <= 2.0:
+        _axis_status = "垂直安定（母指球重心）"
+    elif _pitch < -2.0:
+        _axis_status = f"やや後傾傾向（踵寄り注意 / {_pitch:+.1f}°）"
+    elif _pitch > 2.0:
+        _axis_status = f"やや前傾傾向（{_pitch:+.1f}°）"
+    else:
+        _axis_status = f"左右傾きあり（{_roll:+.1f}°）"
+
+    _yaju_dev = max(abs(_oshide_y), abs(_torikake_y), abs(_elbow_y))
+    if _yaju_dev <= 2.5 and abs(_sh_lvl) <= 2.5:
+        _align_status = "矢筋・肩線 一直線調和"
+    elif abs(_sh_lvl) > 2.5:
+        _align_status = f"両肩・肘に上下差（{_sh_lvl:+.1f}）"
+    else:
+        _align_status = f"前後ラインにズレ傾向（差{_yaju_dev:.1f}）"
+
+    _relax = float(muscle_data.get("首肩の脱力(僧帽筋)", 75))
+    _deep = (float(muscle_data.get("背中の引き込み(広背筋)", 75)) + float(muscle_data.get("体幹・丹田の安定", 75))) / 2.0
+    if _relax >= 75 and _deep >= 75:
+        _emg_status = f"深層筋優位（脱力{_relax:.0f} / 深層{_deep:.0f}）"
+    elif _relax < 70:
+        _emg_status = f"表層(僧帽筋)やや力み（脱力{_relax:.0f}）"
+    else:
+        _emg_status = f"深層筋連動を強化中（深層{_deep:.0f}）"
+
+    bio_c1, bio_c2, bio_c3 = st.columns(3)
+    with bio_c1:
+        st.metric("三重十文字・重心軸", _axis_status)
+    with bio_c2:
+        st.metric("矢筋・肩線アライメント", _align_status)
+    with bio_c3:
+        st.metric("EMG筋活動バランス", _emg_status)
+
     st.markdown("**🕸️ 筋活動バランス（脱力と深層筋連動）**")
     radar_fig = create_muscle_radar_chart(muscle_data)
     st.plotly_chart(radar_fig, use_container_width=True, key=f"radar_chart_{key_suffix}")
