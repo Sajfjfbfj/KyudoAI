@@ -2639,7 +2639,7 @@ def authenticate_user(username: str, password: str) -> bool:
         sb_user = _sb_get_user(uname)
         if sb_user and sb_user.get("salt") and sb_user.get("password_hash"):
             pw_hash, _ = hash_password(password, sb_user["salt"])
-            if pw_hash == sb_user["password_hash"]:
+            if hmac.compare_digest(pw_hash, sb_user["password_hash"]):
                 # ローカルキャッシュにも反映
                 lu = _load_local_users()
                 lu[uname] = {
@@ -2659,27 +2659,42 @@ def authenticate_user(username: str, password: str) -> bool:
     if not user:
         return False
     pw_hash, _ = hash_password(password, user["salt"])
-    if pw_hash == user["password_hash"]:
+    if hmac.compare_digest(pw_hash, user["password_hash"]):
         if is_supabase_enabled():
             _sb_upsert_user(uname, user)
         return True
     return False
 
+def _get_auth_hmac_secret() -> bytes:
+    """サーバー側秘密鍵を取得（フィンガープリント署名用）"""
+    sec = ""
+    try:
+        sec = (
+            str(st.secrets.get("AUTH_HMAC_SECRET", "") or "").strip()
+            or str(st.secrets.get("SUPABASE_KEY", "") or "").strip()
+            or str(st.secrets.get("GEMINI_API_KEY", "") or "").strip()
+        )
+    except Exception:
+        sec = ""
+    if not sec:
+        sec = f"yumiqa_local_{os.path.abspath(__file__)}"
+    return hashlib.sha256(sec.encode("utf-8")).digest()
+
 def get_user_credential_fingerprint(username: str) -> str:
-    """ブラウザ側自動ログイン用：ユーザー名とパスワードハッシュからフィンガープリントを生成"""
+    """ブラウザ側自動ログイン用：サーバー秘密鍵を用いたHMAC-SHA256フィンガープリントを生成"""
     uname = (username or "").strip().lower()
     user = _sb_get_user(uname) if is_supabase_enabled() else None
     if not user:
         user = _load_local_users().get(uname)
     if not user:
         return ""
-    combined = f"{uname}:{user['password_hash']}"
-    return hashlib.sha256(combined.encode("utf-8")).hexdigest()
+    combined = f"{uname}:{user['password_hash']}".encode("utf-8")
+    return hmac.new(_get_auth_hmac_secret(), combined, hashlib.sha256).hexdigest()
 
 def verify_credential_fingerprint(username: str, fingerprint: str) -> bool:
-    """ブラウザに保存されたフィンガープリントを検証してログイン"""
+    """ブラウザに保存されたフィンガープリントを定数時間比較で検証してログイン"""
     expected = get_user_credential_fingerprint(username)
-    return bool(expected and expected == fingerprint)
+    return bool(expected and fingerprint and hmac.compare_digest(expected, str(fingerprint)))
 
 def register_user(username: str, password: str, display_name: str = "") -> tuple[bool, str]:
     uname = username.strip().lower()
@@ -3482,22 +3497,28 @@ def _flush_cookie_js():
         _fp_user = st.session_state.get("logged_in_user", "")
         _fp_val = get_user_credential_fingerprint(_fp_user) if _fp_user else ""
         _is_g = bool(st.session_state.get("is_guest", False))
+        _js_tok = json.dumps(str(set_tok))
+        _js_u = json.dumps(str(_fp_user))
+        _js_fp = json.dumps(str(_fp_val))
+        _js_cookie = json.dumps(str(LOGIN_COOKIE))
+        _js_enc_tok = json.dumps(urllib.parse.quote(str(set_tok), safe=""))
+        _js_enc_u = json.dumps(urllib.parse.quote(str(_fp_user), safe=""))
         _save_last_js = "" if _is_g else (
-            f"try{{P.localStorage.setItem('yumiqa_last_tok','{set_tok}');"
-            f"P.localStorage.setItem('yumiqa_last_u','{_fp_user}');}}catch(e){{}}"
-            f"try{{if(window.top&&window.top.localStorage){{window.top.localStorage.setItem('yumiqa_last_tok','{set_tok}');window.top.localStorage.setItem('yumiqa_last_u','{_fp_user}');}}}}catch(e){{}}"
-            f"try{{var lc1='yumiqa_last_tok={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
-            f"var lc2='yumiqa_last_u={_fp_user}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
+            f"try{{P.localStorage.setItem('yumiqa_last_tok',{_js_tok});"
+            f"P.localStorage.setItem('yumiqa_last_u',{_js_u});}}catch(e){{}}"
+            f"try{{if(window.top&&window.top.localStorage){{window.top.localStorage.setItem('yumiqa_last_tok',{_js_tok});window.top.localStorage.setItem('yumiqa_last_u',{_js_u});}}}}catch(e){{}}"
+            f"try{{var lc1='yumiqa_last_tok='+{_js_enc_tok}+'; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
+            f"var lc2='yumiqa_last_u='+{_js_enc_u}+'; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
             "if(P.location.protocol==='https:'){lc1+='; Secure';lc2+='; Secure';}"
             "P.document.cookie=lc1;P.document.cookie=lc2;}catch(e){}"
         )
         js = (f"var P=window.parent;"
-              f"try{{P.localStorage.setItem('{LOGIN_COOKIE}','{set_tok}');}}catch(e){{}}"
-              f"try{{var c='{LOGIN_COOKIE}={set_tok}; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
+              f"try{{P.localStorage.setItem({_js_cookie},{_js_tok});}}catch(e){{}}"
+              f"try{{var c={_js_cookie}+'='+{_js_enc_tok}+'; path=/; max-age={LOGIN_COOKIE_MAX_AGE}; SameSite=Lax';"
               "if(P.location.protocol==='https:'){c+='; Secure';}P.document.cookie=c;}catch(e){}"
-              f"try{{P.localStorage.setItem('yumiqa_u','{_fp_user}');P.localStorage.setItem('yumiqa_fp','{_fp_val}');}}catch(e){{}}"
+              f"try{{P.localStorage.setItem('yumiqa_u',{_js_u});P.localStorage.setItem('yumiqa_fp',{_js_fp});}}catch(e){{}}"
               f"{_save_last_js}"
-              f"try{{var AA=window.AndroidAuth||P.AndroidAuth||(window.top&&window.top.AndroidAuth);if(AA){{AA.saveAuth('{set_tok}');}}}}catch(e){{}}"
+              f"try{{var AA=window.AndroidAuth||P.AndroidAuth||(window.top&&window.top.AndroidAuth);if(AA){{AA.saveAuth({_js_tok});}}}}catch(e){{}}"
               )
     else:
         js = (f"var P=window.parent;"
@@ -3549,7 +3570,8 @@ def _complete_login(username: str, guest: bool = False, issue_token: bool = True
     if issue_token:
         tok = issue_login_token(user_clean, is_guest=guest)
         st.session_state["_cookie_set"] = tok
-        st.query_params["auth"] = tok
+        st.query_params.pop("auth", None)
+        st.query_params.pop("_kt", None)
     st.session_state.authenticated = True
     st.session_state.is_guest = guest
     st.session_state.logged_in_user = user_clean
@@ -3656,12 +3678,26 @@ def render_login_screen(slot=None):
                     # パスワードマネージャー対応
                     st.markdown("""<script>(function(){function d(){try{var p=window.parent.document;p.querySelectorAll('input').forEach(function(e){var h=e.getAttribute('placeholder')||'';if(h==='ユーザー名'){e.setAttribute('autocomplete','username');e.setAttribute('name','username');}if(e.type==='password'&&h==='パスワード'){e.setAttribute('autocomplete','current-password');e.setAttribute('name','password');}});p.querySelectorAll('form').forEach(function(f){if(!f.getAttribute('method'))f.setAttribute('method','post');if(!f.getAttribute('action'))f.setAttribute('action','');f.setAttribute('autocomplete','on');});}catch(e){}}d();setTimeout(d,500);setTimeout(d,1500);})();</script>""", unsafe_allow_html=True)
                     if submitted:
-                        if uname and upass and authenticate_user(uname, upass):
+                        _now_ts = time.time()
+                        _lock_until = float(st.session_state.get("_login_lock_until", 0.0) or 0.0)
+                        if _now_ts < _lock_until:
+                            _wait_sec = int(_lock_until - _now_ts) + 1
+                            st.error(f"ログイン試行回数が上限に達しました。あと {_wait_sec} 秒待ってから再試行してください。")
+                        elif uname and upass and authenticate_user(uname, upass):
+                            st.session_state.pop("_login_fail_count", None)
+                            st.session_state.pop("_login_lock_until", None)
                             if slot is not None:
                                 slot.empty()
                             _complete_login(uname)
                         else:
-                            st.error("ユーザー名またはパスワードが正しくありません。")
+                            _fails = int(st.session_state.get("_login_fail_count", 0) or 0) + 1
+                            st.session_state["_login_fail_count"] = _fails
+                            if _fails >= 5:
+                                st.session_state["_login_lock_until"] = _now_ts + 60.0
+                                st.session_state["_login_fail_count"] = 0
+                                st.error("ログインに5回連続で失敗したため、セキュリティ保護のため60秒間ロックしました。")
+                            else:
+                                st.error("ユーザー名またはパスワードが正しくありません。")
 
                 with tab_reg:
                     with st.form("reg_form", clear_on_submit=False, border=False):
@@ -3717,7 +3753,8 @@ if "authenticated" not in st.session_state:
         st.session_state.ui_theme = load_ui_theme()
         st.session_state.sb_font_size_choice = load_user_font_size(_auto_user)
         st.session_state.font_size_choice = st.session_state.sb_font_size_choice
-        st.query_params["auth"] = _tok
+        st.query_params.pop("auth", None)
+        st.query_params.pop("_kt", None)
     else:
         # 2) app再起動後にトークンが失効した場合：フィンガープリントで自動ログイン（パスワード不要）
         _fp_u, _fp_val = _query_fingerprint()
@@ -3725,7 +3762,8 @@ if "authenticated" not in st.session_state:
             # フィンガープリントが一致 → 新トークンを発行して自動ログイン
             _new_tok = issue_login_token(_fp_u, is_guest=False)
             st.session_state["_cookie_set"] = _new_tok
-            st.query_params["auth"] = _new_tok
+            st.query_params.pop("auth", None)
+            st.query_params.pop("_kt", None)
             # URLからフィンガープリントパラメータを除去
             st.query_params.pop("yumiqa_u", None)
             st.query_params.pop("yumiqa_fp", None)
@@ -4138,7 +4176,7 @@ with st.sidebar:
                 <span style="background: var(--primary-container); color: var(--on-primary-container); border: 1px solid var(--border-subtle); font-weight: 700; font-size: 10.5px; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.08em;">YUMIQA PRO</span>
                 <span style="font-size: 11px; font-weight: 600; color: #2E6F40;">● 稼働中</span>
             </div>
-            <div style="font-size: 15px; font-weight: 700; color: var(--ink-primary); margin: 2px 0;">{disp_name}</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--ink-primary); margin: 2px 0;">{html.escape(str(disp_name))}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -5374,7 +5412,7 @@ for idx, msg in enumerate(st.session_state.messages):
                     <div class="file-attachment-card">
                         <span class="file-attachment-icon">{icon}</span>
                         <div class="file-attachment-details">
-                            <span class="file-attachment-name">{f_name}</span>
+                            <span class="file-attachment-name">{html.escape(str(f_name))}</span>
                             <span class="file-attachment-meta" style="font-weight: 500;">
                                 🛡️ 個人情報保護：分析完了後に完全抹消済（{f_size}）
                             </span>
@@ -5393,7 +5431,7 @@ for idx, msg in enumerate(st.session_state.messages):
                 # ChatGPT風：メモリ更新バッジ通知
                 if msg.get("memory_items"):
                     mem_tags = "、".join(msg["memory_items"])
-                    st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{html.escape(str(mem_tags))}）</span></div>', unsafe_allow_html=True)
 
                 # 3D立体骨格 ＆ 筋活動レーダーチャートがメッセージに含まれる場合
                 if "muscle_data" in msg and "posture_data" in msg:
@@ -5592,7 +5630,7 @@ if text_to_send or files_to_send:
             <div class="file-attachment-card">
                 <span class="file-attachment-icon">{icon}</span>
                 <div class="file-attachment-details">
-                    <span class="file-attachment-name">{attached_media.name}</span>
+                    <span class="file-attachment-name">{html.escape(str(attached_media.name))}</span>
                     <span class="file-attachment-meta" style="font-weight: 500;">
                         🛡️ 個人情報保護：分析完了後に完全抹消済（{file_size_str}）
                     </span>
@@ -5684,7 +5722,7 @@ if text_to_send or files_to_send:
                     new_mem_items = []
             if new_mem_items:
                 mem_tags = "、".join(new_mem_items)
-                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{mem_tags}）</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="memory-badge"><span>🧠</span><span>メモリを更新しました（{html.escape(str(mem_tags))}）</span></div>', unsafe_allow_html=True)
 
             # アクションツールバー（コピー・読み上げ）
             render_chatgpt_toolbar(full_reply)

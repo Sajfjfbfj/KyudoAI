@@ -1,4 +1,4 @@
-# Streamlit Secrets (API Keys)
+﻿# Streamlit Secrets (API Keys)
 .streamlit/secrets.toml
 
 # Uploads & Temp media
@@ -28,3 +28,10 @@ yumiqa_android/build/
 yumiqa_android/app/build/
 yumiqa_android/local.properties
 yumiqa_android/yumiqa.keystore
+# Auth, User Data & Logs (Never commit secrets/tokens/hashes)
+data/users.json
+data/login_tokens.json
+data/learning_logs.json
+data/user_settings/
+sidebar_items/
+logs-*.txt
