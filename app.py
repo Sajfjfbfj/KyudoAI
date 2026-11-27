@@ -8,6 +8,9 @@ import hmac
 import shutil
 import html
 import secrets
+import urllib.request
+import urllib.parse
+import urllib.error
 from concurrent.futures import ThreadPoolExecutor
 import base64
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
@@ -2063,6 +2066,211 @@ CHARACTERS = {
     }
 }
 
+# ==================== Supabase クラウド永続化レイヤー（未設定時はローカルJSONフォールバック） ====================
+def _get_supabase_config() -> tuple[str, str]:
+    url = ""
+    key = ""
+    try:
+        url = str(st.secrets.get("SUPABASE_URL", "") or "").strip()
+        key = str(st.secrets.get("SUPABASE_KEY", "") or "").strip()
+    except Exception:
+        pass
+    if not url:
+        url = os.environ.get("SUPABASE_URL", "").strip()
+    if not key:
+        key = os.environ.get("SUPABASE_KEY", "").strip()
+    return url.rstrip("/"), key
+
+def is_supabase_enabled() -> bool:
+    url, key = _get_supabase_config()
+    return bool(url and key)
+
+def _sb_request(method: str, path: str, body=None, extra_headers: dict = None, timeout: int = 8):
+    url, key = _get_supabase_config()
+    if not url or not key:
+        return None
+    full_url = f"{url}/rest/v1/{path}"
+    headers = {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+    }
+    if extra_headers:
+        headers.update(extra_headers)
+    data_bytes = json.dumps(body, ensure_ascii=False).encode("utf-8") if body is not None else None
+    req = urllib.request.Request(full_url, data=data_bytes, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8")
+            return json.loads(raw) if raw else True
+    except Exception:
+        return None
+
+def _sb_get_user(username: str):
+    uname = (username or "").strip().lower()
+    if not uname or not is_supabase_enabled():
+        return None
+    q = urllib.parse.quote(uname, safe="")
+    res = _sb_request("GET", f"yumiqa_users?username=eq.{q}&limit=1")
+    if isinstance(res, list) and res:
+        return res[0]
+    return None
+
+def _sb_get_all_users() -> dict:
+    if not is_supabase_enabled():
+        return {}
+    res = _sb_request("GET", "yumiqa_users?select=*")
+    if not isinstance(res, list):
+        return {}
+    out = {}
+    for row in res:
+        u = (row.get("username") or "").strip().lower()
+        if u:
+            out[u] = {
+                "password_hash": row.get("password_hash", ""),
+                "salt": row.get("salt", ""),
+                "display_name": row.get("display_name", u),
+                "created_at": row.get("created_at", ""),
+                "restored": bool(row.get("restored", False)),
+            }
+    return out
+
+def _sb_upsert_user(username: str, user_obj: dict) -> bool:
+    uname = (username or "").strip().lower()
+    if not uname or not is_supabase_enabled():
+        return False
+    row = {
+        "username": uname,
+        "password_hash": user_obj.get("password_hash", ""),
+        "salt": user_obj.get("salt", ""),
+        "display_name": user_obj.get("display_name", uname),
+        "created_at": user_obj.get("created_at", ""),
+        "restored": bool(user_obj.get("restored", False)),
+    }
+    res = _sb_request(
+        "POST",
+        "yumiqa_users?on_conflict=username",
+        body=row,
+        extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+    )
+    return res is not None
+
+def _sb_upsert_user_data(username: str, category: str, item_id: str, payload, updated_at: str = "") -> bool:
+    if not username or not is_supabase_enabled():
+        return False
+    ukey = user_data_key(username)
+    dkey = f"{ukey}:{category}:{item_id}"
+    row = {
+        "data_key": dkey,
+        "username": ukey,
+        "category": category,
+        "item_id": item_id,
+        "payload": payload,
+        "updated_at": updated_at or time.strftime("%Y-%m-%d %H:%M"),
+    }
+    res = _sb_request(
+        "POST",
+        "yumiqa_user_data?on_conflict=data_key",
+        body=row,
+        extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+    )
+    return res is not None
+
+def _sb_delete_user_data(username: str, category: str, item_id: str = "") -> bool:
+    if not username or not is_supabase_enabled():
+        return False
+    ukey = user_data_key(username)
+    dkey = urllib.parse.quote(f"{ukey}:{category}:{item_id}", safe="")
+    res = _sb_request("DELETE", f"yumiqa_user_data?data_key=eq.{dkey}")
+    return res is not None
+
+def sync_user_cloud_data(username: str, force: bool = False):
+    """ログインユーザーの全データ（会話履歴・メモリ・設定・ピン留め等）をSupabaseから1回で同期し、
+    ローカルにのみ存在するデータがあればクラウドへ自動移行する"""
+    uname = (username or "").strip().lower()
+    if not uname or uname == "default" or not is_supabase_enabled():
+        return
+    if not force and st.session_state.get("_sb_synced_user") == uname:
+        return
+
+    ukey = user_data_key(uname)
+    q = urllib.parse.quote(ukey, safe="")
+    rows = _sb_request("GET", f"yumiqa_user_data?username=eq.{q}&select=*")
+    if not isinstance(rows, list):
+        return
+
+    cloud_items = {}
+    for r in rows:
+        cat = r.get("category", "")
+        iid = r.get("item_id", "")
+        cloud_items[(cat, iid)] = r.get("payload")
+
+    # ローカルの保存先パスを準備
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    hist_dir = os.path.join(os.path.dirname(__file__), "history", ukey)
+    os.makedirs(hist_dir, exist_ok=True)
+    mem_path = os.path.join(os.path.dirname(__file__), "data", "memories", f"{ukey}.json")
+    set_path = os.path.join(os.path.dirname(__file__), "data", "user_settings", f"{ukey}.json")
+    ci_path = os.path.join(os.path.dirname(__file__), "data", "custom_instructions", f"{ukey}.json")
+    sb_path = os.path.join(base_dir, "sidebar_items", f"{ukey}.json")
+    char_path = os.path.join(base_dir, "sidebar_items", f"{ukey}_char.json")
+
+    def _write_local(path, obj):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fp:
+            json.dump(obj, fp, ensure_ascii=False, indent=2)
+
+    # 1) クラウドにあるデータをローカルキャッシュへ反映
+    for (cat, iid), payload in cloud_items.items():
+        if payload is None:
+            continue
+        try:
+            if cat == "session" and iid:
+                _write_local(os.path.join(hist_dir, f"{iid}.json"), payload)
+            elif cat == "memory":
+                _write_local(mem_path, payload)
+            elif cat == "settings":
+                _write_local(set_path, payload)
+            elif cat == "custom_instr":
+                _write_local(ci_path, payload)
+            elif cat == "sidebar":
+                _write_local(sb_path, payload)
+            elif cat == "char":
+                _write_local(char_path, payload)
+        except Exception:
+            pass
+
+    # 2) ローカルにしか無い既存データ（移行前データ）があればクラウドへ自動アップロード
+    try:
+        for fname in os.listdir(hist_dir):
+            if fname.endswith(".json"):
+                sid = fname[:-5]
+                if ("session", sid) not in cloud_items:
+                    with open(os.path.join(hist_dir, fname), "r", encoding="utf-8") as fp:
+                        sdata = json.load(fp)
+                    if isinstance(sdata, dict) and sdata.get("messages"):
+                        _sb_upsert_user_data(uname, "session", sid, sdata, sdata.get("updated_at", ""))
+    except Exception:
+        pass
+
+    for cat, lpath in [
+        ("memory", mem_path),
+        ("settings", set_path),
+        ("custom_instr", ci_path),
+        ("sidebar", sb_path),
+        ("char", char_path),
+    ]:
+        if (cat, "") not in cloud_items and os.path.exists(lpath):
+            try:
+                with open(lpath, "r", encoding="utf-8") as fp:
+                    ldata = json.load(fp)
+                _sb_upsert_user_data(uname, cat, "", ldata)
+            except Exception:
+                pass
+
+    st.session_state["_sb_synced_user"] = uname
+
+
 # ==================== ユーザー認証・アカウント管理（ChatGPT風完全ログイン） ====================
 USERS_FILE = os.path.join(os.path.dirname(__file__), "data", "users.json")
 
@@ -2072,7 +2280,7 @@ def hash_password(password: str, salt: str = None) -> tuple[str, str]:
     pw_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000).hex()
     return pw_hash, salt
 
-def load_users() -> dict:
+def _load_local_users() -> dict:
     os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
     if not os.path.exists(USERS_FILE):
         return {}
@@ -2082,27 +2290,75 @@ def load_users() -> dict:
     except Exception:
         return {}
 
-def save_users(users: dict):
+def _save_local_users(users: dict):
     os.makedirs(os.path.dirname(USERS_FILE), exist_ok=True)
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, ensure_ascii=False, indent=2)
 
+def load_users() -> dict:
+    local_users = _load_local_users()
+    if not is_supabase_enabled():
+        return local_users
+    cloud_users = _sb_get_all_users()
+    # ローカルにあってクラウドにないユーザーはクラウドへ保護移行
+    merged = dict(local_users)
+    merged.update(cloud_users)
+    for uname, uobj in local_users.items():
+        if uname not in cloud_users and isinstance(uobj, dict) and uobj.get("password_hash"):
+            _sb_upsert_user(uname, uobj)
+    return merged
+
+def save_users(users: dict):
+    _save_local_users(users)
+    if is_supabase_enabled():
+        for uname, uobj in users.items():
+            if isinstance(uobj, dict):
+                _sb_upsert_user(uname, uobj)
+
 def authenticate_user(username: str, password: str) -> bool:
-    users = load_users()
-    user = users.get(username.strip().lower())
+    uname = (username or "").strip().lower()
+    if not uname:
+        return False
+    # 1) Supabase優先でチェック
+    if is_supabase_enabled():
+        sb_user = _sb_get_user(uname)
+        if sb_user and sb_user.get("salt") and sb_user.get("password_hash"):
+            pw_hash, _ = hash_password(password, sb_user["salt"])
+            if pw_hash == sb_user["password_hash"]:
+                # ローカルキャッシュにも反映
+                lu = _load_local_users()
+                lu[uname] = {
+                    "password_hash": sb_user["password_hash"],
+                    "salt": sb_user["salt"],
+                    "display_name": sb_user.get("display_name", uname),
+                    "created_at": sb_user.get("created_at", ""),
+                    "restored": bool(sb_user.get("restored", False)),
+                }
+                _save_local_users(lu)
+                return True
+            return False
+
+    # 2) ローカルusers.jsonチェック（初回移行用フォールバック）
+    local_users = _load_local_users()
+    user = local_users.get(uname)
     if not user:
         return False
     pw_hash, _ = hash_password(password, user["salt"])
-    return pw_hash == user["password_hash"]
+    if pw_hash == user["password_hash"]:
+        if is_supabase_enabled():
+            _sb_upsert_user(uname, user)
+        return True
+    return False
 
 def get_user_credential_fingerprint(username: str) -> str:
     """ブラウザ側自動ログイン用：ユーザー名とパスワードハッシュからフィンガープリントを生成"""
-    users = load_users()
-    user = users.get(username.strip().lower())
+    uname = (username or "").strip().lower()
+    user = _sb_get_user(uname) if is_supabase_enabled() else None
+    if not user:
+        user = _load_local_users().get(uname)
     if not user:
         return ""
-    # username + password_hash + 固定salt でHMAC署名 → ブラウザに保存しても安全
-    combined = f"{username.strip().lower()}:{user['password_hash']}"
+    combined = f"{uname}:{user['password_hash']}"
     return hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
 def verify_credential_fingerprint(username: str, fingerprint: str) -> bool:
@@ -2120,14 +2376,40 @@ def register_user(username: str, password: str, display_name: str = "") -> tuple
     if uname in users:
         return False, "このユーザー名は既に使用されています。"
     pw_hash, salt = hash_password(password)
-    users[uname] = {
+    user_obj = {
         "password_hash": pw_hash,
         "salt": salt,
         "display_name": display_name.strip() if display_name else uname,
-        "created_at": time.strftime("%Y-%m-%d %H:%M")
+        "created_at": time.strftime("%Y-%m-%d %H:%M"),
+        "restored": False,
     }
-    save_users(users)
+    users[uname] = user_obj
+    _save_local_users(users)
+    if is_supabase_enabled():
+        _sb_upsert_user(uname, user_obj)
     return True, "アカウントが正常に作成されました！"
+
+def update_user_password(username: str, new_password: str) -> tuple[bool, str]:
+    """ログイン中のアカウントに対してパスワードを安全に設定・変更する"""
+    uname = (username or "").strip().lower()
+    if not uname:
+        return False, "ログイン中のユーザーが見つかりません。"
+    if len(new_password) < 6:
+        return False, "パスワードは6文字以上で入力してください。"
+    users = load_users()
+    user_obj = users.get(uname) or {
+        "display_name": uname,
+        "created_at": time.strftime("%Y-%m-%d %H:%M"),
+    }
+    pw_hash, salt = hash_password(new_password)
+    user_obj["password_hash"] = pw_hash
+    user_obj["salt"] = salt
+    user_obj["restored"] = False
+    users[uname] = user_obj
+    _save_local_users(users)
+    if is_supabase_enabled():
+        _sb_upsert_user(uname, user_obj)
+    return True, "パスワードを更新しました！別端末からもこのIDと新しいパスワードでログインできます。"
 
 # ==================== ユーザー別データの保存先（他のユーザーと絶対に混ざらないようにする） ====================
 def _legacy_user_safe(username: str) -> str:
@@ -2204,15 +2486,17 @@ def load_user_memory(username: str) -> list[str]:
 def save_user_memory(username: str, notes: list[str]):
     """ユーザーのAI記憶を保存"""
     path = get_user_memory_path(username)
+    now_str = time.strftime("%Y-%m-%d %H:%M")
     data = {
         "notes": notes,
-        "updated_at": time.strftime("%Y-%m-%d %H:%M")
+        "updated_at": now_str
     }
     try:
         with open(path, "w", encoding="utf-8") as fp:
             json.dump(data, fp, ensure_ascii=False, indent=2)
     except Exception:
         pass
+    _sb_upsert_user_data(username, "memory", "", data, now_str)
 
 RANK_PREFIXES = ("段位:", "段位：")
 RANK_UNSET = "未設定"
@@ -2277,6 +2561,7 @@ def save_user_settings(username: str, data: dict):
             json.dump(data, fp, ensure_ascii=False, indent=2)
     except Exception:
         pass
+    _sb_upsert_user_data(username, "settings", "", data)
 
 def _on_user_setting_change():
     user = st.session_state.get("logged_in_user", "default")
@@ -2442,16 +2727,18 @@ def load_custom_instructions(username: str) -> dict:
 def save_custom_instructions(username: str, profile: str, response_pref: str):
     """ユーザー独自のカスタム指示を保存"""
     path = get_custom_instructions_path(username)
+    now_str = time.strftime("%Y-%m-%d %H:%M")
     data = {
         "profile": profile.strip(),
         "response_pref": response_pref.strip(),
-        "updated_at": time.strftime("%Y-%m-%d %H:%M")
+        "updated_at": now_str
     }
     try:
         with open(path, "w", encoding="utf-8") as fp:
             json.dump(data, fp, ensure_ascii=False, indent=2)
     except Exception:
         pass
+    _sb_upsert_user_data(username, "custom_instr", "", data, now_str)
 
 def build_custom_instructions_prompt(username: str) -> str:
     """プロンプトに注入するカスタム指示ブロックを生成"""
@@ -2490,6 +2777,8 @@ def rename_session(session_id: str, new_title: str):
             data["title"] = new_title.strip()
             with open(path, "w", encoding="utf-8") as fp:
                 json.dump(data, fp, ensure_ascii=False, indent=2)
+            _cur_u = st.session_state.get("logged_in_user", "default")
+            _sb_upsert_user_data(_cur_u, "session", session_id, data, data.get("updated_at", ""))
         except Exception:
             pass
 
@@ -2502,6 +2791,8 @@ def delete_session(session_id: str):
             os.remove(path)
         except Exception:
             pass
+    _cur_u = st.session_state.get("logged_in_user", "default")
+    _sb_delete_user_data(_cur_u, "session", session_id)
 
 def generate_smart_title(user_text: str, api_key: str) -> str:
     """ChatGPT風：最初の質問内容からAIが12文字前後の的確なタイトルを自動生成"""
@@ -2627,6 +2918,8 @@ def save_current_session(session_id: str, messages: list, custom_title: str = No
     }
     with open(path, "w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
+    _cur_u = st.session_state.get("logged_in_user", "default")
+    _sb_upsert_user_data(_cur_u, "session", session_id, data, now_str)
 
 
 def export_session_to_text(messages: list) -> str:
@@ -2756,21 +3049,26 @@ def _get_auth_secret() -> bytes:
     return hashlib.sha256(f"yumiqa:{secret}".encode("utf-8")).digest()
 
 def _ensure_restored_user(username: str):
-    """Streamlit Cloud の再起動等で users.json が初期化された場合でもユーザーを自動復元"""
+    """users.json が初期化された場合でもユーザーを自動復元（クラウドに存在する本アカウントは上書きしない）"""
     uname = (username or "").strip().lower()
     if not uname:
         return
-    users = load_users()
+    if is_supabase_enabled() and _sb_get_user(uname):
+        return
+    users = _load_local_users()
     if uname not in users:
         pw_hash, salt = hash_password(secrets.token_urlsafe(24))
-        users[uname] = {
+        user_obj = {
             "password_hash": pw_hash,
             "salt": salt,
             "display_name": "弓道家" if uname.startswith("archer_") else uname,
             "created_at": time.strftime("%Y-%m-%d %H:%M"),
             "restored": True,
         }
-        save_users(users)
+        users[uname] = user_obj
+        _save_local_users(users)
+        if is_supabase_enabled():
+            _sb_upsert_user(uname, user_obj)
 
 def issue_login_token(username: str, is_guest: bool = False) -> str:
     now = time.time()
@@ -3127,6 +3425,9 @@ if not st.session_state.authenticated:
 if "logged_in_user" not in st.session_state or not st.session_state.logged_in_user:
     st.session_state.logged_in_user = "archer"
 
+if not st.session_state.get("is_guest"):
+    sync_user_cloud_data(st.session_state.logged_in_user)
+
 # セッション状態の先行初期化（ログインユーザー専用履歴を保持）
 if "current_session_id" not in st.session_state:
     existing_sessions = get_all_sessions()
@@ -3160,6 +3461,8 @@ def _save_char(name: str):
             json.dump({"char": name}, fp, ensure_ascii=False)
     except Exception:
         pass
+    _cur_u = st.session_state.get("logged_in_user", "default")
+    _sb_upsert_user_data(_cur_u, "char", "", {"char": name})
 
 if st.session_state.get("current_selected_char") not in CHARACTERS:
     st.session_state.current_selected_char = _load_saved_char() or list(CHARACTERS.keys())[0]
@@ -3207,6 +3510,8 @@ def save_sidebar_items(kind: str, items: list):
     data[kind] = items
     with open(path, "w", encoding="utf-8") as fp:
         json.dump(data, fp, ensure_ascii=False, indent=2)
+    _cur_u = st.session_state.get("logged_in_user", "default")
+    _sb_upsert_user_data(_cur_u, "sidebar", "", data)
 
 def _use_sidebar_item(it: dict):
     """ピン留め項目を押したときの処理（コールバック。追加の再実行なしで即座に質問が走る）。"""
@@ -3630,11 +3935,37 @@ with st.sidebar:
         if _cur_login_u and not st.session_state.get("is_guest"):
             st.divider()
             st.markdown("**📱 他端末で履歴を共有・引き継ぎ**")
-            st.caption(f"現在のログインID: `{_cur_login_u}`")
+            if is_supabase_enabled():
+                st.caption(f"🟢 クラウド自動保存中（ID: `{_cur_login_u}`）")
+                if st.button("🔄 別端末の最新履歴を同期", use_container_width=True, key="btn_sync_cloud_now"):
+                    sync_user_cloud_data(_cur_login_u, force=True)
+                    _reloaded = load_session_messages(st.session_state.get("current_session_id", ""))
+                    if _reloaded is not None:
+                        st.session_state.messages = _reloaded
+                    st.toast("クラウドから最新の会話・設定を同期しました！")
+                    st.rerun()
+            else:
+                st.caption(f"🟡 ローカル保存モード（ID: `{_cur_login_u}`）")
+
             _share_tok = _query_login_token() or issue_login_token(_cur_login_u, is_guest=False)
             _share_url = f"https://aikyudo-6d3n8m5yhzqubjdnr4bbax.streamlit.app/?auth={_share_tok}"
             st.caption("下のURLを別スマホ・PCで開くと、手入力なしで同じアカウント＆履歴に入れます。")
             st.code(_share_url, language=None)
+
+            # ── パスワード設定・再設定（別PCでID/PWログインしたいとき用） ──
+            with st.expander("🔑 パスワードを設定・変更する"):
+                st.caption("別端末からIDとパスワードでログインしたい場合は、ここでパスワードを設定・更新してください。")
+                _new_pw1 = st.text_input("新しいパスワード（6文字以上）", type="password", key="pop_new_pw1")
+                _new_pw2 = st.text_input("確認用にもう一度入力", type="password", key="pop_new_pw2")
+                if st.button("パスワードを更新する", use_container_width=True, key="btn_update_pw_pop"):
+                    if _new_pw1 != _new_pw2:
+                        st.error("確認用のパスワードが一致しません。")
+                    else:
+                        _ok_pw, _msg_pw = update_user_password(_cur_login_u, _new_pw1)
+                        if _ok_pw:
+                            st.success(_msg_pw)
+                        else:
+                            st.error(_msg_pw)
 
         # ── ログアウト（どのタブからでも押せるよう、タブの外に配置） ──
         
@@ -3652,6 +3983,7 @@ with st.sidebar:
             st.session_state.logged_in_user = ""
             st.session_state.font_size_choice = "大きめ (18px)"
             st.session_state.messages = []
+            st.session_state.pop("_sb_synced_user", None)
             if "current_session_id" in st.session_state:
                 del st.session_state["current_session_id"]
             st.rerun()
