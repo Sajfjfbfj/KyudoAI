@@ -2521,7 +2521,24 @@ def save_learning_log(
             body=row,
             extra_headers={"Prefer": "resolution=merge-duplicates,return=representation"},
         )
-        return res is not None
+        # 専用テーブルが未作成またはRLSで拒否された場合は、稼働中の yumiqa_user_data へ確実にフォールバック保存
+        fb_res = None
+        if res is None:
+            ud_row = {
+                "data_key": f"_system_learning:learning_log:{log_id}",
+                "username": "_system_learning",
+                "category": "learning_log",
+                "item_id": log_id,
+                "payload": row,
+                "updated_at": now_str,
+            }
+            fb_res = _sb_request(
+                "POST",
+                "yumiqa_user_data?on_conflict=data_key",
+                body=ud_row,
+                extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"},
+            )
+        return (res is not None) or (fb_res is not None)
     return True
 
 def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = "", query_summary: str = "", char_name: str = "") -> bool:
@@ -2570,7 +2587,7 @@ def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""
             body=patch_body,
             extra_headers={"Prefer": "return=representation"},
         )
-        # 該当行が0件（[]）またはエラー（None）のときは新規 Upsert する
+        # 該当行が0件（[]）またはエラー（None：テーブル未作成/RLS等）のときは Upsert（yumiqa_user_data フォールバック含む）
         if not isinstance(res, list) or len(res) == 0:
             cloud_ok = bool(save_learning_log(
                 log_id,
@@ -2619,6 +2636,28 @@ def build_learning_feedback_hint() -> str:
                 q_sum = (r.get("query_summary") or "").strip()
                 if q_sum:
                     good_topics.append(q_sum[:50])
+
+        # yumiqa_learning_logs が未作成等で空のときは yumiqa_user_data 側のフォールバックログも参照
+        if res_bad is None or res_good is None:
+            res_ud = _sb_request(
+                "GET",
+                "yumiqa_user_data?username=eq._system_learning&category=eq.learning_log&order=updated_at.desc&limit=50&select=payload",
+            )
+            if isinstance(res_ud, list):
+                for item in res_ud:
+                    r = item.get("payload") or {}
+                    if not isinstance(r, dict):
+                        continue
+                    fb = r.get("feedback")
+                    note = (r.get("feedback_note") or "").strip()
+                    q_sum = (r.get("query_summary") or "").strip()
+                    if fb == "bad":
+                        if note and len(bad_notes) < 5:
+                            bad_notes.append(note)
+                        elif q_sum and len(bad_topics) < 3:
+                            bad_topics.append(q_sum[:60])
+                    elif fb == "good" and q_sum and len(good_topics) < 3:
+                        good_topics.append(q_sum[:50])
 
     if not bad_notes and not bad_topics and not good_topics:
         logs = _load_local_learning_logs()

@@ -29,10 +29,8 @@ def _load_supabase_config() -> tuple[str, str]:
     return url, key
 
 
-def _fetch_supabase_feedback_logs(url: str, key: str) -> list[dict] | None:
-    if not url or not key:
-        return None
-    full_url = f"{url}/rest/v1/yumiqa_learning_logs?feedback=neq.&order=created_at.desc&limit=500"
+def _sb_get_json(url: str, key: str, path: str) -> list | None:
+    full_url = f"{url}/rest/v1/{path}"
     if not full_url.startswith("https://"):
         return None
     headers = {
@@ -49,6 +47,39 @@ def _fetch_supabase_feedback_logs(url: str, key: str) -> list[dict] | None:
             return data if isinstance(data, list) else None
     except Exception:
         return None
+
+
+def _fetch_supabase_feedback_logs(url: str, key: str) -> list[dict] | None:
+    if not url or not key:
+        return None
+    merged = {}
+    any_ok = False
+
+    rows_main = _sb_get_json(url, key, "yumiqa_learning_logs?feedback=neq.&order=created_at.desc&limit=500")
+    if rows_main is not None:
+        any_ok = True
+        for r in rows_main:
+            lid = r.get("log_id") or ""
+            if lid:
+                merged[lid] = r
+
+    rows_fb = _sb_get_json(
+        url,
+        key,
+        "yumiqa_user_data?username=eq._system_learning&category=eq.learning_log&order=updated_at.desc&limit=500&select=payload",
+    )
+    if rows_fb is not None:
+        any_ok = True
+        for item in rows_fb:
+            r = item.get("payload") or {}
+            if isinstance(r, dict) and (r.get("feedback") or "").strip():
+                lid = r.get("log_id") or ""
+                if lid and lid not in merged:
+                    merged[lid] = r
+
+    if not any_ok:
+        return None
+    return sorted(merged.values(), key=lambda x: str(x.get("created_at") or ""), reverse=True)
 
 
 def _load_local_feedback_logs() -> list[dict]:
