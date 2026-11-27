@@ -2195,12 +2195,13 @@ COMMON_INSTRUCTION = (
     "4. 【弓道用語に読み仮名（ふりがな）を絶対に付けない】\n"
     "   角見、胴造り、丹田、射法八節、離れ、会、弓手、馬手、などの弓道用語に「（かくみ）」「（どうづくり）」のような読み仮名を付けることは禁止です。\n"
     "   ユーザーは弓道の知識がある射手なので、読み仮名は不要です。漢字だけで表記してください。\n"
-    "5. 【引用元（学術論文のみ・使い回し禁止）】\n"
-    "   回答の末尾に「📚 参考・引用元（学術論文）：」を付ける際は、毎回同じ論文を使い回さず、**今回の説明の根拠として直接参照・該当した論文だけ**を厳選して記載してください。\n"
+    "5. 【常にブラウザ検索で裏取りし、信ぴょう性を担保すること（使い回し禁止）】\n"
+    "   回答を作成する際は、内蔵データベースだけに頼らず**必ず Google 検索ツール（Web調査）で J-STAGE・CiNii・大学紀要・公的学術機関の最新論文や正確な書誌情報を調査・裏取り**してから答えてください。\n"
+    "   その上で、回答の末尾に「📚 参考・引用元（学術論文）：」を付ける際は、毎回同じ論文を使い回さず、**今回の説明の根拠として直接参照・裏取りできた査読論文だけ**を厳選して記載してください。\n"
     "   - 話題と無関係な論文まで羅列しないでください（1〜2本で十分です。たとえば手の内の話なら手の内研究のみ、早気・もたれなら神経筋研究のみ、重心なら床反力研究のみ）。\n"
     "   - 著者名・発行年・論文タイトル・掲載誌名・巻号を正確に明記してください。\n"
-    "   - もし今回の質問内容に直接対応する査読論文がデータベースに無い場合は、無関係な論文を当てはめず「📚 参考・引用元：本回答に直接該当する査読論文はデータベース未登録（弓道一般論に基づく助言）」と正直に記載してください。\n"
-    "   - 『弓道教本』は載せず、データベースや実在する査読論文以外の架空の論文名・著者名・URLも絶対に作らないでください。\n"
+    "   - もし今回の質問内容に直接対応する査読論文が調査しても見当たらない場合は、無関係な論文を当てはめず「📚 参考・引用元：本回答に直接該当する査読論文は見当たらず（弓道一般論に基づく助言）」と正直に記載してください。\n"
+    "   - 『弓道教本』は載せず、実在確認できない架空の論文名・著者名・URLも絶対に作らないでください。\n"
 )
 
 
@@ -2559,26 +2560,104 @@ def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""
             save_learning_log(log_id, "chat", "", "", feedback=feedback, feedback_note=feedback_note)
 
 def build_learning_feedback_hint() -> str:
-    """蓄積された過去のフィードバック傾向（主に改善要望や高評価ポイント）を回答生成ヒントとして返す"""
-    notes = []
+    """蓄積された過去のフィードバック傾向（👎の改善要望・不評傾向と👍の高評価パターン）を常に回答生成ヒントとして返す"""
+    bad_notes = []
+    bad_topics = []
+    good_patterns = []
+
     if is_supabase_enabled():
-        res = _sb_request(
+        res_bad = _sb_request(
             "GET",
-            "yumiqa_learning_logs?feedback=eq.bad&feedback_note=neq.&order=created_at.desc&limit=3&select=feedback_note",
+            "yumiqa_learning_logs?feedback=eq.bad&order=created_at.desc&limit=5&select=feedback_note,prompt_preview",
         )
-        if isinstance(res, list):
-            notes = [r.get("feedback_note", "").strip() for r in res if r.get("feedback_note")]
-    if not notes:
+        if isinstance(res_bad, list):
+            for r in res_bad:
+                note = (r.get("feedback_note") or "").strip()
+                q_prev = (r.get("prompt_preview") or "").strip()
+                if note:
+                    bad_notes.append(note)
+                elif q_prev:
+                    bad_topics.append(q_prev[:60])
+
+        res_good = _sb_request(
+            "GET",
+            "yumiqa_learning_logs?feedback=eq.good&order=created_at.desc&limit=3&select=prompt_preview,answer_preview",
+        )
+        if isinstance(res_good, list):
+            for r in res_good:
+                q_prev = (r.get("prompt_preview") or "").strip()
+                a_prev = (r.get("answer_preview") or "").strip()
+                if q_prev and a_prev:
+                    good_patterns.append(f"質問「{q_prev[:40]}」への回答スタイル（{a_prev[:60]}…）")
+
+    if not bad_notes and not bad_topics and not good_patterns:
         logs = _load_local_learning_logs()
-        notes = [
-            r.get("feedback_note", "").strip()
-            for r in reversed(logs)
-            if r.get("feedback") == "bad" and r.get("feedback_note")
-        ][:3]
-    if not notes:
+        for r in reversed(logs):
+            fb = r.get("feedback")
+            note = (r.get("feedback_note") or "").strip()
+            q_prev = (r.get("prompt_preview") or "").strip()
+            a_prev = (r.get("answer_preview") or "").strip()
+            if fb == "bad":
+                if note and len(bad_notes) < 5:
+                    bad_notes.append(note)
+                elif q_prev and len(bad_topics) < 3:
+                    bad_topics.append(q_prev[:60])
+            elif fb == "good" and q_prev and a_prev and len(good_patterns) < 3:
+                good_patterns.append(f"質問「{q_prev[:40]}」への回答スタイル（{a_prev[:60]}…）")
+
+    parts = []
+    if bad_notes:
+        parts.append("・過去の👎改善要望（必ず修正・反映すること）: " + " / ".join(bad_notes))
+    if bad_topics:
+        parts.append("・過去に👎評価が付いた質問テーマ（より丁寧・具体的に解説し、根拠を明確にすること）: " + " / ".join(bad_topics))
+    if good_patterns:
+        parts.append("・過去に👍高評価を得た回答傾向（この分かりやすさと親身さを維持すること）: " + " / ".join(good_patterns))
+
+    if not parts:
         return ""
-    joined = " / ".join(notes)
-    return f"\n【過去の射手フィードバックから得た改善ポイント（参考にし、より分かりやすく具体的に答えてください）】\n{joined}\n"
+    return "\n【過去の射手フィードバックからの継続学習（常に反映すること）】\n" + "\n".join(parts) + "\n"
+
+
+def _build_search_config(temperature: float | None = None, use_search: bool = True) -> types.GenerateContentConfig:
+    """Google 検索グラウンディング（ブラウザ調査）を有効にした GenerateContentConfig を構築する"""
+    kwargs = {}
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    if use_search:
+        kwargs["tools"] = [types.Tool(google_search=types.GoogleSearch())]
+    return types.GenerateContentConfig(**kwargs)
+
+
+def _extract_grounding_sources(resp_obj, max_items: int = 4) -> str:
+    """Gemini の Google 検索グラウンディング結果から実在する参照 URL・タイトルを抽出して整形する"""
+    if resp_obj is None:
+        return ""
+    try:
+        candidates = getattr(resp_obj, "candidates", None) or []
+        if not candidates:
+            return ""
+        meta = getattr(candidates[0], "grounding_metadata", None)
+        if not meta:
+            return ""
+        chunks = getattr(meta, "grounding_chunks", None) or []
+        seen_urls = set()
+        items = []
+        for ch in chunks:
+            web = getattr(ch, "web", None)
+            if not web:
+                continue
+            uri = (getattr(web, "uri", None) or "").strip()
+            title = (getattr(web, "title", None) or "").strip() or uri
+            if uri and uri.startswith(("http://", "https://")) and uri not in seen_urls:
+                seen_urls.add(uri)
+                items.append(f"- [{title}]({uri})")
+                if len(items) >= max_items:
+                    break
+        if not items:
+            return ""
+        return "\n\n🌐 **ブラウザ調査で確認した実在情報源（Google検索）**：\n" + "\n".join(items)
+    except Exception:
+        return ""
 
 
 def _handle_feedback_click(log_id: str, feedback: str, note_key: str = ""):
@@ -4671,20 +4750,22 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
             
             temp_setting = 0.85 if is_regenerate else 0.7
             for m_name in model_candidates:
-                try:
-                    response = client.models.generate_content(
-                        model=m_name,
-                        contents=prompt_text,
-                        config=types.GenerateContentConfig(
-                            temperature=temp_setting,
+                for use_search in (True, False):
+                    try:
+                        response = client.models.generate_content(
+                            model=m_name,
+                            contents=prompt_text,
+                            config=_build_search_config(temperature=temp_setting, use_search=use_search),
                         )
-                    )
-                    if response.text:
-                        response_text = response.text
-                        break
-                except Exception as e:
-                    last_err = e
-                    continue
+                        if response.text:
+                            sources_md = _extract_grounding_sources(response)
+                            response_text = response.text + sources_md
+                            break
+                    except Exception as e:
+                        last_err = e
+                        continue
+                if response_text:
+                    break
 
             
             if response_text:
@@ -4777,41 +4858,45 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
         temp_setting = 0.88 if is_regenerate else 0.7
         last_err = None
         for m_name in model_candidates:
-            text_buffer = []
-            candidate_had_text = False
-            try:
-                response = client.models.generate_content_stream(
-                    model=m_name,
-                    contents=prompt_text,
-                    config=types.GenerateContentConfig(
-                        temperature=temp_setting,
+            for use_search in (True, False):
+                text_buffer = []
+                candidate_had_text = False
+                last_chunk_obj = None
+                try:
+                    response = client.models.generate_content_stream(
+                        model=m_name,
+                        contents=prompt_text,
+                        config=_build_search_config(temperature=temp_setting, use_search=use_search),
                     )
-                )
-                buffered_length = 0
-                last_yield = time.monotonic()
-                for chunk in response:
-                    if chunk.text:
-                        candidate_had_text = True
-                        text_buffer.append(chunk.text)
-                        buffered_length += len(chunk.text)
-                        now = time.monotonic()
-                        if buffered_length >= 6 or now - last_yield >= 0.02:
+                    buffered_length = 0
+                    last_yield = time.monotonic()
+                    for chunk in response:
+                        last_chunk_obj = chunk
+                        if chunk.text:
+                            candidate_had_text = True
+                            text_buffer.append(chunk.text)
+                            buffered_length += len(chunk.text)
+                            now = time.monotonic()
+                            if buffered_length >= 6 or now - last_yield >= 0.02:
+                                yield "".join(text_buffer)
+                                text_buffer.clear()
+                                buffered_length = 0
+                                last_yield = now
+                    if candidate_had_text:
+                        if text_buffer:
                             yield "".join(text_buffer)
-                            text_buffer.clear()
-                            buffered_length = 0
-                            last_yield = now
-                if candidate_had_text:
+                        sources_md = _extract_grounding_sources(last_chunk_obj)
+                        if sources_md:
+                            yield sources_md
+                        return
+                    last_err = RuntimeError("Geminiから回答が返されませんでした。")
+                except Exception as e:
                     if text_buffer:
                         yield "".join(text_buffer)
-                    return
-                last_err = RuntimeError("Geminiから回答が返されませんでした。")
-            except Exception as e:
-                if text_buffer:
-                    yield "".join(text_buffer)
-                if candidate_had_text:
-                    yield f"\n\n⚠️ 回答の途中でGeminiとの通信が途切れました: {e}"
-                    return
-                last_err = e
+                    if candidate_had_text:
+                        yield f"\n\n⚠️ 回答の途中でGeminiとの通信が途切れました: {e}"
+                        return
+                    last_err = e
 
         if last_err:
             yield f"⚠️ Geminiで回答を生成できなかったため、ローカル参考回答を表示します。原因: {last_err}\n\n"
@@ -5223,8 +5308,8 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
 5. 🎌【{char_name}からの温かい応援メッセージ】
    試行錯誤を楽しみながら前向きに稽古できるようエールを送ってください。
 
-6. 📚【参考・引用元（学術論文・使い回し禁止）】
-   今回の立体解析・筋活動評価で実際に根拠とした論文だけを1〜3本厳選し、著者名・年号・論文タイトル・掲載誌・巻号を正確に明記してください。毎回同じリストを使い回したり、今回の指摘内容と無関係な論文まで並べたりしないでください。『弓道教本』は載せず、架空の論文やURLも出さないでください。
+6. 📚【参考・引用元（学術論文・ブラウザ検索で裏取り・使い回し禁止）】
+   必ず Google 検索ツール（Web調査）で J-STAGE・CiNii・公的学術機関の論文を調査し、今回の立体解析・筋活動評価で実際に根拠とした論文だけを1〜3本厳選して著者名・年号・論文タイトル・掲載誌・巻号を正確に明記してください。毎回同じリストを使い回したり、今回の指摘内容と無関係な論文まで並べたりしないでください。『弓道教本』は載せず、架空の論文やURLも出さないでください。
 
 --------------------------------------------------
 【必須出力：末尾に以下のJSONブロックを必ず記載してください】
@@ -5258,34 +5343,52 @@ def analyze_media_file(uploaded_file, user_note: str, char_name: str, api_key: s
         model_candidates = ["gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-flash-latest"]
         res_text = None
         clean_text = ""
+        sources_md = ""
         last_err = None
         for m_name in model_candidates:
-            raw_chunks = []
-            try:
-                response = client.models.generate_content_stream(
-                    model=m_name,
-                    contents=[gemini_file, analysis_prompt]
-                )
-                visible_chunks = _visible_analysis_chunks(response, raw_chunks)
-                write_stream = getattr(output, "write_stream", None)
-                if callable(write_stream):
-                    clean_text = write_stream(visible_chunks).strip()
-                else:
-                    clean_text = "".join(visible_chunks).strip()
-                    if clean_text:
-                        output.markdown(clean_text)
-                res_text = "".join(raw_chunks)
-                if res_text:
-                    break
-            except Exception as e:
-                if raw_chunks:
-                    raise
-                last_err = e
+            for use_search in (True, False):
+                raw_chunks = []
+                last_chunk_box = [None]
+                try:
+                    response = client.models.generate_content_stream(
+                        model=m_name,
+                        contents=[gemini_file, analysis_prompt],
+                        config=_build_search_config(use_search=use_search),
+                    )
+                    def _track_last_chunk(stream):
+                        for ch in stream:
+                            last_chunk_box[0] = ch
+                            yield ch
+                    visible_chunks = _visible_analysis_chunks(_track_last_chunk(response), raw_chunks)
+                    write_stream = getattr(output, "write_stream", None)
+                    if callable(write_stream):
+                        clean_text = write_stream(visible_chunks).strip()
+                    else:
+                        clean_text = "".join(visible_chunks).strip()
+                        if clean_text:
+                            output.markdown(clean_text)
+                    res_text = "".join(raw_chunks)
+                    if res_text:
+                        sources_md = _extract_grounding_sources(last_chunk_box[0])
+                        break
+                except Exception as e:
+                    if raw_chunks:
+                        raise
+                    last_err = e
+            if res_text:
+                break
 
         if not res_text and last_err:
             raise last_err
         if not res_text:
             raise RuntimeError("AIから分析結果が返されませんでした。")
+
+        if sources_md:
+            clean_text = (clean_text + sources_md).strip()
+            try:
+                output.markdown(clean_text)
+            except Exception:
+                pass
 
         # JSONブロックの抽出
         muscle_data = None
