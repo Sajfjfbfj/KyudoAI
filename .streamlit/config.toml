@@ -6,10 +6,5 @@ enableStaticServing = true
 [browser]
 gatherUsageStats = false
 
-[theme]
-base = "light"
-primaryColor = "#1B365D"
-backgroundColor = "#FAF9F6"
-secondaryBackgroundColor = "#F3F1EC"
-textColor = "#1C1B18"
-font = "sans serif"
+# テーマはアプリ内 CSS で完全制御するため、Streamlit デフォルトに委ねる
+# （ライト/ダーク/自動はサイドバーのラジオボタンで切り替え）

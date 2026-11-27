@@ -2014,11 +2014,48 @@ div[data-testid="stVerticalBlock"] > div:has(iframe[height="1"]),
 </style>
 """, unsafe_allow_html=True)
 
-# 選択されたテーマを強制（「自動」のときは OS 設定に従う）
-if st.session_state.get("ui_theme") == "ライト":
+# 選択されたテーマを強制（「自動」のときは JS で OS カラースキームを検知して即時適用）
+_theme_now = st.session_state.get("ui_theme", "自動")
+if _theme_now == "ライト":
     st.markdown(f"<style>:root {{ color-scheme: light; {_THEME_LIGHT_VARS} }}</style>", unsafe_allow_html=True)
-elif st.session_state.get("ui_theme") == "ダーク":
+elif _theme_now == "ダーク":
     st.markdown(f"<style>:root {{ color-scheme: dark; {_THEME_DARK_VARS} }}</style>", unsafe_allow_html=True)
+else:
+    # 「自動」: JavaScript で OS のカラースキームを即座に検知し、
+    # CSS カスタムプロパティを上書きすることで Streamlit 側の遅延切り替えを防ぐ
+    _light_vars = _THEME_LIGHT_VARS.replace('"', '\\"').replace("'", "\\'")
+    _dark_vars  = _THEME_DARK_VARS.replace('"', '\\"').replace("'", "\\'")
+    st.markdown(f"""
+<style id="yumiqa-auto-theme-style">
+/* 自動テーマ: OS に追従。CSS media query で切り替え（JS が補完） */
+:root {{ color-scheme: light dark; {_THEME_LIGHT_VARS} }}
+@media (prefers-color-scheme: dark) {{
+  :root {{ {_THEME_DARK_VARS} }}
+}}
+</style>
+<script>
+(function() {{
+  var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var lightVars = `{_THEME_LIGHT_VARS}`;
+  var darkVars  = `{_THEME_DARK_VARS}`;
+  function applyVars(varsStr) {{
+    var style = document.getElementById('yumiqa-auto-theme-style');
+    if (!style) {{
+      style = document.createElement('style');
+      style.id = 'yumiqa-auto-theme-style';
+      document.head.appendChild(style);
+    }}
+    style.textContent = ':root{{color-scheme:' + (isDark ? 'dark' : 'light') + ';' + varsStr + '}}';
+  }}
+  applyVars(isDark ? darkVars : lightVars);
+  // OS のテーマ変更をリアルタイムで追従
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {{
+    isDark = e.matches;
+    applyVars(isDark ? darkVars : lightVars);
+  }});
+}})();
+</script>
+""", unsafe_allow_html=True)
 
 # 選択された文字サイズをアプリ全体に適用（アカウント連動）
 _cur_fs_choice = st.session_state.get("sb_font_size_choice") or load_user_font_size()
