@@ -678,6 +678,17 @@ html, body, [class*="css"], .stApp {
     height: 0 !important; min-height: 0 !important;
     pointer-events: none !important;
 }
+/* 回答生成中（Streamlit再実行中）に画面や過去の会話が暗く・半透明にならないようにする */
+[data-stale="true"],
+[data-stale="true"] > *,
+.stApp [data-stale="true"],
+[data-testid="stVerticalBlock"][data-stale="true"],
+[data-testid="stElementContainer"][data-stale="true"],
+.element-container[data-stale="true"] {
+    opacity: 1 !important;
+    filter: none !important;
+    transition: none !important;
+}
 [data-testid="stHeader"] button, [data-testid="stHeader"] a { pointer-events: auto !important; }
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stToolbarActions"],
 [data-testid="stDecoration"], [data-testid="stStatusWidget"], [data-testid="manage-app-button"],
@@ -4592,7 +4603,7 @@ def generate_response(user_input: str, char_name: str, api_key: str, is_regenera
     # APIキーがない、またはエラー時のローカル知識ベース応答
     return get_local_response(user_input, char_name)
 
-def _yield_typewriter_chunks(text: str, chunk_size: int = 8, delay: float = 0.025):
+def _yield_typewriter_chunks(text: str, chunk_size: int = 4, delay: float = 0.015):
     for start in range(0, len(text), chunk_size):
         yield text[start:start + chunk_size]
         if start + chunk_size < len(text):
@@ -4690,7 +4701,7 @@ def generate_response_stream(user_input: str, char_name: str, api_key: str, is_r
                         text_buffer.append(chunk.text)
                         buffered_length += len(chunk.text)
                         now = time.monotonic()
-                        if buffered_length >= 32 or now - last_yield >= 0.06:
+                        if buffered_length >= 6 or now - last_yield >= 0.02:
                             yield "".join(text_buffer)
                             text_buffer.clear()
                             buffered_length = 0
