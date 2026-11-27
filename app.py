@@ -4178,7 +4178,7 @@ def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
         "L_Wrist": l_wrist_pos,
         # 妻手（右腕：弦を引く側・会・口割と同じ高さで水平に引き込む）
         "R_Shoulder": [-0.22 * shoulder_width_scale, 0.0, 1.45 * height_scale],
-        "R_Elbow": [-0.55 * arm_scale, 0.20 + elbow_back_depth, (1.52 + elbow_offset) * height_scale],
+        "R_Elbow": [-0.55 * arm_scale, 0.20 + elbow_back_depth, (1.47 + elbow_offset) * height_scale],
         "R_Wrist": r_wrist_pos,
         # 下半身（足踏み・胴造り）
         "L_Hip": [0.14 * shoulder_width_scale, 0.0, 0.90 * height_scale],
