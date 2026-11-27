@@ -4158,10 +4158,11 @@ def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
     # 動画観察: 取りかけは耳〜頬の横・顔面と同じ奥行き(y≈0)
     #           妻手肘は肩の斜め後方(y≈+0.20)に張り出す
     # -----------------------------------------------------------
-    l_wrist_pos = [0.95 * arm_scale, oshide_angle_y, 1.41 * height_scale]
-    r_wrist_pos = [-0.18 * shoulder_width_scale, torikake_depth, 1.55 * height_scale]
+    kuchiwari_z = 1.56 * height_scale
+    l_wrist_pos = [0.95 * arm_scale, oshide_angle_y, kuchiwari_z]
+    r_wrist_pos = [-0.18 * shoulder_width_scale, torikake_depth, kuchiwari_z]
 
-    # 口割: 矢（L_Wrist〜R_Wrist）の直線上に乗るようにx=0.0での位置を算出
+    # 口割: 矢（L_Wrist〜R_Wrist）の直線上に乗るようにx=0.0での位置を算出（zは水平維持）
     t_kw = l_wrist_pos[0] / (l_wrist_pos[0] - r_wrist_pos[0]) if (l_wrist_pos[0] - r_wrist_pos[0]) != 0 else 0.84
     kw_y = l_wrist_pos[1] + t_kw * (r_wrist_pos[1] - l_wrist_pos[1])
     kw_z = l_wrist_pos[2] + t_kw * (r_wrist_pos[2] - l_wrist_pos[2])
@@ -4171,23 +4172,23 @@ def create_3d_kyudo_skeleton(posture_params: dict, view_mode: str = "front"):
         "Neck": [0.0 + tilt_roll*0.008, 0.0 + tilt_pitch*0.008, 1.50 * height_scale],
         "Chest": [0.0 + tilt_roll*0.005, 0.0 + tilt_pitch*0.005, 1.35 * height_scale],
         "Pelvis": [0.0, 0.0, 0.95 * height_scale],
-        # 押手（左腕：弓を押す側）
+        # 押手（左腕：弓を押す側・矢の高さに合わせて水平に伸ばす）
         "L_Shoulder": [0.22 * shoulder_width_scale, 0.0, 1.45 * height_scale],
-        "L_Elbow": [0.58 * arm_scale, oshide_angle_y * 0.5, 1.43 * height_scale],
+        "L_Elbow": [0.58 * arm_scale, oshide_angle_y * 0.5, 1.51 * height_scale],
         "L_Wrist": l_wrist_pos,
-        # 妻手（右腕：弦を引く側・会）
+        # 妻手（右腕：弦を引く側・会・口割と同じ高さで水平に引き込む）
         "R_Shoulder": [-0.22 * shoulder_width_scale, 0.0, 1.45 * height_scale],
-        "R_Elbow": [-0.55 * arm_scale, 0.20 + elbow_back_depth, (1.44 + elbow_offset) * height_scale],
+        "R_Elbow": [-0.55 * arm_scale, 0.20 + elbow_back_depth, (1.52 + elbow_offset) * height_scale],
         "R_Wrist": r_wrist_pos,
         # 下半身（足踏み・胴造り）
         "L_Hip": [0.14 * shoulder_width_scale, 0.0, 0.90 * height_scale],
         "L_Foot": [0.46 * height_scale, 0.0, 0.0],
         "R_Hip": [-0.14 * shoulder_width_scale, 0.0, 0.90 * height_scale],
         "R_Foot": [-0.46 * height_scale, 0.0, 0.0],
-        # 弓の上下末端
-        "Bow_Top": [0.95 * arm_scale, oshide_angle_y, 2.25 * height_scale],
-        "Bow_Bottom": [0.95 * arm_scale, oshide_angle_y, 0.15 * height_scale],
-        # 口割: 矢が上唇〜人中に触れる基準点
+        # 弓の上下末端（握り位置L_Wristの上が長く、下がやや短い和弓比率）
+        "Bow_Top": [0.95 * arm_scale, oshide_angle_y, 2.30 * height_scale],
+        "Bow_Bottom": [0.95 * arm_scale, oshide_angle_y, 0.25 * height_scale],
+        # 口割: 矢が上唇〜人中に触れる基準点（矢は地面と平行）
         "Kuchiwari": [0.0, round(kw_y, 3), round(kw_z, 3)]
     }
     
