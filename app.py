@@ -1685,6 +1685,111 @@ div[data-testid="stAlert"] p { color: var(--ink-secondary) !important; }
     border-radius: var(--radius-xl) !important; padding: 10px; box-shadow: var(--shadow-sm) !important;
 }
 
+/* ---------- ダークモード時に白背景のまま白文字になって見えなくなる要素の一括対策 ---------- */
+/* 1) ダイアログ（@st.dialog） */
+div[data-testid="stDialog"] div[role="dialog"],
+div[role="dialog"] {
+    background: var(--surface-2) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+div[role="dialog"] p,
+div[role="dialog"] span,
+div[role="dialog"] li,
+div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3, div[role="dialog"] h4,
+div[role="dialog"] label {
+    color: var(--ink-primary) !important;
+}
+
+/* 2) エクスパンダー（見出し・中身） */
+div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] details,
+div[data-testid="stExpander"] [data-testid="stExpanderDetails"] {
+    background: var(--surface-2) !important;
+    color: var(--ink-primary) !important;
+}
+div[data-testid="stExpander"] summary p,
+div[data-testid="stExpander"] summary svg {
+    color: var(--ink-primary) !important;
+    fill: var(--ink-primary) !important;
+}
+
+/* 3) コードブロック（st.code / Markdownコード） */
+[data-testid="stCode"],
+[data-testid="stCode"] pre,
+[data-testid="stCode"] code,
+[data-testid="stMarkdownContainer"] pre,
+[data-testid="stMarkdownContainer"] code {
+    background: var(--surface-3) !important;
+    background-color: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
+    border-color: var(--border-subtle) !important;
+}
+
+/* 4) 全画面共通の入力欄・テキストエリア・セレクトボックス */
+[data-testid="stMain"] [data-baseweb="input"],
+[data-testid="stMain"] [data-baseweb="base-input"],
+[data-testid="stMain"] [data-baseweb="textarea"],
+[data-testid="stMain"] [data-baseweb="select"] > div,
+div[role="dialog"] [data-baseweb="input"],
+div[role="dialog"] [data-baseweb="base-input"],
+div[role="dialog"] [data-baseweb="textarea"],
+div[role="dialog"] [data-baseweb="select"] > div,
+div[data-testid="stExpander"] [data-baseweb="input"],
+div[data-testid="stExpander"] [data-baseweb="base-input"] {
+    background: var(--surface-3) !important;
+    background-color: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
+    border-color: var(--border-subtle) !important;
+}
+[data-testid="stMain"] input,
+[data-testid="stMain"] textarea,
+div[role="dialog"] input,
+div[role="dialog"] textarea,
+div[data-testid="stExpander"] input,
+div[data-testid="stExpander"] textarea {
+    color: var(--ink-primary) !important;
+    -webkit-text-fill-color: var(--ink-primary) !important;
+    caret-color: var(--ink-primary) !important;
+}
+[data-testid="stMain"] input::placeholder,
+[data-testid="stMain"] textarea::placeholder {
+    color: var(--ink-dim) !important;
+    -webkit-text-fill-color: var(--ink-dim) !important;
+}
+
+/* 5) ファイルアップローダー */
+[data-testid="stFileUploaderDropzone"],
+[data-testid="stFileUploader"] section {
+    background: var(--surface-2) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--ink-primary) !important;
+}
+[data-testid="stFileUploaderDropzone"] span,
+[data-testid="stFileUploaderDropzone"] small {
+    color: var(--ink-secondary) !important;
+}
+
+/* 6) 一般のセカンダリボタン・ダウンロードボタン（白背景化を防止） */
+button[kind="secondary"],
+button[data-testid="stBaseButton-secondary"],
+[data-testid="stDownloadButton"] button {
+    background: var(--surface-2) !important;
+    color: var(--ink-primary) !important;
+    border: 1px solid var(--border-subtle) !important;
+}
+button[kind="secondary"]:hover,
+button[data-testid="stBaseButton-secondary"]:hover,
+[data-testid="stDownloadButton"] button:hover {
+    background: var(--surface-3) !important;
+    color: var(--ink-primary) !important;
+}
+button[kind="secondary"] *,
+button[data-testid="stBaseButton-secondary"] *,
+[data-testid="stDownloadButton"] button * {
+    color: var(--ink-primary) !important;
+}
+
 /* 黒（ダークでは白）の塗りボタン内の文字は、背景と逆の色にする */
 button[kind="primary"] *, .stFormSubmitButton > button *,
 button[kind="primary"]:focus *, .stFormSubmitButton > button:focus *,
