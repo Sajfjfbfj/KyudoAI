@@ -35,3 +35,4 @@ data/learning_logs.json
 data/user_settings/
 sidebar_items/
 logs-*.txt
+logs/

@@ -2558,6 +2558,7 @@ def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""
         })
     _save_local_learning_logs(logs)
 
+    cloud_ok = True
     if is_supabase_enabled():
         q = urllib.parse.quote(log_id, safe="")
         patch_body = {"feedback": feedback}
@@ -2571,7 +2572,7 @@ def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""
         )
         # 該当行が0件（[]）またはエラー（None）のときは新規 Upsert する
         if not isinstance(res, list) or len(res) == 0:
-            return bool(save_learning_log(
+            cloud_ok = bool(save_learning_log(
                 log_id,
                 "chat",
                 existing_char,
@@ -2579,8 +2580,15 @@ def update_learning_feedback(log_id: str, feedback: str, feedback_note: str = ""
                 feedback=feedback,
                 feedback_note=clean_note,
             ))
-        return True
-    return True
+
+    # 開発者専用のローカル一覧ログファイル（logs/developer_feedback_log.md）も静かに更新
+    try:
+        from export_feedback_log import write_developer_feedback_markdown
+        fb_rows = [r for r in reversed(logs) if (r.get("feedback") or "").strip()]
+        write_developer_feedback_markdown(fb_rows, "アプリ内フィードバック更新（ローカル＋クラウド）")
+    except Exception:
+        pass
+    return cloud_ok
 
 def build_learning_feedback_hint() -> str:
     """蓄積された過去のフィードバック傾向（👎の改善要望・不評傾向と👍の高評価傾向）を常に回答生成ヒントとして返す"""
